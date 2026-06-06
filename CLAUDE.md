@@ -122,3 +122,18 @@ Mobile reads batches/ads **directly from Firestore** via the Web SDK under secur
 ## Shared Types (`packages/types`)
 
 Zod schemas + TS types imported by both `apps/api` and `apps/mobile` via the `@megadon/types` workspace alias. Single source of truth for `Brief`, `Batch`, `Ad`, `Revision`, error codes, and request/response shapes.
+
+### Integration tests
+
+API tests live in `apps/api/tests/` and hit the Firebase Emulator Suite (Auth + Firestore + Storage). They use Fastify's `app.inject()` so no HTTP listener is started, and Firestore is cleared between tests via the emulator's REST endpoint.
+
+```bash
+# Requires Java 11+ for Firestore emulator
+cd apps/api
+npm run test:emulator        # Boots emulators, runs tests, tears down
+npm run test                 # Skip the boot step if emulators are already running
+```
+
+`tests/helpers/app.ts` — boots Fastify in-process via `buildApp()` and exposes a `call({ method, url, idToken, workspaceId, body })` helper.
+`tests/helpers/auth.ts` — `createTestUser(email)` mints emulator users + ID tokens; `clearFirestore()` wipes between tests.
+`tests/helpers/mocks.ts` — `mockOpenAI()` vi.mock helper that swaps the OpenAI provider for deterministic responses (no real API calls).
