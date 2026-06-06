@@ -3,11 +3,15 @@ import type { ErrorCode } from '@megadon/types';
 export class AppError extends Error {
   code: ErrorCode;
   status: number;
+  statusCode: number; // Fastify recognizes this field
+  __isAppError = true;
 
   constructor(code: ErrorCode, message: string, status = 400) {
     super(message);
+    this.name = 'AppError';
     this.code = code;
     this.status = status;
+    this.statusCode = status;
   }
 
   static authRequired(msg = 'Authentication required') {

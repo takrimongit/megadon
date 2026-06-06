@@ -1,4 +1,5 @@
 import admin from 'firebase-admin';
+import { initFirebase } from '../../src/lib/firebase.js';
 
 const PROJECT = process.env.GCP_PROJECT!;
 const AUTH_HOST = process.env.FIREBASE_AUTH_EMULATOR_HOST!;
@@ -14,6 +15,7 @@ interface TestUser {
  * Uses the emulator's REST endpoint to exchange a custom token for an ID token.
  */
 export async function createTestUser(email: string): Promise<TestUser> {
+  initFirebase();
   const uid = `uid_${Math.random().toString(36).slice(2, 10)}`;
   try {
     await admin.auth().createUser({ uid, email });

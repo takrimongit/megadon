@@ -28,7 +28,8 @@ interface InjectOpts {
 
 export async function call<T = any>(opts: InjectOpts): Promise<{ status: number; body: { data: T | null; error: { code: string; message: string } | null } }> {
   const app = await getApp();
-  const headers: Record<string, string> = { 'content-type': 'application/json' };
+  const headers: Record<string, string> = {};
+  if (opts.body !== undefined) headers['content-type'] = 'application/json';
   if (opts.idToken) headers['authorization'] = `Bearer ${opts.idToken}`;
   if (opts.workspaceId) headers['x-workspace-id'] = opts.workspaceId;
 
@@ -36,7 +37,7 @@ export async function call<T = any>(opts: InjectOpts): Promise<{ status: number;
     method: opts.method,
     url: opts.url,
     headers,
-    payload: opts.body ? JSON.stringify(opts.body) : undefined,
+    payload: opts.body !== undefined ? JSON.stringify(opts.body) : undefined,
   });
 
   let parsed: any;
