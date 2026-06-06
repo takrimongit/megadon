@@ -82,7 +82,12 @@ Follows `stitch_adforge_ai_platform/high_velocity_intelligence/DESIGN.md`.
 
 ## Backend API (`apps/api`)
 
-Fastify + TypeScript on Cloud Run. Firebase Auth, Firestore, Cloud Storage, Cloud Tasks. See [docs/backend-design.md](docs/backend-design.md) for the full design.
+Fastify + TypeScript on Cloud Run. Firebase Auth, Firestore, Cloud Storage, Cloud Tasks.
+
+**Docs:**
+- [docs/backend-design.md](docs/backend-design.md) — architecture & build phases
+- [docs/api.md](docs/api.md) — REST endpoint reference (request/response shapes, error codes)
+- [docs/mobile-integration.md](docs/mobile-integration.md) — how mobile screens map to API calls + Firestore listeners (**integration not yet done**)
 
 ### Commands
 
