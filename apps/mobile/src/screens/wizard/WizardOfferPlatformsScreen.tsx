@@ -1,35 +1,33 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { Platform } from '@megadon/types';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
 import WizardProgress from '../../components/WizardProgress';
 import PrimaryButton from '../../components/PrimaryButton';
 import { RootStackParamList } from '../../navigation';
+import { useWizard } from '../../lib/WizardContext';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const platforms = [
-  { id: 'instagram', icon: 'photo-camera', label: 'Instagram', formats: 'Reels, Stories, Feed' },
-  { id: 'tiktok', icon: 'music-video', label: 'TikTok', formats: 'Short-form Video' },
-  { id: 'facebook', icon: 'facebook', label: 'Facebook', formats: 'Feed, Stories, Reels' },
-  { id: 'youtube', icon: 'play-circle', label: 'YouTube', formats: 'Shorts, In-stream' },
-  { id: 'linkedin', icon: 'work', label: 'LinkedIn', formats: 'Feed, Stories' },
-];
-
 export default function WizardOfferPlatformsScreen() {
   const navigation = useNavigation<Nav>();
-  const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
-  const [offer, setOffer] = useState('');
-  const [batchSize, setBatchSize] = useState('10');
+  const { state, update } = useWizard();
 
-  const toggle = (id: string) =>
-    setSelectedPlatforms((prev) => prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]);
+  const platforms = state.options?.platforms ?? [];
 
-  const isValid = selectedPlatforms.length > 0 && offer.length > 5;
+  const togglePlatform = (id: Platform) => {
+    const next = state.platforms.includes(id)
+      ? state.platforms.filter((x) => x !== id)
+      : [...state.platforms, id];
+    update({ platforms: next });
+  };
+
+  const isValid = state.platforms.length > 0 && state.offer.length > 5;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -42,43 +40,49 @@ export default function WizardOfferPlatformsScreen() {
         <Text style={styles.fieldLabel}>YOUR OFFER / PRODUCT</Text>
         <TextInput
           style={styles.input}
-          value={offer}
-          onChangeText={setOffer}
+          value={state.offer}
+          onChangeText={(offer) => update({ offer })}
           placeholder="e.g. 30% off summer collection, limited time..."
           placeholderTextColor={Colors.onSurfaceVariant + '80'}
         />
 
         <Text style={styles.fieldLabel}>TARGET PLATFORMS</Text>
-        {platforms.map((p) => (
-          <TouchableOpacity
-            key={p.id}
-            style={[styles.platformCard, selectedPlatforms.includes(p.id) && styles.platformCardSelected]}
-            onPress={() => toggle(p.id)}
-            activeOpacity={0.8}
-          >
-            <MaterialIcons name={p.icon as any} size={22} color={selectedPlatforms.includes(p.id) ? Colors.primary : Colors.onSurfaceVariant} />
-            <View style={styles.platformText}>
-              <Text style={[styles.platformName, selectedPlatforms.includes(p.id) && styles.platformNameSelected]}>{p.label}</Text>
-              <Text style={styles.platformFormats}>{p.formats}</Text>
-            </View>
-            {selectedPlatforms.includes(p.id) && (
-              <MaterialIcons name="check-circle" size={20} color={Colors.primary} />
-            )}
-          </TouchableOpacity>
-        ))}
+        {platforms.map((p) => {
+          const selected = state.platforms.includes(p.id);
+          return (
+            <TouchableOpacity
+              key={p.id}
+              style={[styles.platformCard, selected && styles.platformCardSelected]}
+              onPress={() => togglePlatform(p.id)}
+              activeOpacity={0.8}
+            >
+              <MaterialIcons name={p.icon as keyof typeof MaterialIcons.glyphMap} size={22} color={selected ? Colors.primary : Colors.onSurfaceVariant} />
+              <View style={styles.platformText}>
+                <Text style={[styles.platformName, selected && styles.platformNameSelected]}>{p.label}</Text>
+                <Text style={styles.platformFormats}>{p.formats}</Text>
+              </View>
+              {selected && (
+                <MaterialIcons name="check-circle" size={20} color={Colors.primary} />
+              )}
+            </TouchableOpacity>
+          );
+        })}
 
         <Text style={styles.fieldLabel}>BATCH SIZE</Text>
         <View style={styles.batchSizeRow}>
-          {['5', '10', '20', '30'].map((size) => (
-            <TouchableOpacity
-              key={size}
-              style={[styles.sizeChip, batchSize === size && styles.sizeChipSelected]}
-              onPress={() => setBatchSize(size)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.sizeChipText, batchSize === size && styles.sizeChipTextSelected]}>{size} ads</Text>
-            </TouchableOpacity>
-          ))}
+          {[5, 10, 20, 30].map((size) => {
+            const selected = state.batchSize === size;
+            return (
+              <TouchableOpacity
+                key={size}
+                style={[styles.sizeChip, selected && styles.sizeChipSelected]}
+                onPress={() => update({ batchSize: size })}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.sizeChipText, selected && styles.sizeChipTextSelected]}>{size} ads</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
       <View style={styles.footer}>

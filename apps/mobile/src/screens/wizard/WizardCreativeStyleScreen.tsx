@@ -1,33 +1,39 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { VisualStyle } from '@megadon/types';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
 import WizardProgress from '../../components/WizardProgress';
 import PrimaryButton from '../../components/PrimaryButton';
 import { RootStackParamList } from '../../navigation';
+import { useWizard } from '../../lib/WizardContext';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const styles_data = [
-  { id: 'bold', label: 'Bold & Energetic', desc: 'High contrast, dynamic motion', gradient: ['#3525cd', '#831ada'] as const },
-  { id: 'minimal', label: 'Minimal & Clean', desc: 'Whitespace-first, elegant typography', gradient: ['#374151', '#6b7280'] as const },
-  { id: 'warm', label: 'Warm & Authentic', desc: 'Natural tones, lifestyle imagery', gradient: ['#d97706', '#b45309'] as const },
-  { id: 'playful', label: 'Playful & Fun', desc: 'Bright colors, quirky elements', gradient: ['#16a34a', '#059669'] as const },
-];
-
-const tones = ['Professional', 'Casual', 'Urgent', 'Inspiring', 'Humorous', 'Trustworthy'];
+const styleGradients: Record<VisualStyle, readonly [string, string]> = {
+  bold: ['#3525cd', '#831ada'],
+  minimal: ['#374151', '#6b7280'],
+  warm: ['#d97706', '#b45309'],
+  playful: ['#16a34a', '#059669'],
+};
 
 export default function WizardCreativeStyleScreen() {
   const navigation = useNavigation<Nav>();
-  const [selectedStyle, setSelectedStyle] = useState<string | null>(null);
-  const [selectedTones, setSelectedTones] = useState<string[]>([]);
+  const { state, update } = useWizard();
 
-  const toggleTone = (t: string) =>
-    setSelectedTones((prev) => prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]);
+  const visualStyles = state.options?.visualStyles ?? [];
+  const tones = state.options?.tones ?? [];
+
+  const toggleTone = (t: string) => {
+    const next = state.tones.includes(t)
+      ? state.tones.filter((x) => x !== t)
+      : [...state.tones, t];
+    update({ tones: next });
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -39,36 +45,51 @@ export default function WizardCreativeStyleScreen() {
 
         <Text style={styles.fieldLabel}>VISUAL STYLE</Text>
         <View style={styles.styleGrid}>
-          {styles_data.map((s) => (
-            <TouchableOpacity
-              key={s.id}
-              style={[styles.styleCard, selectedStyle === s.id && styles.styleCardSelected]}
-              onPress={() => setSelectedStyle(s.id)}
-              activeOpacity={0.85}
-            >
-              <LinearGradient colors={s.gradient} style={styles.stylePreview} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }} />
-              <Text style={[styles.styleName, selectedStyle === s.id && styles.styleNameSelected]}>{s.label}</Text>
-              <Text style={styles.styleDesc}>{s.desc}</Text>
-            </TouchableOpacity>
-          ))}
+          {visualStyles.map((s) => {
+            const selected = state.creativeStyle === s.id;
+            return (
+              <TouchableOpacity
+                key={s.id}
+                style={[styles.styleCard, selected && styles.styleCardSelected]}
+                onPress={() => update({ creativeStyle: s.id })}
+                activeOpacity={0.85}
+              >
+                <LinearGradient
+                  colors={styleGradients[s.id] ?? [Colors.primary, Colors.secondary]}
+                  style={styles.stylePreview}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                />
+                <Text style={[styles.styleName, selected && styles.styleNameSelected]}>{s.label}</Text>
+                <Text style={styles.styleDesc}>{s.desc}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <Text style={styles.fieldLabel}>TONE OF VOICE</Text>
         <View style={styles.toneRow}>
-          {tones.map((t) => (
-            <TouchableOpacity
-              key={t}
-              style={[styles.toneChip, selectedTones.includes(t) && styles.toneChipSelected]}
-              onPress={() => toggleTone(t)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.toneText, selectedTones.includes(t) && styles.toneTextSelected]}>{t}</Text>
-            </TouchableOpacity>
-          ))}
+          {tones.map((t) => {
+            const selected = state.tones.includes(t);
+            return (
+              <TouchableOpacity
+                key={t}
+                style={[styles.toneChip, selected && styles.toneChipSelected]}
+                onPress={() => toggleTone(t)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.toneText, selected && styles.toneTextSelected]}>{t}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
       </ScrollView>
       <View style={styles.footer}>
-        <PrimaryButton label="Review & Launch" onPress={() => navigation.navigate('WizardFinalReview')} disabled={!selectedStyle} />
+        <PrimaryButton
+          label="Review & Launch"
+          onPress={() => navigation.navigate('WizardFinalReview')}
+          disabled={!state.creativeStyle}
+        />
       </View>
     </SafeAreaView>
   );

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
@@ -8,22 +8,32 @@ import AppHeader from '../../components/AppHeader';
 import WizardProgress from '../../components/WizardProgress';
 import PrimaryButton from '../../components/PrimaryButton';
 import { RootStackParamList } from '../../navigation';
+import { useWizard } from '../../lib/WizardContext';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const ageGroups = ['18–24', '25–34', '35–44', '45–54', '55+'];
-const interests = ['Fashion', 'Tech', 'Fitness', 'Travel', 'Food', 'Finance', 'Gaming', 'Parenting'];
-
 export default function WizardAudienceScreen() {
   const navigation = useNavigation<Nav>();
-  const [selectedAges, setSelectedAges] = useState<string[]>([]);
-  const [selectedInterests, setSelectedInterests] = useState<string[]>([]);
-  const [persona, setPersona] = useState('');
+  const { state, update } = useWizard();
 
-  const toggle = <T,>(arr: T[], item: T, set: (v: T[]) => void) =>
-    set(arr.includes(item) ? arr.filter((x) => x !== item) : [...arr, item]);
+  const ageGroups = state.options?.ageGroups ?? [];
+  const interests = state.options?.interests ?? [];
 
-  const isValid = selectedAges.length > 0 || persona.length > 10;
+  const toggleAge = (age: string) => {
+    const next = state.ageGroups.includes(age)
+      ? state.ageGroups.filter((x) => x !== age)
+      : [...state.ageGroups, age];
+    update({ ageGroups: next });
+  };
+
+  const toggleInterest = (interest: string) => {
+    const next = state.interests.includes(interest)
+      ? state.interests.filter((x) => x !== interest)
+      : [...state.interests, interest];
+    update({ interests: next });
+  };
+
+  const isValid = state.ageGroups.length > 0 || state.personaDescription.length > 10;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -35,37 +45,43 @@ export default function WizardAudienceScreen() {
 
         <Text style={styles.fieldLabel}>AGE GROUPS</Text>
         <View style={styles.chipRow}>
-          {ageGroups.map((age) => (
-            <TouchableOpacity
-              key={age}
-              style={[styles.chip, selectedAges.includes(age) && styles.chipSelected]}
-              onPress={() => toggle(selectedAges, age, setSelectedAges)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.chipText, selectedAges.includes(age) && styles.chipTextSelected]}>{age}</Text>
-            </TouchableOpacity>
-          ))}
+          {ageGroups.map((age) => {
+            const selected = state.ageGroups.includes(age);
+            return (
+              <TouchableOpacity
+                key={age}
+                style={[styles.chip, selected && styles.chipSelected]}
+                onPress={() => toggleAge(age)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{age}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <Text style={styles.fieldLabel}>INTERESTS</Text>
         <View style={styles.chipRow}>
-          {interests.map((interest) => (
-            <TouchableOpacity
-              key={interest}
-              style={[styles.chip, selectedInterests.includes(interest) && styles.chipSelected]}
-              onPress={() => toggle(selectedInterests, interest, setSelectedInterests)}
-              activeOpacity={0.8}
-            >
-              <Text style={[styles.chipText, selectedInterests.includes(interest) && styles.chipTextSelected]}>{interest}</Text>
-            </TouchableOpacity>
-          ))}
+          {interests.map((interest) => {
+            const selected = state.interests.includes(interest);
+            return (
+              <TouchableOpacity
+                key={interest}
+                style={[styles.chip, selected && styles.chipSelected]}
+                onPress={() => toggleInterest(interest)}
+                activeOpacity={0.8}
+              >
+                <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{interest}</Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
         <Text style={styles.fieldLabel}>DESCRIBE YOUR IDEAL CUSTOMER (OPTIONAL)</Text>
         <TextInput
           style={styles.textArea}
-          value={persona}
-          onChangeText={setPersona}
+          value={state.personaDescription}
+          onChangeText={(personaDescription) => update({ personaDescription })}
           placeholder="e.g. Urban millennials who care about sustainable fashion and shop online..."
           placeholderTextColor={Colors.onSurfaceVariant + '80'}
           multiline

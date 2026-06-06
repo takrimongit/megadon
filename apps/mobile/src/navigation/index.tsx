@@ -40,8 +40,8 @@ export type RootStackParamList = {
   WizardOfferPlatforms: undefined;
   WizardCreativeStyle: undefined;
   WizardFinalReview: undefined;
-  WizardFinalReviewSummary: undefined;
-  GeneratingBatch: undefined;
+  WizardFinalReviewSummary: { batchId: string; estimatedSeconds?: number };
+  GeneratingBatch: { batchId: string };
 };
 
 export type TabParamList = {

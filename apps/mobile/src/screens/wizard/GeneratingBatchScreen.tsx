@@ -2,57 +2,86 @@ import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, StyleSheet, Animated, Easing } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
+import { doc, onSnapshot } from 'firebase/firestore';
+import type { Batch } from '@megadon/types';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import { RootStackParamList } from '../../navigation';
+import { getDb } from '../../lib/firebase';
+import { useAuth } from '../../lib/AuthContext';
+import ErrorView from '../../components/ErrorView';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Route = RouteProp<RootStackParamList, 'GeneratingBatch'>;
 
-const steps = [
-  'Analyzing your brief...',
-  'Building audience profile...',
-  'Generating creative concepts...',
-  'Producing ad variations...',
-  'Applying brand guidelines...',
-  'Finalizing batch...',
+const stages = [
+  { threshold: 0, label: 'Analyzing your brief...' },
+  { threshold: 0.1, label: 'Building audience profile...' },
+  { threshold: 0.25, label: 'Generating creative concepts...' },
+  { threshold: 0.5, label: 'Producing ad variations...' },
+  { threshold: 0.75, label: 'Applying brand guidelines...' },
+  { threshold: 0.95, label: 'Finalizing batch...' },
 ];
 
 export default function GeneratingBatchScreen() {
   const navigation = useNavigation<Nav>();
-  const [currentStep, setCurrentStep] = useState(0);
+  const route = useRoute<Route>();
+  const { workspaceId } = useAuth();
+  const { batchId } = route.params;
+  const [batch, setBatch] = useState<Batch | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const rotation = useRef(new Animated.Value(0)).current;
   const progress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
     Animated.loop(
-      Animated.timing(rotation, { toValue: 1, duration: 2000, easing: Easing.linear, useNativeDriver: true })
+      Animated.timing(rotation, { toValue: 1, duration: 2000, easing: Easing.linear, useNativeDriver: true }),
     ).start();
+  }, [rotation]);
 
-    const stepInterval = setInterval(() => {
-      setCurrentStep((s) => {
-        if (s >= steps.length - 1) {
-          clearInterval(stepInterval);
-          setTimeout(() => navigation.replace('WizardFinalReviewSummary'), 800);
-          return s;
-        }
-        return s + 1;
-      });
-    }, 1800);
+  useEffect(() => {
+    if (!workspaceId || !batchId) return;
+    const ref = doc(getDb(), `workspaces/${workspaceId}/batches/${batchId}`);
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        if (!snap.exists()) return;
+        const data = { id: snap.id, ...snap.data() } as Batch;
+        setBatch(data);
+      },
+      (e) => setError(e.message),
+    );
+    return unsub;
+  }, [workspaceId, batchId]);
 
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: steps.length * 1800,
-      easing: Easing.linear,
-      useNativeDriver: false,
-    }).start();
-
-    return () => clearInterval(stepInterval);
-  }, []);
+  useEffect(() => {
+    if (!batch) return;
+    const pct = batch.progress.total > 0 ? batch.progress.completed / batch.progress.total : 0;
+    Animated.timing(progress, { toValue: pct, duration: 600, useNativeDriver: false }).start();
+    if (batch.status === 'pending_review' || batch.status === 'approved') {
+      navigation.replace('WizardFinalReviewSummary', { batchId: batch.id });
+    } else if (batch.status === 'failed') {
+      setError('The batch failed to generate. Please try again.');
+    }
+  }, [batch, navigation, progress]);
 
   const spin = rotation.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] });
   const progressWidth = progress.interpolate({ inputRange: [0, 1], outputRange: ['0%', '100%'] });
+
+  const pct = batch && batch.progress.total > 0 ? batch.progress.completed / batch.progress.total : 0;
+  const currentStageIndex = stages.findLastIndex((s) => pct >= s.threshold);
+  const total = batch?.progress.total ?? 0;
+  const completed = batch?.progress.completed ?? 0;
+
+  if (error) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <ErrorView message={error} onRetry={() => navigation.goBack()} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -72,24 +101,28 @@ export default function GeneratingBatchScreen() {
           </Animated.View>
 
           <Text style={styles.title}>Generating Your Batch</Text>
-          <Text style={styles.subtitle}>AdForge AI is crafting 10 high-performance ads tailored to your brief.</Text>
+          <Text style={styles.subtitle}>
+            {total > 0
+              ? `AdForge AI is crafting ${total} high-performance ads — ${completed}/${total} ready.`
+              : 'AdForge AI is queuing your batch…'}
+          </Text>
 
           <View style={styles.progressTrack}>
             <Animated.View style={[styles.progressFill, { width: progressWidth }]} />
           </View>
 
           <View style={styles.stepsList}>
-            {steps.map((step, i) => (
-              <View key={step} style={styles.stepRow}>
-                {i < currentStep ? (
+            {stages.map((stage, i) => (
+              <View key={stage.label} style={styles.stepRow}>
+                {i < currentStageIndex ? (
                   <MaterialIcons name="check-circle" size={18} color={Colors.success} />
-                ) : i === currentStep ? (
+                ) : i === currentStageIndex ? (
                   <MaterialIcons name="radio-button-checked" size={18} color={Colors.primary} />
                 ) : (
                   <MaterialIcons name="radio-button-unchecked" size={18} color={Colors.outlineVariant} />
                 )}
-                <Text style={[styles.stepText, i < currentStep && styles.stepDone, i === currentStep && styles.stepActive]}>
-                  {step}
+                <Text style={[styles.stepText, i < currentStageIndex && styles.stepDone, i === currentStageIndex && styles.stepActive]}>
+                  {stage.label}
                 </Text>
               </View>
             ))}

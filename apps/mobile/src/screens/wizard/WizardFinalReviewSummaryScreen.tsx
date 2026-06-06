@@ -2,17 +2,22 @@ import React from 'react';
 import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import PrimaryButton from '../../components/PrimaryButton';
 import { RootStackParamList } from '../../navigation';
+import { useWizard } from '../../lib/WizardContext';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Route = RouteProp<RootStackParamList, 'WizardFinalReviewSummary'>;
 
 export default function WizardFinalReviewSummaryScreen() {
   const navigation = useNavigation<Nav>();
+  const route = useRoute<Route>();
+  const { state } = useWizard();
+  const batchId = route.params?.batchId ?? '';
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -21,31 +26,33 @@ export default function WizardFinalReviewSummaryScreen() {
           <View style={styles.heroIcon}>
             <MaterialIcons name="check-circle" size={48} color={Colors.onPrimary} />
           </View>
-          <Text style={styles.heroTitle}>Batch Submitted!</Text>
-          <Text style={styles.heroSubtitle}>Your brief is queued. AdForge AI will begin generating your 10 ads shortly.</Text>
+          <Text style={styles.heroTitle}>Batch Ready to Review!</Text>
+          <Text style={styles.heroSubtitle}>
+            AdForge AI has generated your {state.batchSize} ads. Review and approve to go live.
+          </Text>
         </LinearGradient>
 
         <View style={styles.body}>
           <View style={styles.infoCard}>
             <View style={styles.infoRow}>
               <Text style={styles.infoLabel}>BATCH ID</Text>
-              <Text style={styles.infoValue}>#403</Text>
+              <Text style={styles.infoValue} numberOfLines={1}>{batchId.slice(0, 12)}…</Text>
             </View>
             <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>ESTIMATED TIME</Text>
-              <Text style={styles.infoValue}>~2–3 min</Text>
+              <Text style={styles.infoLabel}>ADS GENERATED</Text>
+              <Text style={styles.infoValue}>{state.batchSize} ads</Text>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>ADS TO GENERATE</Text>
-              <Text style={styles.infoValue}>10 ads</Text>
+            <View style={[styles.infoRow, { borderBottomWidth: 0 }]}>
+              <Text style={styles.infoLabel}>NEXT STEP</Text>
+              <Text style={styles.infoValue}>Review</Text>
             </View>
           </View>
 
           <View style={styles.nextSteps}>
             <Text style={styles.nextTitle}>What happens next?</Text>
             {[
-              'AI generates your ads based on the brief',
-              'You review and approve or request revisions',
+              'Review each ad and approve or reject it',
+              'Request AI revisions for ads that need tweaks',
               'Approved ads are exported for publishing',
               'Performance data feeds back into the next batch',
             ].map((step, i) => (
@@ -58,7 +65,14 @@ export default function WizardFinalReviewSummaryScreen() {
         </View>
       </ScrollView>
       <View style={styles.footer}>
-        <PrimaryButton label="View Batch Queue" onPress={() => navigation.navigate('MainTabs')} />
+        <PrimaryButton
+          label="Review Batch"
+          onPress={() =>
+            batchId
+              ? navigation.replace('ReviewBatch', { batchId })
+              : navigation.navigate('MainTabs')
+          }
+        />
       </View>
     </SafeAreaView>
   );

@@ -1,28 +1,80 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useMemo, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import type { Brief } from '@megadon/types';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
 import WizardProgress from '../../components/WizardProgress';
 import PrimaryButton from '../../components/PrimaryButton';
 import { RootStackParamList } from '../../navigation';
+import { useWizard } from '../../lib/WizardContext';
+import { api } from '../../lib/api';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const summary = [
-  { label: 'Campaign Goal', value: 'Drive Conversions', icon: 'shopping-cart' },
-  { label: 'Audience', value: 'The Trendsetter · 25–34', icon: 'people' },
-  { label: 'Offer', value: '30% off summer collection', icon: 'local-offer' },
-  { label: 'Platforms', value: 'Instagram, TikTok', icon: 'devices' },
-  { label: 'Creative Style', value: 'Bold & Energetic', icon: 'palette' },
-  { label: 'Batch Size', value: '10 ads', icon: 'layers' },
-];
+function summarizeGoal(goal: string | null, options: ReturnType<typeof useWizard>['state']['options']): string {
+  if (!goal) return '—';
+  return options?.goals.find((g) => g.id === goal)?.label ?? goal;
+}
 
 export default function WizardFinalReviewScreen() {
   const navigation = useNavigation<Nav>();
+  const { state } = useWizard();
+  const [submitting, setSubmitting] = useState(false);
+
+  const summary = useMemo(() => {
+    const goalLabel = summarizeGoal(state.goal, state.options);
+    const audienceLabel = state.selectedPersona
+      ? `${state.selectedPersona.name} · ${state.ageGroups.join(', ') || '—'}`
+      : state.ageGroups.join(', ') || '—';
+    const platformLabel = state.platforms
+      .map((p) => state.options?.platforms.find((opt) => opt.id === p)?.label ?? p)
+      .join(', ') || '—';
+    const styleLabel = state.options?.visualStyles.find((s) => s.id === state.creativeStyle)?.label ?? '—';
+    return [
+      { label: 'Campaign Goal', value: goalLabel, icon: 'campaign' },
+      { label: 'Audience', value: audienceLabel, icon: 'people' },
+      { label: 'Offer', value: state.offer || '—', icon: 'local-offer' },
+      { label: 'Platforms', value: platformLabel, icon: 'devices' },
+      { label: 'Creative Style', value: styleLabel, icon: 'palette' },
+      { label: 'Batch Size', value: `${state.batchSize} ads`, icon: 'layers' },
+    ];
+  }, [state]);
+
+  const handleGenerate = async () => {
+    if (!state.goal || !state.creativeStyle || state.platforms.length === 0 || state.offer.length < 5) {
+      Alert.alert('Incomplete brief', 'Please finish filling out every step before generating.');
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const brief: Brief = {
+        goal: state.goal,
+        audience: {
+          ageGroups: state.ageGroups,
+          interests: state.interests,
+          personaDescription: state.personaDescription || undefined,
+          selectedPersona: state.selectedPersona ?? undefined,
+        },
+        offer: state.offer,
+        platforms: state.platforms,
+        batchSize: state.batchSize,
+        creativeStyle: state.creativeStyle,
+        tones: state.tones,
+      };
+      const name = `${summarizeGoal(state.goal, state.options)} — ${new Date().toLocaleDateString()}`;
+      const { batchId } = await api.createBatch({ name, brief });
+      navigation.replace('GeneratingBatch', { batchId });
+    } catch (e) {
+      Alert.alert('Generation failed', e instanceof Error ? e.message : 'Could not create the batch.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -34,20 +86,20 @@ export default function WizardFinalReviewScreen() {
           <Text style={styles.readyText}>Ready to Generate</Text>
         </View>
         <Text style={styles.title}>Review your brief</Text>
-        <Text style={styles.subtitle}>AdForge AI will use this brief to generate your batch. You can edit any section below.</Text>
+        <Text style={styles.subtitle}>AdForge AI will use this brief to generate your batch.</Text>
 
         <View style={styles.summaryCard}>
           {summary.map((item, i) => (
             <View key={item.label}>
               <View style={styles.summaryRow}>
                 <View style={styles.summaryIcon}>
-                  <MaterialIcons name={item.icon as any} size={18} color={Colors.primary} />
+                  <MaterialIcons name={item.icon as keyof typeof MaterialIcons.glyphMap} size={18} color={Colors.primary} />
                 </View>
                 <View style={styles.summaryText}>
                   <Text style={styles.summaryLabel}>{item.label}</Text>
-                  <Text style={styles.summaryValue}>{item.value}</Text>
+                  <Text style={styles.summaryValue} numberOfLines={2}>{item.value}</Text>
                 </View>
-                <TouchableOpacity style={styles.editBtn}>
+                <TouchableOpacity style={styles.editBtn} onPress={() => navigation.goBack()}>
                   <MaterialIcons name="edit" size={16} color={Colors.onSurfaceVariant} />
                 </TouchableOpacity>
               </View>
@@ -58,11 +110,13 @@ export default function WizardFinalReviewScreen() {
 
         <View style={styles.estimateCard}>
           <MaterialIcons name="schedule" size={18} color={Colors.primary} />
-          <Text style={styles.estimateText}>Estimated generation time: <Text style={styles.estimateBold}>~2–3 minutes</Text></Text>
+          <Text style={styles.estimateText}>
+            Estimated generation time: <Text style={styles.estimateBold}>~{Math.max(1, Math.round(state.batchSize * 8 / 60))}–{Math.max(2, Math.round(state.batchSize * 12 / 60))} min</Text>
+          </Text>
         </View>
       </ScrollView>
       <View style={styles.footer}>
-        <PrimaryButton label="Generate Batch" onPress={() => navigation.navigate('GeneratingBatch')} />
+        <PrimaryButton label="Generate Batch" onPress={handleGenerate} loading={submitting} disabled={submitting} />
       </View>
     </SafeAreaView>
   );
