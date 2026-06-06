@@ -118,7 +118,7 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      - name: Deploy worker service (internal-only)
+      - name: Deploy worker service (initial — no WORKER_URL yet)
         id: worker
         run: |
           IMAGE="${REGISTRY}/${PROJECT_ID}/${IMAGE_REPO}/api:${IMAGE_TAG}"
@@ -132,6 +132,13 @@ jobs:
             --quiet
           WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
           echo "url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Patch worker with its own WORKER_URL (for self-enqueued poll tasks)
+        run: |
+          gcloud run services update "worker-${ENV_NAME}" \
+            --region="${REGION}" \
+            --update-env-vars="WORKER_URL=${{ steps.worker.outputs.url }}" \
+            --quiet
 
       - name: Allow tasks-invoker SA to call worker
         run: |
@@ -257,7 +264,7 @@ jobs:
 
       - uses: google-github-actions/setup-gcloud@v2
 
-      - name: Deploy worker service (internal-only)
+      - name: Deploy worker service (initial — no WORKER_URL yet)
         id: worker
         run: |
           IMAGE="${REGISTRY}/${PROJECT_ID}/${IMAGE_REPO}/api:${IMAGE_TAG}"
@@ -271,6 +278,13 @@ jobs:
             --quiet
           WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
           echo "url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Patch worker with its own WORKER_URL (for self-enqueued poll tasks)
+        run: |
+          gcloud run services update "worker-${ENV_NAME}" \
+            --region="${REGION}" \
+            --update-env-vars="WORKER_URL=${{ steps.worker.outputs.url }}" \
+            --quiet
 
       - name: Allow tasks-invoker SA to call worker
         run: |
