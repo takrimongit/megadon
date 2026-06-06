@@ -12,7 +12,7 @@
     "test": "vitest run",
     "test:emulator": "firebase --project=megadon-test emulators:exec --only auth,firestore,storage 'vitest run'",
     "test:e2e": "vitest run --config vitest.e2e.config.ts",
-    "test:e2e:full": "vitest run --config vitest.e2e.config.ts tests/e2e/full-pipeline.full.e2e.test.ts"
+    "test:e2e:full": "vitest run --config vitest.e2e.full.config.ts"
   },
   "dependencies": {
     "@google-cloud/tasks": "^5.5.1",
