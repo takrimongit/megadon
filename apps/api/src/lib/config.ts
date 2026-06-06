@@ -12,12 +12,12 @@ export const config = {
   workerUrl: process.env.WORKER_URL ?? 'http://localhost:8080',
   tasksInvokerSA: process.env.TASKS_INVOKER_SA ?? '',
 
-  // kie.ai — OpenAI-compatible AI gateway. https://kie.ai
-  // Single key powers both chat (copy + personas) and images (ad creatives).
+  // kie.ai — single key powers both copy + images.
+  // - Chat is per-model OpenAI-compatible at https://api.kie.ai/{model}/v1
+  // - Images use kie.ai's async task pattern at https://api.kie.ai/api/v1/jobs/*
   kieKey: process.env.KIE_API_KEY ?? '',
-  kieBaseUrl: process.env.KIE_BASE_URL ?? 'https://api.kie.ai/v1',
-  kieModel: process.env.KIE_MODEL ?? 'gpt-4o-mini',
-  kieImageModel: process.env.KIE_IMAGE_MODEL ?? 'flux-schnell',
+  kieChatModel: process.env.KIE_CHAT_MODEL ?? 'gpt-5-2',
+  kieImageModel: process.env.KIE_IMAGE_MODEL ?? 'google/nano-banana',
 
   emulators: {
     auth: process.env.FIREBASE_AUTH_EMULATOR_HOST,

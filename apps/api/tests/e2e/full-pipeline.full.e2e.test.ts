@@ -23,7 +23,7 @@ const brief: Brief = {
 };
 
 const TERMINAL_STATES = ['pending_review', 'failed'] as const;
-const MAX_WAIT_MS = 90_000;
+const MAX_WAIT_MS = 180_000;
 
 describe('e2e: full pipeline (real kie.ai + Cloud Storage)', () => {
   let user: E2ETestUser;

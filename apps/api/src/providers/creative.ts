@@ -1,19 +1,48 @@
-import OpenAI from 'openai';
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import type { CreativeProvider } from './types.js';
 
-// kie.ai exposes an OpenAI-compatible `/v1/images/generations` endpoint
-// across multiple image models (FLUX, Recraft, DALL-E, etc.).
-// Reuse the OpenAI SDK pointed at kie.ai.
-const client = new OpenAI({
-  apiKey: config.kieKey,
-  baseURL: config.kieBaseUrl,
-});
+// kie.ai image generation is async:
+//   POST /api/v1/jobs/createTask  → { taskId }
+//   GET  /api/v1/jobs/recordInfo?taskId=...  → { state, resultJson }
+// resultJson is a stringified JSON containing { resultUrls: [string] }.
+
+const BASE = 'https://api.kie.ai/api/v1';
+
+interface CreateTaskResponse {
+  code: number;
+  msg: string;
+  data: { taskId: string } | null;
+}
+
+interface RecordInfoResponse {
+  code: number;
+  msg: string;
+  data: {
+    taskId: string;
+    state: 'waiting' | 'queuing' | 'generating' | 'success' | 'fail';
+    resultJson?: string;
+    failCode?: string;
+    failMsg?: string;
+  } | null;
+}
+
+async function authedJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+  if (!config.kieKey) throw AppError.provider('KIE_API_KEY not set');
+  const resp = await fetch(`${BASE}${path}`, {
+    ...init,
+    headers: {
+      ...(init.headers ?? {}),
+      'Authorization': `Bearer ${config.kieKey}`,
+      'Content-Type': 'application/json',
+    },
+  });
+  if (!resp.ok) throw AppError.provider(`kie.ai ${resp.status}: ${await resp.text()}`);
+  return resp.json() as Promise<T>;
+}
 
 export const kieCreativeProvider: CreativeProvider = {
   async kickoff(brief, platform, copy) {
-    if (!config.kieKey) throw AppError.provider('KIE_API_KEY not set');
     const prompt = [
       `Ad creative for ${platform}.`,
       `Headline: ${copy.headline}.`,
@@ -23,25 +52,45 @@ export const kieCreativeProvider: CreativeProvider = {
       `Tone: ${brief.tones.join(', ')}.`,
     ].join(' ');
 
-    try {
-      const resp = await client.images.generate({
+    const json = await authedJson<CreateTaskResponse>('/jobs/createTask', {
+      method: 'POST',
+      body: JSON.stringify({
         model: config.kieImageModel,
-        prompt,
-        size: '1024x1024',
-        n: 1,
-      });
-      const url = resp.data?.[0]?.url;
-      if (!url) throw new Error('Provider returned no image URL');
-      return { assetUrl: url };
-    } catch (e) {
-      throw AppError.provider(`kie.ai image: ${(e as Error).message}`);
+        input: {
+          prompt,
+          aspect_ratio: '1:1',
+          resolution: '1K',
+        },
+      }),
+    });
+
+    if (json.code !== 200 || !json.data?.taskId) {
+      throw AppError.provider(`kie.ai image kickoff failed: ${json.msg ?? 'unknown'}`);
     }
+    return { jobId: json.data.taskId };
   },
 
-  // kie.ai image generation is synchronous in our usage.
-  // pollJob remains on the interface for future async video models.
-  async pollJob() {
-    return { status: 'ready' };
+  async pollJob(jobId) {
+    const json = await authedJson<RecordInfoResponse>(`/jobs/recordInfo?taskId=${encodeURIComponent(jobId)}`);
+    if (json.code !== 200 || !json.data) {
+      return { status: 'failed', error: json.msg ?? 'no data' };
+    }
+
+    const state = json.data.state;
+    if (state === 'success') {
+      try {
+        const result = JSON.parse(json.data.resultJson ?? '{}') as { resultUrls?: string[] };
+        const url = result.resultUrls?.[0];
+        if (!url) return { status: 'failed', error: 'no resultUrl in success response' };
+        return { status: 'ready', assetUrl: url };
+      } catch {
+        return { status: 'failed', error: 'malformed resultJson' };
+      }
+    }
+    if (state === 'fail') {
+      return { status: 'failed', error: json.data.failMsg ?? json.data.failCode ?? 'unknown' };
+    }
+    return { status: 'pending' };
   },
 };
 

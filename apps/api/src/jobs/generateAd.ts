@@ -43,7 +43,7 @@ export async function runGenerateAd(payload: JobPayload) {
       await enqueueJob({
         path: '/internal/jobs/poll-creative',
         payload: { workspaceId, batchId, adId, attempt: 1 },
-        delaySeconds: 30,
+        delaySeconds: 10,
       });
       return;
     }

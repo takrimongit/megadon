@@ -36,7 +36,7 @@ export async function runPollCreative(payload: JobPayload) {
     await enqueueJob({
       path: '/internal/jobs/poll-creative',
       payload: { ...payload, attempt: attempt + 1 },
-      delaySeconds: 30,
+      delaySeconds: 10,
     });
     return;
   }
