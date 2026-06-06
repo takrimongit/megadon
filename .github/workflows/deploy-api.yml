@@ -1,0 +1,219 @@
+name: Deploy API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/api/**'
+      - 'packages/types/**'
+      - '.github/workflows/deploy-api.yml'
+      - 'infra/**'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+      image_tag:
+        description: 'Image tag to deploy (default: latest pushed by build job on main)'
+        required: false
+        type: string
+
+permissions:
+  contents: read
+  id-token: write   # required for Workload Identity Federation
+
+env:
+  REGISTRY: ${{ secrets.GCP_REGION }}-docker.pkg.dev
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+  IMAGE_REPO: api
+
+jobs:
+  test:
+    name: Type check + integration tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+
+      - run: npm ci
+
+      - name: Type-check workspaces
+        run: npm run typecheck
+
+      - name: Install Firebase CLI
+        run: npm i -g firebase-tools
+
+      - name: Run API integration tests against emulators
+        working-directory: apps/api
+        run: npm run test:emulator
+
+  build:
+    name: Build + push image
+    needs: test
+    # Skip the build on manual prod promote if an image tag was provided.
+    if: github.event_name == 'push' || github.event.inputs.image_tag == ''
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.tag.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: tag
+        run: echo "tag=${GITHUB_SHA::12}" >> "$GITHUB_OUTPUT"
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build + push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/api/Dockerfile
+          push: true
+          platforms: linux/amd64
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_REPO }}/api:${{ steps.tag.outputs.tag }}
+            ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/${{ env.IMAGE_REPO }}/api:latest
+
+  deploy-staging:
+    name: Deploy → staging
+    needs: build
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: staging
+    env:
+      ENV_NAME: staging
+      IMAGE_TAG: ${{ needs.build.outputs.image_tag }}
+    steps:
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy worker service (internal-only)
+        id: worker
+        run: |
+          IMAGE="${REGISTRY}/${PROJECT_ID}/${IMAGE_REPO}/api:${IMAGE_TAG}"
+          gcloud run deploy "worker-${ENV_NAME}" \
+            --image="$IMAGE" \
+            --region="${REGION}" \
+            --no-allow-unauthenticated \
+            --service-account="worker-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY_${ENV_NAME^^}:latest,HIGGSFIELD_API_KEY=HIGGSFIELD_API_KEY_${ENV_NAME^^}:latest" \
+            --quiet
+          WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
+          echo "url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Allow tasks-invoker SA to call worker
+        run: |
+          gcloud run services add-iam-policy-binding "worker-${ENV_NAME}" \
+            --region="${REGION}" \
+            --member="serviceAccount:tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --role="roles/run.invoker" \
+            --quiet
+
+      - name: Deploy api service (public)
+        run: |
+          IMAGE="${REGISTRY}/${PROJECT_ID}/${IMAGE_REPO}/api:${IMAGE_TAG}"
+          gcloud run deploy "api-${ENV_NAME}" \
+            --image="$IMAGE" \
+            --region="${REGION}" \
+            --allow-unauthenticated \
+            --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY_${ENV_NAME^^}:latest,HIGGSFIELD_API_KEY=HIGGSFIELD_API_KEY_${ENV_NAME^^}:latest" \
+            --quiet
+
+      - name: Smoke test /healthz
+        run: |
+          API_URL="$(gcloud run services describe "api-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
+          echo "API URL: $API_URL"
+          curl -fsS "${API_URL}/healthz"
+
+  deploy-prod:
+    name: Deploy → prod (manual)
+    needs: build
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production   # configure required reviewers on this GH environment
+    env:
+      ENV_NAME: prod
+      IMAGE_TAG: ${{ github.event.inputs.image_tag != '' && github.event.inputs.image_tag || needs.build.outputs.image_tag }}
+    steps:
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy worker service (internal-only)
+        id: worker
+        run: |
+          IMAGE="${REGISTRY}/${PROJECT_ID}/${IMAGE_REPO}/api:${IMAGE_TAG}"
+          gcloud run deploy "worker-${ENV_NAME}" \
+            --image="$IMAGE" \
+            --region="${REGION}" \
+            --no-allow-unauthenticated \
+            --service-account="worker-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY_${ENV_NAME^^}:latest,HIGGSFIELD_API_KEY=HIGGSFIELD_API_KEY_${ENV_NAME^^}:latest" \
+            --quiet
+          WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
+          echo "url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
+
+      - name: Allow tasks-invoker SA to call worker
+        run: |
+          gcloud run services add-iam-policy-binding "worker-${ENV_NAME}" \
+            --region="${REGION}" \
+            --member="serviceAccount:tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --role="roles/run.invoker" \
+            --quiet
+
+      - name: Deploy api service (public)
+        run: |
+          IMAGE="${REGISTRY}/${PROJECT_ID}/${IMAGE_REPO}/api:${IMAGE_TAG}"
+          gcloud run deploy "api-${ENV_NAME}" \
+            --image="$IMAGE" \
+            --region="${REGION}" \
+            --allow-unauthenticated \
+            --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --set-secrets="OPENAI_API_KEY=OPENAI_API_KEY_${ENV_NAME^^}:latest,HIGGSFIELD_API_KEY=HIGGSFIELD_API_KEY_${ENV_NAME^^}:latest" \
+            --quiet
+
+      - name: Smoke test /healthz
+        run: |
+          API_URL="$(gcloud run services describe "api-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
+          echo "API URL: $API_URL"
+          curl -fsS "${API_URL}/healthz"

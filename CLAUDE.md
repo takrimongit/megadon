@@ -87,6 +87,7 @@ Fastify + TypeScript on Cloud Run. Firebase Auth, Firestore, Cloud Storage, Clou
 **Docs:**
 - [docs/backend-design.md](docs/backend-design.md) — architecture & build phases
 - [docs/api.md](docs/api.md) — REST endpoint reference (request/response shapes, error codes)
+- [docs/deployment.md](docs/deployment.md) — CI/CD flow, one-time GCP bootstrap, staging vs prod
 - [docs/mobile-integration.md](docs/mobile-integration.md) — how mobile screens map to API calls + Firestore listeners (**integration not yet done**)
 
 ### Commands

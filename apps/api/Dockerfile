@@ -14,7 +14,9 @@ RUN npm install --include-workspace-root --workspaces
 COPY packages/types packages/types
 COPY apps/api apps/api
 
-RUN npm run build -w @megadon/api
+# Build types first (api imports compiled JS at runtime), then API.
+RUN npm run build -w @megadon/types && \
+    npm run build -w @megadon/api
 
 # ---- runtime stage ----
 FROM gcr.io/distroless/nodejs20-debian12 AS runtime
