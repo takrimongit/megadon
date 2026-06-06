@@ -1,17 +1,13 @@
-import OpenAI from 'openai';
 import { z } from 'zod';
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import type { CopyProvider, CopyResult } from './types.js';
 import type { Brief, Persona, Platform } from '@megadon/types';
 
-// kie.ai exposes OpenAI-compatible chat completions PER MODEL at
-// https://api.kie.ai/{model}/v1/chat/completions. The OpenAI SDK is fine —
-// we just set baseURL to include the model prefix.
-const client = new OpenAI({
-  apiKey: config.kieKey,
-  baseURL: `https://api.kie.ai/${config.kieChatModel}/v1`,
-});
+// kie.ai chat completions are per-model: POST to
+// https://api.kie.ai/{model}/v1/chat/completions with an OpenAI-shaped
+// payload. Plain fetch — the OpenAI SDK adds telemetry headers that
+// kie.ai's WAF appears to block.
 
 const CopySchema = z.object({
   headline: z.string(),
@@ -30,9 +26,12 @@ const PersonasSchema = z.object({
   })).length(3),
 });
 
-/**
- * Strip ```json fences a model might wrap structured output in.
- */
+interface ChatResponse {
+  choices?: Array<{ message?: { content?: string } }>;
+  msg?: string;
+}
+
+/** Strip ```json fences a model might wrap structured output in. */
 function unwrapJson(raw: string): string {
   const fenced = raw.match(/```(?:json)?\s*([\s\S]+?)\s*```/);
   return fenced ? fenced[1] : raw;
@@ -40,20 +39,33 @@ function unwrapJson(raw: string): string {
 
 async function callJson<T>(schema: z.ZodSchema<T>, system: string, user: string): Promise<T> {
   if (!config.kieKey) throw AppError.provider('KIE_API_KEY not set');
-  try {
-    const resp = await client.chat.completions.create({
+  const url = `https://api.kie.ai/${config.kieChatModel}/v1/chat/completions`;
+  const resp = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${config.kieKey}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
       model: config.kieChatModel,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user },
       ],
-      // Not every kie.ai-hosted model supports response_format. Ask for
-      // JSON in the prompt and parse defensively instead.
-    });
-    const raw = resp.choices[0]?.message?.content ?? '{}';
+    }),
+  });
+  if (!resp.ok) {
+    throw AppError.provider(`kie.ai chat ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
+  }
+  const json = await resp.json() as ChatResponse;
+  const raw = json.choices?.[0]?.message?.content;
+  if (!raw) {
+    throw AppError.provider(`kie.ai chat: empty content (${json.msg ?? 'unknown'})`);
+  }
+  try {
     return schema.parse(JSON.parse(unwrapJson(raw)));
   } catch (e) {
-    throw AppError.provider(`kie.ai chat (${config.kieChatModel}): ${(e as Error).message}`);
+    throw AppError.provider(`kie.ai chat: malformed JSON — ${(e as Error).message}`);
   }
 }
 
