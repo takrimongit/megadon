@@ -141,6 +141,19 @@ else
 fi
 done_msg "Firestore ready"
 
+# ============ Step 5a: Firestore composite indexes ============
+# These mirror firestore.indexes.json. Re-creating an existing index errors,
+# so we filter that out. Idempotent.
+log "Ensuring Firestore composite indexes"
+gcloud firestore indexes composite create \
+  --collection-group=ads \
+  --query-scope=COLLECTION_GROUP \
+  --field-config=field-path=id,order=ascending \
+  --field-config=field-path=workspaceId,order=ascending \
+  --project="${PROJECT_ID}" \
+  --quiet 2>&1 | (grep -v "ALREADY_EXISTS" || true) | (grep -v "already exists" || true) || true
+done_msg "Indexes ensured"
+
 # ============ Step 5b: Identity Platform (Firebase Auth backend) ============
 log "Initializing Identity Platform (Firebase Auth)"
 init_resp=$(curl -sS -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
