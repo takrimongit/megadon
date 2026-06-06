@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AdForge AI - Batch Generation Wizard</title>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Typography (Inter & JetBrains Mono) -->
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    /* AI Shimmer Effect */
+    .ai-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-shimmer::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        45deg,
+        transparent,
+        rgba(79, 70, 229, 0.05),
+        transparent
+      );
+      transform: rotate(45deg);
+      animation: shimmer 4s infinite linear;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+            "surface-container-lowest": "#ffffff",
+            "on-surface": "#0b1c30",
+            "on-tertiary-fixed-variant": "#7b2f00",
+            "primary-fixed": "#e2dfff",
+            "on-secondary-fixed-variant": "#6800b4",
+            "on-tertiary": "#ffffff",
+            "on-primary-fixed": "#0f0069",
+            "tertiary-fixed-dim": "#ffb695",
+            "tertiary": "#7e3000",
+            "surface-dim": "#cbdbf5",
+            "on-secondary-container": "#fffbff",
+            "on-error": "#ffffff",
+            "tertiary-fixed": "#ffdbcc",
+            "surface": "#f8f9ff",
+            "inverse-on-surface": "#eaf1ff",
+            "inverse-primary": "#c3c0ff",
+            "secondary": "#831ada",
+            "surface-variant": "#d3e4fe",
+            "outline": "#777587",
+            "secondary-fixed": "#f0dbff",
+            "outline-variant": "#c7c4d8",
+            "on-secondary-fixed": "#2c0051",
+            "on-tertiary-container": "#ffd2be",
+            "primary": "#3525cd",
+            "on-error-container": "#93000a",
+            "on-background": "#0b1c30",
+            "secondary-container": "#9e41f5",
+            "secondary-fixed-dim": "#ddb8ff",
+            "background": "#f8f9ff",
+            "on-surface-variant": "#464555",
+            "on-primary-fixed-variant": "#3323cc",
+            "error": "#ba1a1a",
+            "primary-fixed-dim": "#c3c0ff",
+            "surface-container": "#e5eeff",
+            "on-secondary": "#ffffff",
+            "primary-container": "#4f46e5",
+            "tertiary-container": "#a44100",
+            "error-container": "#ffdad6",
+            "surface-container-low": "#eff4ff",
+            "surface-tint": "#4d44e3",
+            "on-tertiary-fixed": "#351000",
+            "on-primary-container": "#dad7ff",
+            "surface-container-high": "#dce9ff",
+            "inverse-surface": "#213145",
+            "surface-container-highest": "#d3e4fe",
+            "on-primary": "#ffffff",
+            "surface-bright": "#f8f9ff"
+          },
+          "borderRadius": {
+            "DEFAULT": "0.25rem",
+            "lg": "0.5rem",
+            "xl": "0.75rem",
+            "full": "9999px"
+          },
+          "spacing": {
+            "lg": "24px",
+            "sm": "8px",
+            "margin-desktop": "32px",
+            "md": "16px",
+            "base": "4px",
+            "margin-mobile": "16px",
+            "xs": "4px",
+            "xl": "40px",
+            "gutter": "16px"
+          },
+          "fontFamily": {
+            "display-lg-mobile": ["Inter"],
+            "display-lg": ["Inter"],
+            "label-caps": ["JetBrains Mono"],
+            "headline-md": ["Inter"],
+            "body-sm": ["Inter"],
+            "body-base": ["Inter"]
+          },
+          "fontSize": {
+            "display-lg-mobile": ["36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+            "label-caps": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500" }],
+            "headline-md": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+            "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+            "body-base": ["16px", { "lineHeight": "24px", "fontWeight": "400" }]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-base min-h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container overflow-hidden">
+<img alt="Workspace Selector" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqxRs2BmK3Bru47Cx2vciOwzqoHAu9dB0nF0PuZNS_jEIwGKVlzWTDCvvdY7s7aaMikp9pXL4aBlF34uH9h_zSV1qRdkDxx96hlHXPxCFgorVK9ApxBVLvPb_JuCJgIG42uaFmgXw0BPsni6T0TWgzQ2zttfZVl-R3bUTsX2vbWJ_Jb7RmthWP0j2lC0rXbn2MZ7b5pUoJX2xG3gS_O8hF3UBgEO_WmQgotVBbZfOfv4ngZ8MQXBL2S_LAu30Q51fhVgCNGHUb01tD"/>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg font-bold tracking-tight text-primary">AdForge AI</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-100">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="search">search</span>
+</button>
+<button class="hidden md:flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-xl font-medium active:scale-95 transition-all">
+<span>New Batch</span>
+</button>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow pt-24 pb-32 px-margin-mobile md:px-0">
+<div class="max-w-4xl mx-auto">
+<!-- Stepper Progress -->
+<nav class="mb-12">
+<div class="flex items-center justify-between mb-4 px-2">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">Step 1 of 6</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">Campaign Configuration</span>
+</div>
+<div class="flex gap-2 h-1.5 w-full bg-surface-container rounded-full overflow-hidden">
+<div class="h-full bg-primary w-1/6 rounded-full transition-all duration-500 ease-out"></div>
+<div class="h-full bg-surface-container-highest flex-1"></div>
+<div class="h-full bg-surface-container-highest flex-1"></div>
+<div class="h-full bg-surface-container-highest flex-1"></div>
+<div class="h-full bg-surface-container-highest flex-1"></div>
+<div class="h-full bg-surface-container-highest flex-1"></div>
+</div>
+</nav>
+<!-- Header -->
+<header class="mb-xl text-center md:text-left">
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Define Campaign Goal</h2>
+<p class="text-on-surface-variant max-w-xl">Our AI will optimize your creative assets based on your primary objective. Select the goal that best fits your current strategy.</p>
+</header>
+<!-- Goal Selection Cards (Bento-style Grid) -->
+<section class="grid grid-cols-1 md:grid-cols-2 gap-md">
+<!-- Goal Card 1 -->
+<label class="relative group cursor-pointer">
+<input checked="" class="peer hidden" name="goal" type="radio"/>
+<div class="h-full p-lg rounded-xl border border-outline-variant/30 bg-surface-container-lowest transition-all duration-300 peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/20 group-hover:shadow-md ai-shimmer">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+<span class="material-symbols-outlined !text-3xl" data-icon="shopping_cart">shopping_cart</span>
+</div>
+<div class="opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md mb-xs text-on-surface">Drive Conversions</h3>
+<p class="text-body-sm text-on-surface-variant">Optimize creatives to encourage purchases, sign-ups, or specific high-value actions on your site.</p>
+</div>
+</label>
+<!-- Goal Card 2 -->
+<label class="relative group cursor-pointer">
+<input class="peer hidden" name="goal" type="radio"/>
+<div class="h-full p-lg rounded-xl border border-outline-variant/30 bg-surface-container-lowest transition-all duration-300 peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/20 group-hover:shadow-md">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 rounded-lg bg-secondary/10 text-secondary flex items-center justify-center">
+<span class="material-symbols-outlined !text-3xl" data-icon="campaign">campaign</span>
+</div>
+<div class="opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md mb-xs text-on-surface">Increase Brand Awareness</h3>
+<p class="text-body-sm text-on-surface-variant">Maximize reach and visibility to ensure your brand stays top-of-mind for your target audience.</p>
+</div>
+</label>
+<!-- Goal Card 3 -->
+<label class="relative group cursor-pointer">
+<input class="peer hidden" name="goal" type="radio"/>
+<div class="h-full p-lg rounded-xl border border-outline-variant/30 bg-surface-container-lowest transition-all duration-300 peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/20 group-hover:shadow-md">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 rounded-lg bg-tertiary-container/20 text-tertiary flex items-center justify-center">
+<span class="material-symbols-outlined !text-3xl" data-icon="person_add">person_add</span>
+</div>
+<div class="opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md mb-xs text-on-surface">Generate Leads</h3>
+<p class="text-body-sm text-on-surface-variant">Capture interest and collect contact information from potential customers through targeted assets.</p>
+</div>
+</label>
+<!-- Goal Card 4 -->
+<label class="relative group cursor-pointer">
+<input class="peer hidden" name="goal" type="radio"/>
+<div class="h-full p-lg rounded-xl border border-outline-variant/30 bg-surface-container-lowest transition-all duration-300 peer-checked:border-primary peer-checked:ring-2 peer-checked:ring-primary/20 group-hover:shadow-md">
+<div class="flex items-start justify-between mb-lg">
+<div class="w-12 h-12 rounded-lg bg-secondary-container/20 text-secondary-container flex items-center justify-center">
+<span class="material-symbols-outlined !text-3xl" data-icon="install_mobile">install_mobile</span>
+</div>
+<div class="opacity-0 peer-checked:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-primary" data-icon="check_circle" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+</div>
+<h3 class="font-headline-md text-headline-md mb-xs text-on-surface">Boost App Installs</h3>
+<p class="text-body-sm text-on-surface-variant">Drive high-intent users directly to the App Store or Google Play to increase your mobile footprint.</p>
+</div>
+</label>
+</section>
+<!-- Wizard Footer / Next Button -->
+<footer class="mt-xl flex items-center justify-between">
+<button class="px-lg py-sm rounded-xl border border-outline-variant/30 text-on-surface hover:bg-surface-container transition-colors active:scale-95">
+          Cancel
+        </button>
+<button class="flex items-center gap-2 px-xl py-md bg-gradient-to-b from-primary to-secondary text-on-primary rounded-xl font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:-translate-y-0.5 active:scale-95 transition-all">
+<span>Next Step</span>
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</footer>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg flex justify-around items-center pt-2 pb-safe px-4 h-16">
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/20 rounded-xl px-3 py-1" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="layers">layers</span>
+<span class="font-label-caps text-label-caps">Batches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="rule">rule</span>
+<span class="font-label-caps text-label-caps">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="school">school</span>
+<span class="font-label-caps text-label-caps">Learn</span>
+</a>
+</nav>
+<!-- Interactive Script for micro-interactions -->
+<script>
+    document.querySelectorAll('input[name="goal"]').forEach(input => {
+      input.addEventListener('change', function() {
+        // Clear all shimmer effects
+        document.querySelectorAll('label > div').forEach(div => {
+          div.classList.remove('ai-shimmer');
+        });
+        // Add shimmer to selected
+        if(this.checked) {
+          this.nextElementSibling.classList.add('ai-shimmer');
+        }
+      });
+    });
+  </script>
+</body></html>

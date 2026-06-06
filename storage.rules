@@ -1,0 +1,9 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+    // All access via signed URLs from API; deny direct client traffic.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}

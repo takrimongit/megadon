@@ -34,7 +34,7 @@ export default function GeneratingBatchScreen() {
       setCurrentStep((s) => {
         if (s >= steps.length - 1) {
           clearInterval(stepInterval);
-          setTimeout(() => navigation.replace('ReviewBatch', { batchId: '403' }), 800);
+          setTimeout(() => navigation.replace('WizardFinalReviewSummary'), 800);
           return s;
         }
         return s + 1;

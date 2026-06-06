@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .step-gradient {
+            background: linear-gradient(to bottom, #3525cd, #831ada);
+        }
+        .shimmer-border {
+            position: relative;
+            overflow: hidden;
+        }
+        .shimmer-border::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(131, 26, 218, 0.1), transparent 30%);
+            animation: rotate 4s linear infinite;
+            z-index: -1;
+        }
+        @keyframes rotate {
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "primary-fixed": "#e2dfff",
+                        "on-secondary-fixed-variant": "#6800b4",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#0f0069",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "tertiary": "#7e3000",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-container": "#fffbff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface": "#f8f9ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary": "#831ada",
+                        "surface-variant": "#d3e4fe",
+                        "outline": "#777587",
+                        "secondary-fixed": "#f0dbff",
+                        "outline-variant": "#c7c4d8",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-tertiary-container": "#ffd2be",
+                        "primary": "#3525cd",
+                        "on-error-container": "#93000a",
+                        "on-background": "#0b1c30",
+                        "secondary-container": "#9e41f5",
+                        "secondary-fixed-dim": "#ddb8ff",
+                        "background": "#f8f9ff",
+                        "on-surface-variant": "#464555",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-container": "#e5eeff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#4f46e5",
+                        "tertiary-container": "#a44100",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "surface-tint": "#4d44e3",
+                        "on-tertiary-fixed": "#351000",
+                        "on-primary-container": "#dad7ff",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-surface": "#213145",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "sm": "8px",
+                        "margin-desktop": "32px",
+                        "md": "16px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "xl": "40px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-base": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-base antialiased">
+<!-- Top Navigation Anchor (Suppressed standard shell for Wizard Context) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16">
+<div class="flex items-center gap-md">
+<span class="font-display-lg-mobile text-display-lg-mobile md:font-display-lg md:text-display-lg font-bold tracking-tight text-primary">AdForge AI</span>
+</div>
+<div class="flex items-center gap-sm">
+<button class="flex items-center justify-center h-10 w-10 rounded-full hover:bg-surface-container-high transition-colors active:scale-95 duration-100">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="close">close</span>
+</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto min-h-screen">
+<!-- Wizard Header & Stepper -->
+<div class="max-w-3xl mx-auto mb-xl">
+<div class="flex items-center justify-between mb-md">
+<div class="space-y-xs">
+<p class="font-label-caps text-label-caps text-secondary uppercase tracking-widest">Step 5 of 6</p>
+<h1 class="font-headline-md text-headline-md md:font-display-lg md:text-display-lg text-on-surface">Creative Style</h1>
+</div>
+<div class="hidden md:flex gap-base">
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-12 rounded-full step-gradient"></div>
+<div class="h-1.5 w-8 rounded-full bg-outline-variant/30"></div>
+</div>
+</div>
+<p class="font-body-base text-on-surface-variant max-w-2xl">
+                Define the visual narrative of your ad batch. Our AI will optimize the hooks and pacing based on the chosen aesthetic.
+            </p>
+</div>
+<!-- Selection Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-lg max-w-6xl mx-auto">
+<!-- UGC Style -->
+<label class="group cursor-pointer">
+<input class="hidden peer" name="creative_style" type="radio" value="ugc"/>
+<div class="relative overflow-hidden rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest p-base transition-all duration-300 peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/10 group-hover:shadow-md">
+<div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-surface-container-high mb-sm relative">
+<img class="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700" data-alt="A candid, high-quality photograph of a person in a bright modern kitchen holding a product and smiling at their smartphone camera. The lighting is natural and warm, suggesting an authentic user-generated content vibe. The overall aesthetic is clean, minimalist, and relatable, with a soft blur in the background focused on the person's genuine expression." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAeFdZ0-50tcvioTZU1EKTJ9sTh2cPzuPuc2INy-DmwpVCR3QpbMgCG0FDrFmL4nNxDzk9veZL2c2op_0azI-9BUiQo0l_uAqPZCckXZwqTwz2y0QASxDILx4ZnWSUmqhEZdyBN5VZp5Iy9txL2fvlb6eOZIR9BP0AnyY6Ufo5AXjprmDU0vjxWgeaFxEH9ru8er9HlbkepKfJre1tQe6pm4GzDlNvTUwf6kw1VP-z6gejDVhWSPNICmn6GfIc4L1oXxLNnFyecefqA"/>
+<div class="absolute top-sm right-sm bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full flex items-center gap-xs">
+<span class="material-symbols-outlined text-[16px] text-primary" data-icon="videocam" style="font-variation-settings: 'FILL' 1;">videocam</span>
+<span class="font-label-caps text-[10px] text-on-surface">Trending</span>
+</div>
+</div>
+<div class="px-sm pb-sm">
+<h3 class="font-headline-md text-body-base font-bold text-on-surface mb-xs">UGC</h3>
+<p class="font-body-sm text-on-surface-variant">Authentic, creator-led content that builds trust through relatability.</p>
+</div>
+</div>
+</label>
+<!-- Founder Story -->
+<label class="group cursor-pointer">
+<input class="hidden peer" name="creative_style" type="radio" value="founder"/>
+<div class="relative overflow-hidden rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest p-base transition-all duration-300 peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/10 group-hover:shadow-md">
+<div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-surface-container-high mb-sm relative">
+<img class="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700" data-alt="A sophisticated black and white portrait of a visionary founder looking thoughtfully out of a large glass window in a high-rise office building. The lighting is dramatic and professional, emphasizing texture and ambition. The scene captures a moment of quiet determination and creative power, reflecting a high-end corporate modern aesthetic with deep indigo shadows." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDmwPDwq99Nw94yhjhmvDcZa--y0Of0UijIG2B6d7tRqLDUJu5wOgWn8T260hhRwRLG5zkeb9ElAIpor2VbluWOUJShRoPUMlINzUrw9aMHjpMkLrO1qietkpM3xUAUeOU3c9HUF45DP_1RI-eKdcJi4iNLBIMNP-Mvv0tGarKI2ED0eTmBrUWNU-b8HMSalLdAhRX8RI2BnGl4CgnIIEkBcKQrYpOhS0sDEJrLpritvhiuqB0JjVk-sgSkdx-rxOxMnhPUdunAyGOP"/>
+</div>
+<div class="px-sm pb-sm">
+<h3 class="font-headline-md text-body-base font-bold text-on-surface mb-xs">Founder Story</h3>
+<p class="font-body-sm text-on-surface-variant">Visionary narratives that connect your audience to the brand's core mission.</p>
+</div>
+</div>
+</label>
+<!-- Product Showcase -->
+<label class="group cursor-pointer">
+<input checked="" class="hidden peer" name="creative_style" type="radio" value="product"/>
+<div class="relative shimmer-border overflow-hidden rounded-xl border-2 border-primary bg-surface-container-lowest p-base transition-all duration-300 ring-4 ring-primary/10 group-hover:shadow-md">
+<div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-surface-container-high mb-sm relative">
+<img class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" data-alt="A ultra-high-definition product photography shot of a sleek modern gadget floating against a vibrant purple and indigo gradient background. Dynamic lighting creates sharp highlights and soft reflections, emphasizing premium materials and design precision. The composition is clean and minimalist, utilizing a high-velocity intelligence aesthetic that feels futuristic and high-end." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCC6sa-UDW-v_ZAV2DJo9GcA10KYAHz5WDbU9dRvcO4Hd4SWGozSgj2VQ-iIMiyGPHfIGXJZ4saEIXT8HnKo-xFnaTjkyAEoXvV2b4-cyUloteodv1sBQi5tJtn5BWSu678nOlxYDINdAleDGts2zpU1xJRJ5C6yoIJQAc3y7GE6UO2FA7LB2mDCeoQy-hM-hqYapJAF-p11TiDABAoVKES2m4uFRGx1ruoI-aaNuCAdCPlf44Rejd_TqF8SC6M0GfGeRtc5p0iYsS4"/>
+<div class="absolute inset-0 bg-primary/5 pointer-events-none"></div>
+</div>
+<div class="px-sm pb-sm">
+<div class="flex items-center justify-between mb-xs">
+<h3 class="font-headline-md text-body-base font-bold text-on-surface">Product Showcase</h3>
+<span class="material-symbols-outlined text-primary" data-icon="auto_awesome" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<p class="font-body-sm text-on-surface-variant">Cinematic visuals focusing on design, features, and premium build quality.</p>
+</div>
+</div>
+</label>
+<!-- Educational -->
+<label class="group cursor-pointer">
+<input class="hidden peer" name="creative_style" type="radio" value="educational"/>
+<div class="relative overflow-hidden rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest p-base transition-all duration-300 peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/10 group-hover:shadow-md">
+<div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-surface-container-high mb-sm relative flex items-center justify-center p-xl">
+<div class="w-full h-full border border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center gap-md bg-surface-dim/20">
+<span class="material-symbols-outlined text-outline text-5xl" data-icon="model_training">model_training</span>
+<div class="w-24 h-2 bg-outline-variant/30 rounded-full"></div>
+<div class="w-16 h-2 bg-outline-variant/30 rounded-full"></div>
+</div>
+</div>
+<div class="px-sm pb-sm">
+<h3 class="font-headline-md text-body-base font-bold text-on-surface mb-xs">Educational</h3>
+<p class="font-body-sm text-on-surface-variant">Information-dense layouts designed to teach value and solve complex problems.</p>
+</div>
+</div>
+</label>
+<!-- Testimonial -->
+<label class="group cursor-pointer">
+<input class="hidden peer" name="creative_style" type="radio" value="testimonial"/>
+<div class="relative overflow-hidden rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest p-base transition-all duration-300 peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/10 group-hover:shadow-md">
+<div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-surface-container-high mb-sm relative">
+<img class="w-full h-full object-cover grayscale-[20%] group-hover:scale-105 transition-transform duration-700" data-alt="A clean, minimalist testimonial scene featuring a professional woman in a bright, airy office space speaking with confidence. The background is softly out of focus, showing a collaborative environment. Warm, soft-box lighting highlights the subject's reliable and trustworthy expression, embodying a sense of professional reliability and high-velocity intelligence." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDk-naemzWmRPwchLlqL8fb2n-cn_6YgHP7IRDkMFdjZdvbyph6JLmbM_el6ml2JQO4gtPo2Q5prb7J4bTkl2w2IlaBP0IA-RqFpIRQ_ouCr0vJCGEU3-yJrfFxFrcph4aJpbTFBWMrEOrFjLjfpO3CoaNkqeVL4PbXUVnTWXsvDabgEMyn89b9a-OXvYuYZ-ruIu2wDT8zY4o0eeMWmt5INOxBSebf368AEIVNJMWONh4LztGB_LaohGsXw7h7CyqaCKZvLbUVY7hS"/>
+</div>
+<div class="px-sm pb-sm">
+<h3 class="font-headline-md text-body-base font-bold text-on-surface mb-xs">Testimonial</h3>
+<p class="font-body-sm text-on-surface-variant">Social proof through real stories, focusing on the human impact of your product.</p>
+</div>
+</div>
+</label>
+<!-- Direct Response -->
+<label class="group cursor-pointer">
+<input class="hidden peer" name="creative_style" type="radio" value="direct_response"/>
+<div class="relative overflow-hidden rounded-xl border-2 border-outline-variant/30 bg-surface-container-lowest p-base transition-all duration-300 peer-checked:border-primary peer-checked:ring-4 peer-checked:ring-primary/10 group-hover:shadow-md">
+<div class="aspect-[4/3] w-full overflow-hidden rounded-lg bg-surface-container-high mb-sm relative bg-primary-container/10 flex items-center justify-center">
+<div class="text-center p-md">
+<span class="font-display-lg text-primary block leading-none mb-base">70%</span>
+<span class="font-label-caps text-on-surface-variant tracking-widest">CONVERSION BOOST</span>
+</div>
+</div>
+<div class="px-sm pb-sm">
+<h3 class="font-headline-md text-body-base font-bold text-on-surface mb-xs">Direct Response</h3>
+<p class="font-body-sm text-on-surface-variant">Action-oriented visuals designed to drive immediate engagement and clicks.</p>
+</div>
+</div>
+</label>
+</div>
+</main>
+<!-- Footer Action Bar -->
+<footer class="fixed bottom-0 w-full z-50 glass-card border-t border-outline-variant/20 shadow-lg px-margin-mobile md:px-margin-desktop py-md">
+<div class="max-w-7xl mx-auto flex items-center justify-between">
+<button class="flex items-center gap-sm px-lg py-sm rounded-xl font-label-caps text-label-caps text-on-surface-variant hover:bg-surface-container-high transition-all active:scale-95 duration-100">
+<span class="material-symbols-outlined" data-icon="arrow_back">arrow_back</span>
+                Back
+            </button>
+<div class="flex items-center gap-md">
+<p class="hidden md:block font-body-sm text-on-surface-variant italic">
+                    AI will generate 12 variants for the selected style.
+                </p>
+<button class="flex items-center gap-sm px-xl py-md rounded-xl font-label-caps text-label-caps text-on-primary bg-primary step-gradient shadow-md hover:shadow-primary/20 hover:scale-[1.02] transition-all active:scale-95 duration-100">
+                    Next Step
+                    <span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+</footer>
+<script>
+        // Simple micro-interaction for radio selection
+        document.querySelectorAll('input[name="creative_style"]').forEach(input => {
+            input.addEventListener('change', (e) => {
+                // Remove special styling from all
+                document.querySelectorAll('.shimmer-border').forEach(el => {
+                    el.classList.remove('shimmer-border', 'border-primary', 'ring-4', 'ring-primary/10');
+                    el.classList.add('border-outline-variant/30');
+                });
+                
+                // Add to selected
+                if (e.target.checked) {
+                    const card = e.target.closest('div');
+                    card.classList.add('shimmer-border', 'border-primary', 'ring-4', 'ring-primary/10');
+                    card.classList.remove('border-outline-variant/30');
+                }
+            });
+        });
+    </script>
+</body></html>

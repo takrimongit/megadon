@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Colors, Typography, Spacing } from '../theme';
 
@@ -13,10 +12,8 @@ interface Props {
 }
 
 export default function AppHeader({ title, showBack, onBack, rightIcon, onRightPress }: Props) {
-  const insets = useSafeAreaInsets();
-
   return (
-    <View style={[styles.container, { paddingTop: insets.top }]}>
+    <View style={styles.container}>
       <View style={styles.inner}>
         {showBack ? (
           <TouchableOpacity onPress={onBack} style={styles.iconBtn} activeOpacity={0.7}>

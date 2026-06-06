@@ -1,6 +1,10 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "paths": {
+      "@megadon/types": ["../../packages/types/src/index.ts"]
+    },
+    "ignoreDeprecations": "6.0"
   }
 }

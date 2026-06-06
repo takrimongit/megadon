@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#3525cd",
+                    "on-primary-container": "#dad7ff",
+                    "on-background": "#0b1c30",
+                    "surface-bright": "#f8f9ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary-container": "#fffbff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffdbcc",
+                    "outline-variant": "#c7c4d8",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "surface-container-low": "#eff4ff",
+                    "surface-tint": "#4d44e3",
+                    "on-secondary-fixed-variant": "#6800b4",
+                    "outline": "#777587",
+                    "on-primary-fixed": "#0f0069",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface": "#f8f9ff",
+                    "secondary-fixed": "#f0dbff",
+                    "on-tertiary-fixed": "#351000",
+                    "primary-container": "#4f46e5",
+                    "secondary": "#831ada",
+                    "surface-container-high": "#dce9ff",
+                    "secondary-container": "#9e41f5",
+                    "on-tertiary-container": "#ffd2be",
+                    "background": "#f8f9ff",
+                    "tertiary": "#7e3000",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "secondary-fixed-dim": "#ddb8ff",
+                    "on-surface-variant": "#464555",
+                    "primary-fixed": "#e2dfff",
+                    "surface-variant": "#d3e4fe",
+                    "surface-container": "#e5eeff",
+                    "inverse-surface": "#213145",
+                    "inverse-primary": "#c3c0ff",
+                    "tertiary-container": "#a44100",
+                    "on-secondary-fixed": "#2c0051",
+                    "on-tertiary-fixed-variant": "#7b2f00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "base": "4px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "xl": "40px",
+                    "margin-desktop": "32px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "display-lg-mobile": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-base": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.5);
+        }
+        .ai-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-shimmer::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 25%,
+                rgba(79, 70, 229, 0.1) 50%,
+                transparent 75%
+            );
+            animation: shimmer 4s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { transform: translate(-30%, -30%); }
+            100% { transform: translate(30%, 30%); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-base antialiased min-h-screen pb-32">
+<!-- Top AppBar (from JSON guidance) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm">
+<div class="flex items-center justify-between px-margin-mobile h-16 w-full">
+<div class="flex items-center gap-sm">
+<button class="p-base active:scale-95 duration-100">
+<span class="material-symbols-outlined text-primary">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md text-on-surface truncate max-w-[200px]">Summer Peak 24</h1>
+</div>
+<div class="flex items-center gap-md">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:bg-surface-container-high p-base rounded-full transition-colors">search</span>
+<div class="h-8 w-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold text-xs">
+                    WS
+                </div>
+</div>
+</div>
+</header>
+<main class="pt-20 px-margin-mobile space-y-lg">
+<!-- Header & Status -->
+<section class="flex items-center justify-between">
+<div class="space-y-xs">
+<p class="font-label-caps text-label-caps text-outline uppercase tracking-widest">Active Campaign</p>
+<div class="flex items-center gap-sm">
+<span class="h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
+<span class="font-bold text-primary">Live &amp; Scaling</span>
+</div>
+</div>
+<div class="bg-surface-container-low border border-outline-variant/30 rounded-xl px-md py-sm">
+<p class="font-label-caps text-label-caps text-on-surface-variant">BUDGET</p>
+<p class="font-bold text-on-surface">$12,400.00</p>
+</div>
+</section>
+<!-- Performance Summary (Bento-style Grid) -->
+<section class="grid grid-cols-2 gap-sm">
+<div class="col-span-2 glass-card rounded-xl p-md flex flex-col justify-between ai-shimmer">
+<p class="font-label-caps text-label-caps text-outline">AGGREGATED ROAS</p>
+<div class="flex items-baseline gap-sm pt-base">
+<span class="font-display-lg-mobile text-display-lg-mobile text-primary">4.2x</span>
+<span class="text-green-600 flex items-center font-bold text-sm">
+<span class="material-symbols-outlined text-sm">trending_up</span> 12%
+                    </span>
+</div>
+<div class="mt-md h-12 w-full bg-primary-container/10 rounded-lg overflow-hidden flex items-end">
+<!-- Simple Sparkline Representation -->
+<div class="flex-1 bg-primary/20 h-[20%] mx-px rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[35%] mx-px rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[25%] mx-px rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[45%] mx-px rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[60%] mx-px rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[50%] mx-px rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[80%] mx-px rounded-t-sm"></div>
+<div class="flex-1 bg-primary/20 h-[70%] mx-px rounded-t-sm"></div>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md">
+<p class="font-label-caps text-label-caps text-outline">SPEND</p>
+<p class="font-headline-md text-headline-md mt-xs">$4,290</p>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl p-md">
+<p class="font-label-caps text-label-caps text-outline">CONV.</p>
+<p class="font-headline-md text-headline-md mt-xs">1,102</p>
+</div>
+</section>
+<!-- Audience & Goal Overview -->
+<section class="space-y-sm">
+<h2 class="font-label-caps text-label-caps text-outline">STRATEGY &amp; AUDIENCE</h2>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden">
+<div class="p-md border-b border-outline-variant/20 flex items-center gap-md">
+<div class="h-10 w-10 rounded-full bg-secondary/10 flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">groups</span>
+</div>
+<div>
+<p class="font-bold text-on-surface">Creative Technologists</p>
+<p class="text-sm text-on-surface-variant">Ages 24-45 • Global • Interests: Generative AI, UX</p>
+</div>
+</div>
+<div class="p-md bg-surface-container-low/40">
+<p class="text-sm text-on-surface-variant italic leading-relaxed">
+                        "Focus on high-velocity creative testing using dynamic video backgrounds and technical value propositions."
+                    </p>
+</div>
+</div>
+</section>
+<!-- Generated Batches -->
+<section class="space-y-sm">
+<div class="flex items-center justify-between">
+<h2 class="font-label-caps text-label-caps text-outline">GENERATED BATCHES</h2>
+<button class="text-primary font-bold text-sm">View All</button>
+</div>
+<div class="space-y-sm">
+<!-- Batch Card 1 -->
+<div class="glass-card rounded-xl p-md flex items-center justify-between group active:scale-[0.98] transition-transform">
+<div class="flex items-center gap-md">
+<div class="relative h-12 w-12 rounded-lg overflow-hidden border border-outline-variant/30">
+<img class="object-cover w-full h-full" data-alt="A macro photograph of iridescent liquid swirls in deep indigo and vibrant purple, representing complex AI data patterns. The lighting is crisp and modern with a professional high-key studio feel. The composition is abstract and futuristic, echoing the design's high-velocity intelligence aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCWnNZrjI1Rhn6KpPhmxVcl4FMHjkqW8-Jvvkc8UpxIeb1y8V-PT5wYXQ0DqN4st6x_bdamGu-_D4aH2a39LBMiXboxYvhqLljsKQ0ANx1C4vHjAPZk96R7mkssMnsUoHqXMgxLaMBEPKh-vYBoyJxzjCvran8z1lNxFj2VqjSlS7STpKwcGIYEZgv68MDl4tAHUwpm9Tjfhr_QMJh2qFHFfKMS67X5S_man4sNo295_Ii-UD8QleBRdhxqK7eY-AAMmBGENqZ7mIiT"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">Batch #402 - Neon Flux</p>
+<p class="text-xs text-on-surface-variant">12 Assets • 2h ago</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-xs">
+<span class="px-2 py-0.5 rounded-full bg-green-100 text-green-700 text-[10px] font-bold uppercase tracking-wider">Deployed</span>
+<span class="text-xs font-mono text-outline">ROAS 4.8</span>
+</div>
+</div>
+<!-- Batch Card 2 -->
+<div class="glass-card rounded-xl p-md flex items-center justify-between group active:scale-[0.98] transition-transform">
+<div class="flex items-center gap-md">
+<div class="relative h-12 w-12 rounded-lg overflow-hidden border border-outline-variant/30">
+<img class="object-cover w-full h-full" data-alt="Abstract 3D rendering of floating geometric glass shards reflecting soft purple and blue light. The background is a clean, neutral white gallery wall. The aesthetic is minimal, corporate, and sophisticated, emphasizing precision and creative power through professional architectural lighting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoxyP6S5Ig-zgs4PVvo-Ttb_TS1dkYaruV-6r2dZkfsyWybmZC45z9YkVbXIuq6JLtZh47d1mlJgFb1NOv_cawRbFAL0vGzexz1PFKkQr9BMeR6yr304CkIRd3dovwXO4cSjZnL2li1B2ap0IxVtzJQ3QwS_CxCqNOLJU0E6aVG1mJsFI4n-VRqOZDXiTqQbN3Vy2XozGMxDeijzwWynQ2rBLd5RkBaRB-9b1S5C1JiNXVDCyx40FGwj33NbsI-z1bKNzWKO0-uasi"/>
+</div>
+<div>
+<p class="font-bold text-on-surface">Batch #399 - Minimalist</p>
+<p class="text-xs text-on-surface-variant">8 Assets • 6h ago</p>
+</div>
+</div>
+<div class="flex flex-col items-end gap-xs">
+<span class="px-2 py-0.5 rounded-full bg-surface-container-high text-on-surface-variant text-[10px] font-bold uppercase tracking-wider">Draft</span>
+<span class="text-xs font-mono text-outline">ROAS --</span>
+</div>
+</div>
+<!-- Batch Card 3 (AI Loading State) -->
+<div class="glass-card rounded-xl p-md flex items-center justify-between ai-shimmer border-primary/20">
+<div class="flex items-center gap-md">
+<div class="h-12 w-12 rounded-lg bg-primary/5 flex items-center justify-center">
+<span class="material-symbols-outlined text-primary animate-spin">autorenew</span>
+</div>
+<div>
+<p class="font-bold text-primary">Generating Batch #403...</p>
+<div class="w-24 h-1 bg-primary/10 rounded-full mt-sm">
+<div class="w-2/3 h-full bg-primary rounded-full"></div>
+</div>
+</div>
+</div>
+<span class="px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider">75%</span>
+</div>
+</div>
+</section>
+</main>
+<!-- Generate New Batch FAB -->
+<div class="fixed bottom-24 right-margin-mobile z-40">
+<button class="bg-primary text-on-primary h-14 px-lg rounded-full flex items-center gap-sm shadow-xl hover:shadow-2xl active:scale-95 transition-all group overflow-hidden">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">add</span>
+<span class="font-bold">Generate Batch</span>
+<!-- Ambient Purple Glow for FAB -->
+<div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+</button>
+</div>
+<!-- Bottom Navigation (from JSON guidance) -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg rounded-t-xl">
+<div class="flex justify-around items-center pt-2 pb-safe px-4 h-16">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed bg-primary-container/20 rounded-xl px-3 py-1 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="font-label-caps text-label-caps mt-1">Batches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">rule</span>
+<span class="font-label-caps text-label-caps mt-1">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-caps text-label-caps mt-1">Learn</span>
+</a>
+</div>
+</nav>
+<script>
+        // Micro-interaction for batch cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('touchstart', () => {
+                card.style.transform = 'scale(0.98)';
+            });
+            card.addEventListener('touchend', () => {
+                card.style.transform = 'scale(1)';
+            });
+        });
+
+        // Simulating progressive generation update
+        const progressBar = document.querySelector('.w-2\/3.h-full.bg-primary');
+        const progressText = document.querySelector('.text-\[10px\].font-bold.uppercase.tracking-wider.bg-primary\\/10');
+        if(progressBar) {
+            let width = 66;
+            setInterval(() => {
+                if(width < 98) {
+                    width += 1;
+                    progressBar.style.width = width + '%';
+                    progressText.innerText = width + '%';
+                }
+            }, 3000);
+        }
+    </script>
+</body></html>

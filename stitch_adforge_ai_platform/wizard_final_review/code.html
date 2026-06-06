@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review &amp; Launch | AdForge AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-lowest": "#ffffff",
+                        "on-surface": "#0b1c30",
+                        "on-tertiary-fixed-variant": "#7b2f00",
+                        "primary-fixed": "#e2dfff",
+                        "on-secondary-fixed-variant": "#6800b4",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-fixed": "#0f0069",
+                        "tertiary-fixed-dim": "#ffb695",
+                        "tertiary": "#7e3000",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-container": "#fffbff",
+                        "on-error": "#ffffff",
+                        "tertiary-fixed": "#ffdbcc",
+                        "surface": "#f8f9ff",
+                        "inverse-on-surface": "#eaf1ff",
+                        "inverse-primary": "#c3c0ff",
+                        "secondary": "#831ada",
+                        "surface-variant": "#d3e4fe",
+                        "outline": "#777587",
+                        "secondary-fixed": "#f0dbff",
+                        "outline-variant": "#c7c4d8",
+                        "on-secondary-fixed": "#2c0051",
+                        "on-tertiary-container": "#ffd2be",
+                        "primary": "#3525cd",
+                        "on-error-container": "#93000a",
+                        "on-background": "#0b1c30",
+                        "secondary-container": "#9e41f5",
+                        "secondary-fixed-dim": "#ddb8ff",
+                        "background": "#f8f9ff",
+                        "on-surface-variant": "#464555",
+                        "on-primary-fixed-variant": "#3323cc",
+                        "error": "#ba1a1a",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-container": "#e5eeff",
+                        "on-secondary": "#ffffff",
+                        "primary-container": "#4f46e5",
+                        "tertiary-container": "#a44100",
+                        "error-container": "#ffdad6",
+                        "surface-container-low": "#eff4ff",
+                        "surface-tint": "#4d44e3",
+                        "on-tertiary-fixed": "#351000",
+                        "on-primary-container": "#dad7ff",
+                        "surface-container-high": "#dce9ff",
+                        "inverse-surface": "#213145",
+                        "surface-container-highest": "#d3e4fe",
+                        "on-primary": "#ffffff",
+                        "surface-bright": "#f8f9ff"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "lg": "24px",
+                        "sm": "8px",
+                        "margin-desktop": "32px",
+                        "md": "16px",
+                        "base": "4px",
+                        "margin-mobile": "16px",
+                        "xs": "4px",
+                        "xl": "40px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "display-lg-mobile": ["Inter"],
+                        "display-lg": ["Inter"],
+                        "label-caps": ["JetBrains Mono"],
+                        "headline-md": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "body-base": ["Inter"]
+                    },
+                    "fontSize": {
+                        "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4); }
+            50% { box-shadow: 0 0 20px 10px rgba(79, 70, 229, 0.2); }
+        }
+        .animate-pulse-glow {
+            animation: pulse-glow 3s infinite ease-in-out;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+        }
+        .ai-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-shimmer::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(131, 26, 218, 0.05),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shimmer 4s infinite;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-base antialiased min-h-screen pb-24">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex items-center justify-between px-margin-mobile h-16 md:px-margin-desktop">
+<div class="flex items-center gap-md">
+<div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">widgets</span>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile font-bold tracking-tight text-primary">AdForge AI</h1>
+</div>
+<div class="flex items-center gap-md">
+<button class="material-symbols-outlined p-2 text-on-surface-variant hover:bg-surface-container-high transition-colors rounded-full active:scale-95 duration-100">search</button>
+<div class="w-8 h-8 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed font-bold text-xs">JS</div>
+</div>
+</header>
+<main class="pt-24 px-margin-mobile max-w-5xl mx-auto">
+<!-- Stepper Indicator -->
+<div class="mb-xl flex flex-col items-center">
+<div class="flex items-center gap-sm mb-md">
+<div class="flex gap-xs">
+<div class="w-8 h-1 rounded-full bg-primary/20"></div>
+<div class="w-8 h-1 rounded-full bg-primary/20"></div>
+<div class="w-8 h-1 rounded-full bg-primary/20"></div>
+<div class="w-8 h-1 rounded-full bg-primary/20"></div>
+<div class="w-8 h-1 rounded-full bg-primary/20"></div>
+<div class="w-12 h-1.5 rounded-full bg-primary"></div>
+</div>
+</div>
+<p class="font-label-caps text-label-caps text-primary uppercase tracking-widest">Step 6 of 6: Review &amp; Launch</p>
+<h2 class="font-headline-md text-headline-md mt-sm text-center">Ready to unleash your creativity?</h2>
+</div>
+<!-- Summary Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-6 gap-md">
+<!-- Primary Goal Card -->
+<div class="md:col-span-4 glass-panel rounded-xl p-lg ai-shimmer">
+<div class="flex justify-between items-start mb-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant">01 Campaign Goal</span>
+<span class="material-symbols-outlined text-primary text-xl">target</span>
+</div>
+<h3 class="font-headline-md text-headline-md mb-xs">High-Conversion Retargeting</h3>
+<p class="text-on-surface-variant font-body-sm max-w-md">Re-engage previous website visitors with dynamic creative tailored to their last interaction point.</p>
+</div>
+<!-- Variant Count Card -->
+<div class="md:col-span-2 bg-primary-container/10 border border-primary/20 rounded-xl p-lg flex flex-col justify-center items-center text-center">
+<span class="font-label-caps text-label-caps text-primary mb-sm">Output Capacity</span>
+<span class="text-[64px] font-extrabold leading-none text-primary tracking-tighter">50</span>
+<span class="font-body-base font-semibold text-primary">Unique Variants</span>
+</div>
+<!-- Target Audience -->
+<div class="md:col-span-3 glass-panel rounded-xl p-lg">
+<div class="flex justify-between items-start mb-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant">02 Target Audience</span>
+<span class="material-symbols-outlined text-primary text-xl">group</span>
+</div>
+<div class="flex flex-wrap gap-xs mb-md">
+<span class="px-sm py-1 bg-surface-container-high rounded-full text-xs font-medium">Tech Professionals</span>
+<span class="px-sm py-1 bg-surface-container-high rounded-full text-xs font-medium">SaaS Decision Makers</span>
+<span class="px-sm py-1 bg-surface-container-high rounded-full text-xs font-medium">Remote Work Enthusiasts</span>
+</div>
+<p class="text-on-surface-variant font-body-sm italic">"Focusing on 25-45 age bracket with high interest in productivity tools."</p>
+</div>
+<!-- Creative Offer -->
+<div class="md:col-span-3 glass-panel rounded-xl p-lg">
+<div class="flex justify-between items-start mb-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant">03 Primary Offer</span>
+<span class="material-symbols-outlined text-primary text-xl">local_offer</span>
+</div>
+<div class="p-md bg-surface-container-lowest rounded-lg border border-outline-variant/50">
+<p class="font-body-base font-bold text-primary mb-base">30-Day Free Trial</p>
+<p class="text-on-surface-variant font-body-sm">"Get unlimited access to AdForge AI's enterprise engine for a month."</p>
+</div>
+</div>
+<!-- Platforms Selection -->
+<div class="md:col-span-2 glass-panel rounded-xl p-lg">
+<span class="font-label-caps text-label-caps text-on-surface-variant block mb-md">04 Distribution</span>
+<div class="space-y-sm">
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container">ads_click</span>
+<span class="font-body-sm font-medium">Instagram Reels</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container">ads_click</span>
+<span class="font-body-sm font-medium">LinkedIn Feed</span>
+</div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined text-primary-container">ads_click</span>
+<span class="font-body-sm font-medium">Google Display</span>
+</div>
+</div>
+</div>
+<!-- Visual Style Preview -->
+<div class="md:col-span-4 relative overflow-hidden rounded-xl h-48 group">
+<img alt="Style Preview" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A sophisticated abstract digital background with fluid gradients of deep indigo, royal purple, and soft lavender. The lighting is ethereal and atmospheric, suggesting high-velocity data flow and modern artificial intelligence. The style is ultra-minimalist and corporate, perfect for a high-end SaaS platform interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7v63kz__-ht5fZ_wkRj3HndCKeB3eGGSbmpmkBE7mReGquq80v6g0f31UTYka6I630AHCmEmEdZv4ZEo13SQSrfToIm1wnRVbF3nXmT8R_D74J_02s9ZZYiFPd6Eu4xwIOMfD7oeYKtvw1g7W9mSu7GzMPAyPedkxixPr-eE682-7i3eezbYXeHEJTPIjWm6Et6q-2a0YqCLDPFIszST6Oflt4kruTuK_7-vzZndtyyirBU52bBhRK1ZjBOEN0P8tqL0BSfpHd8aS"/>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 to-transparent flex flex-col justify-end p-lg">
+<span class="font-label-caps text-label-caps text-primary-fixed mb-xs">05 Creative Direction</span>
+<h4 class="text-white font-headline-md">Cyber-Minimalism</h4>
+<p class="text-primary-fixed/80 font-body-sm">Clean layouts, neon accents, and bold typography.</p>
+</div>
+</div>
+</div>
+<!-- Launch Action -->
+<div class="mt-xl flex flex-col items-center gap-md">
+<button class="animate-pulse-glow group relative px-xl py-lg bg-gradient-to-b from-primary to-secondary text-white rounded-xl font-bold text-lg shadow-xl active:scale-95 transition-all duration-200 overflow-hidden" id="launchButton">
+<div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<div class="flex items-center gap-sm">
+<span class="material-symbols-outlined">auto_awesome</span>
+<span>Generate Batch</span>
+</div>
+</button>
+<p class="text-on-surface-variant font-body-sm">Estimated generation time: ~45 seconds</p>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg flex justify-around items-center pt-2 pb-safe px-4">
+<div class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-label-caps">Dashboard</span>
+</div>
+<div class="flex flex-col items-center justify-center text-primary bg-primary-container/20 rounded-xl px-3 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="font-label-caps text-label-caps">Batches</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all">
+<span class="material-symbols-outlined">rule</span>
+<span class="font-label-caps text-label-caps">Queue</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-caps text-label-caps">Learn</span>
+</div>
+</nav>
+<script>
+        const launchBtn = document.getElementById('launchButton');
+        launchBtn.addEventListener('click', () => {
+            launchBtn.innerHTML = `
+                <div class="flex items-center gap-sm">
+                    <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Igniting AI Engine...</span>
+                </div>
+            `;
+            launchBtn.classList.remove('animate-pulse-glow');
+            launchBtn.disabled = true;
+            
+            // Artificial delay to simulate startup
+            setTimeout(() => {
+                alert('Generation started! Redirecting to queue...');
+            }, 1500);
+        });
+    </script>
+</body></html>

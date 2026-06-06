@@ -96,7 +96,11 @@ export default function DashboardScreen() {
               key={batch.id}
               style={styles.batchCard}
               activeOpacity={0.75}
-              onPress={() => navigation.navigate('ReviewBatch', { batchId: batch.id })}
+              onPress={() =>
+              batch.status === 'Generating'
+                ? navigation.navigate('BatchGenerating', { batchId: batch.id })
+                : navigation.navigate('ReviewBatch', { batchId: batch.id })
+            }
             >
               <View style={styles.batchIcon}>
                 <MaterialIcons name="layers" size={20} color={Colors.primary} />

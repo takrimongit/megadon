@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 16.0.0"
+    "version": ">= 16.0.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -13,7 +14,15 @@
         "simulator": false
       }
     },
+    "testflight": {
+      "distribution": "store",
+      "autoIncrement": true,
+      "ios": {
+        "resourceClass": "m-medium"
+      }
+    },
     "production": {
+      "autoIncrement": true,
       "ios": {
         "resourceClass": "m-medium"
       }
@@ -23,8 +32,8 @@
     "production": {
       "ios": {
         "appleId": "cliqueadmin@helpables.org",
-        "ascAppId": "",
-        "appleTeamId": ""
+        "ascAppId": "6777372110",
+        "appleTeamId": "Z3JJLJD2UT"
       }
     }
   }

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review Batch #402 | AdForge AI</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-primary-fixed": "#0f0069",
+                    "on-primary-container": "#dad7ff",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "on-tertiary": "#ffffff",
+                    "tertiary-container": "#a44100",
+                    "surface-tint": "#4d44e3",
+                    "secondary": "#831ada",
+                    "on-background": "#0b1c30",
+                    "secondary-fixed-dim": "#ddb8ff",
+                    "surface-container-lowest": "#ffffff",
+                    "surface-container-low": "#eff4ff",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "surface-container": "#e5eeff",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#351000",
+                    "on-error": "#ffffff",
+                    "surface-variant": "#d3e4fe",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "primary-fixed": "#e2dfff",
+                    "on-secondary-fixed": "#2c0051",
+                    "tertiary-fixed": "#ffdbcc",
+                    "on-secondary-container": "#fffbff",
+                    "outline-variant": "#c7c4d8",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "primary-container": "#4f46e5",
+                    "surface-container-high": "#dce9ff",
+                    "on-secondary-fixed-variant": "#6800b4",
+                    "on-error-container": "#93000a",
+                    "inverse-surface": "#213145",
+                    "error": "#ba1a1a",
+                    "background": "#f8f9ff",
+                    "tertiary": "#7e3000",
+                    "secondary-fixed": "#f0dbff",
+                    "on-tertiary-fixed-variant": "#7b2f00",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-surface": "#0b1c30",
+                    "surface": "#f8f9ff",
+                    "secondary-container": "#9e41f5",
+                    "primary": "#3525cd",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface-dim": "#cbdbf5",
+                    "outline": "#777587",
+                    "inverse-primary": "#c3c0ff",
+                    "on-tertiary-container": "#ffd2be",
+                    "surface-bright": "#f8f9ff",
+                    "on-surface-variant": "#464555"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "base": "4px",
+                    "lg": "24px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "xs": "4px",
+                    "sm": "8px",
+                    "xl": "40px",
+                    "margin-desktop": "32px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "body-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-caps": ["JetBrains Mono"],
+                    "display-lg": ["Inter"],
+                    "display-lg-mobile": ["Inter"],
+                    "body-base": ["Inter"]
+            },
+            "fontSize": {
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .ai-shimmer {
+            position: relative;
+            overflow: hidden;
+        }
+        .ai-shimmer::after {
+            content: "";
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent,
+                rgba(131, 26, 218, 0.05),
+                transparent
+            );
+            transform: rotate(45deg);
+            animation: shimmer 4s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen pb-24 md:pb-0">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex items-center justify-between px-margin-mobile h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined text-sm">workspace_premium</span>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile font-bold tracking-tight text-primary">AdForge AI</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="p-2 hover:bg-surface-container-high transition-colors rounded-full active:scale-95 duration-100">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</button>
+<div class="hidden md:flex gap-6 items-center px-6">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-all" href="#">Dashboard</a>
+<a class="font-label-caps text-label-caps text-primary font-bold" href="#">Batches</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-all" href="#">Queue</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-all" href="#">Learn</a>
+</div>
+</div>
+</header>
+<main class="pt-24 px-margin-mobile md:px-margin-desktop max-w-7xl mx-auto pb-20">
+<!-- Header Section -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-lg">
+<div>
+<div class="flex items-center gap-2 mb-2">
+<span class="font-label-caps text-label-caps px-2 py-1 bg-surface-container rounded-md text-on-surface-variant">BATCH ID</span>
+<span class="font-label-caps text-label-caps px-2 py-1 bg-green-100 text-green-800 rounded-md">COMPLETE</span>
+</div>
+<h2 class="font-headline-md text-headline-md text-on-surface">Batch #402</h2>
+</div>
+<div class="flex gap-3">
+<button class="px-6 py-2 rounded-xl border border-outline-variant text-on-surface font-label-caps text-label-caps hover:bg-surface-container transition-colors active:scale-95 duration-100">
+                    EXPORT ALL
+                </button>
+<button class="px-6 py-2 rounded-xl bg-gradient-to-b from-primary to-secondary text-on-primary font-label-caps text-label-caps shadow-md hover:shadow-lg transition-all active:scale-95 duration-100">
+                    PUBLISH BATCH
+                </button>
+</div>
+</div>
+<!-- Summary Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-gutter mb-xl">
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant/30 shadow-sm flex flex-col justify-between ai-shimmer">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">TOTAL VARIANTS</span>
+<p class="font-display-lg text-display-lg mt-2 text-primary">50</p>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-4">Generated across 4 unique creative directions.</p>
+</div>
+<div class="bg-surface-container-lowest p-lg rounded-xl border border-outline-variant/30 shadow-sm flex flex-col justify-between">
+<div>
+<span class="font-label-caps text-label-caps text-on-surface-variant">HIGH PERFORMANCE</span>
+<p class="font-display-lg text-display-lg mt-2 text-secondary">08</p>
+</div>
+<div class="flex items-center gap-2 mt-4 text-green-600">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<p class="font-body-sm text-body-sm font-semibold">Recommended for scaling</p>
+</div>
+</div>
+<div class="bg-primary-container p-lg rounded-xl border border-primary/20 shadow-sm flex flex-col justify-between text-on-primary-container relative overflow-hidden">
+<div class="z-10">
+<span class="font-label-caps text-label-caps opacity-80">AVERAGE PREDICTION</span>
+<p class="font-display-lg text-display-lg mt-2">82%</p>
+</div>
+<div class="mt-4 z-10 flex items-center gap-2">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+<p class="font-body-sm text-body-sm">+12% vs previous batch</p>
+</div>
+<!-- Abstract visual element -->
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full blur-3xl"></div>
+</div>
+</div>
+<!-- Filters -->
+<div class="flex items-center justify-between mb-md">
+<div class="flex gap-4 overflow-x-auto pb-2 no-scrollbar">
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-primary text-on-primary font-label-caps text-label-caps">ALL VARIANTS</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high transition-colors">RECOMMENDED</button>
+<button class="whitespace-nowrap px-4 py-1.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-label-caps hover:bg-surface-container-high transition-colors">PENDING</button>
+</div>
+<div class="hidden md:flex items-center gap-2 text-on-surface-variant">
+<span class="material-symbols-outlined">filter_list</span>
+<span class="font-label-caps text-label-caps">SORT BY SCORE</span>
+</div>
+</div>
+<!-- Ad Variants Grid -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-gutter">
+<!-- Card 1 -->
+<div class="group bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+<div class="aspect-square relative overflow-hidden bg-surface-container">
+<img alt="Ad variant" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A clean, professional social media advertisement graphic for a futuristic software product. The design features a sleek interface overlay on a high-tech background with glowing indigo and purple gradients. Soft studio lighting highlights the sharp typography and minimalist layout. The overall aesthetic is corporate yet cutting-edge, perfectly suited for a high-velocity intelligence brand in light mode." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBqRlt5Kjdzg3-47eyrzAnmCCjGS-UMf48BTCaLvL-f52SZ-X4f73NK0ImWtC7xUnIjnbuZ8X9FWuNf_yEEFG0sW4kUWBL8JwEbViAj571h6w05WfD1UYPNLfU8b1mbEsHACnK2NCKgk__K0GAP7mLSyDuZaDWQoWnbKwLmc1QWy8tgrOTpzGEjeJwsVfrN6WvmG17XGtMCYxK70xsY0YMy8fuoQ6_-1FHuVLpmOj7yYT860Wxepi4fCqUSbLe76ziL3Yy414yTFVtM"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-primary font-label-caps text-[10px] font-bold border border-primary/20">94% SCORE</span>
+</div>
+<button class="absolute bottom-3 right-3 w-10 h-10 rounded-full bg-white/90 backdrop-blur-sm flex items-center justify-center text-on-surface opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined">zoom_in</span>
+</button>
+</div>
+<div class="p-md">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px]">VALUE-DRIVEN</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-label-caps text-[10px]">HOOK: FEAR-OF-MISSING-OUT</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-4">
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg border border-red-200 text-red-600 font-label-caps text-label-caps hover:bg-red-50 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span> REJECT
+                        </button>
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg bg-primary/10 text-primary font-label-caps text-label-caps hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-sm">check</span> APPROVE
+                        </button>
+</div>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="group bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+<div class="aspect-square relative overflow-hidden bg-surface-container">
+<img alt="Ad variant" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A minimalist tech advertisement layout showcasing a mobile application interface with vibrant indigo accents. The setting is a bright, modern office with soft daylight filtering through large windows. The image focuses on the clarity and professional design of the UI elements, maintaining a premium feel with generous whitespace and a restricted color palette of white, gray, and deep purple." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC5ravJ5S2jtXtBdhJGG2ZDCcqxs9f0OGbrrbTbyb2QgexLEwfMX61z8AaxaL-BtkBPivaSkCOhDGjvwCKWFUyXY-KV6aJtFbiQDDiYaz6qWy0a5_yTxTzc3uXpgJmZ_FTSChb6OsEi2j_jpe789oGzduzLVAoaOGcJyNBP8PEpixG97LRYcpJ4qbiTeW63JCaDlBxk6_3yvGSf7lrpabYn1KtT-GEnQI3p7zZVMhmbOduiShWX60xTn6EpR6h4PtnXqb0vYuxyyXO9"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-primary font-label-caps text-[10px] font-bold border border-primary/20">89% SCORE</span>
+</div>
+</div>
+<div class="p-md">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px]">EDUCATIONAL</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-label-caps text-[10px]">HOOK: PROBLEM-SOLVER</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-4">
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg border border-red-200 text-red-600 font-label-caps text-label-caps hover:bg-red-50 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span> REJECT
+                        </button>
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg bg-primary/10 text-primary font-label-caps text-label-caps hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-sm">check</span> APPROVE
+                        </button>
+</div>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="group bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 ai-shimmer">
+<div class="aspect-square relative overflow-hidden bg-surface-container">
+<img alt="Ad variant" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A data-driven creative advertisement featuring dynamic graphs and AI-generated insights. The background is a clean white canvas with subtle geometric patterns in low-opacity primary indigo. The central subject is an abstract visualization of growth and speed, using vibrant purple and blue trails. The atmosphere is sophisticated and highlights professional reliability and creative power." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBexzhBPF8I-zLtHhtXfdwOIK0lC60TPtlAPfMQ5YSK3-ZHmLHxWyyzsw17MUXh_faIW3f9Da-iscrLhd-94-YhWoc1jCYOT-uOLOTrkVdi1bg_aicnbMyUuoN9TiQrWsBaAt-yQHNP29MnnNP-Ygw-yz7fYUZ0gbGW2UVS85Ji8b-whM4_nQVaHRuHwSD3AfoCfPkLkc17pXyVaOIHhc5dHjZF5Nm2jhh-2ymv5Kvshft-HP-Fasmxcb7XhM3Y9uFVbQIWEeRol6_0"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-primary font-label-caps text-[10px] font-bold border border-primary/20">98% SCORE</span>
+<span class="bg-secondary text-white px-2 py-1 rounded-md font-label-caps text-[10px] font-bold">BEST PERFORMER</span>
+</div>
+</div>
+<div class="p-md">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px]">DATA-CENTRIC</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-label-caps text-[10px]">HOOK: AUTHORITY</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-4">
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg border border-red-200 text-red-600 font-label-caps text-label-caps hover:bg-red-50 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span> REJECT
+                        </button>
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg bg-primary text-on-primary font-label-caps text-label-caps hover:bg-primary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-sm">check</span> APPROVE
+                        </button>
+</div>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="group bg-surface-container-lowest rounded-xl border border-outline-variant/30 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+<div class="aspect-square relative overflow-hidden bg-surface-container">
+<img alt="Ad variant" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A professional business-themed advertisement featuring diverse entrepreneurs collaborating in a high-tech, minimalist coworking space. The lighting is bright and airy, emphasizing a light-mode aesthetic. Subtle digital overlays of AI icons and connection lines reinforce the theme of intelligent collaboration. The color palette uses deep navy and vibrant indigo to suggest trust and innovation." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDS8xH6BOTW8apbVhL01x9ydzH3UIRiRcNlst_YJIvXTpgXKncvg7uNkCFAp7awmLO9UBB0gSdR8lCZJSqZ-Xp0Dxu_DU3cyfMzyyjp5ZmADI5eKVMEshh-X_S0E6Qah8sTei_ZYpU_LjqYvqsLgLRBYgaGWoX_TUnRelbkJcjjUrIz8S_SE6_oD5dh1CbIE0nB4x5qlm0YAix307gr5lKpV1VMgXrLFOpdIUoOO4_gX8xwYTbtHzSVzlY5G08N5LB6fjyPUYEZJ3Vt"/>
+<div class="absolute top-3 left-3 flex gap-2">
+<span class="bg-white/90 backdrop-blur-sm px-2 py-1 rounded-md text-primary font-label-caps text-[10px] font-bold border border-primary/20">78% SCORE</span>
+</div>
+</div>
+<div class="p-md">
+<div class="flex items-center gap-2 mb-3">
+<span class="px-2 py-0.5 rounded-full bg-surface-container text-on-surface-variant font-label-caps text-[10px]">SOCIAL PROOF</span>
+<span class="px-2 py-0.5 rounded-full bg-secondary/10 text-secondary font-label-caps text-[10px]">HOOK: COMMUNITY</span>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-4">
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg border border-red-200 text-red-600 font-label-caps text-label-caps hover:bg-red-50 transition-colors">
+<span class="material-symbols-outlined text-sm">close</span> REJECT
+                        </button>
+<button class="flex items-center justify-center gap-2 py-2 rounded-lg bg-primary/10 text-primary font-label-caps text-label-caps hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-sm">check</span> APPROVE
+                        </button>
+</div>
+</div>
+</div>
+</div>
+<!-- Pagination / Load More -->
+<div class="mt-xl flex flex-col items-center">
+<button class="group flex items-center gap-2 px-8 py-3 rounded-xl border border-outline-variant text-on-surface-variant font-label-caps text-label-caps hover:border-primary hover:text-primary transition-all">
+                LOAD MORE VARIANTS
+                <span class="material-symbols-outlined group-hover:translate-y-1 transition-transform">keyboard_arrow_down</span>
+</button>
+<p class="mt-4 font-body-sm text-body-sm text-on-surface-variant">Showing 12 of 50 variants</p>
+</div>
+</main>
+<!-- BottomNavBar (Mobile Only) -->
+<nav class="md:hidden fixed bottom-0 w-full z-50 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg flex justify-around items-center pt-2 pb-safe px-4 rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-caps text-[10px] mt-1">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-primary bg-primary-container/20 rounded-xl px-3 py-1 active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">layers</span>
+<span class="font-label-caps text-[10px] mt-1">Batches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">rule</span>
+<span class="font-label-caps text-[10px] mt-1">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-caps text-[10px] mt-1">Learn</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for buttons
+        document.querySelectorAll('button').forEach(button => {
+            button.addEventListener('mousedown', () => {
+                button.classList.add('scale-95');
+            });
+            button.addEventListener('mouseup', () => {
+                button.classList.remove('scale-95');
+            });
+            button.addEventListener('mouseleave', () => {
+                button.classList.remove('scale-95');
+            });
+        });
+
+        // Simple reveal animation on scroll for variants
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                    entry.target.classList.add('opacity-100', 'translate-y-0');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.group.bg-surface-container-lowest').forEach(el => {
+            el.classList.add('opacity-0', 'translate-y-4', 'transition-all', 'duration-700');
+            observer.observe(el);
+        });
+    </script>
+</body></html>

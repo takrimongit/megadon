@@ -23,10 +23,12 @@ import WizardCreativeStyleScreen from '../screens/wizard/WizardCreativeStyleScre
 import WizardFinalReviewScreen from '../screens/wizard/WizardFinalReviewScreen';
 import WizardFinalReviewSummaryScreen from '../screens/wizard/WizardFinalReviewSummaryScreen';
 import GeneratingBatchScreen from '../screens/wizard/GeneratingBatchScreen';
+import BatchGeneratingScreen from '../screens/review/BatchGeneratingScreen';
 
 export type RootStackParamList = {
   MainTabs: undefined;
   ReviewBatch: { batchId: string };
+  BatchGenerating: { batchId: string };
   RapidReview: { batchId: string };
   AIRevision: { adId: string };
   CampaignInsights: { campaignId: string };
@@ -109,6 +111,7 @@ export default function Navigation() {
         <Stack.Screen name="WizardFinalReview" component={WizardFinalReviewScreen} />
         <Stack.Screen name="WizardFinalReviewSummary" component={WizardFinalReviewSummaryScreen} />
         <Stack.Screen name="GeneratingBatch" component={GeneratingBatchScreen} />
+        <Stack.Screen name="BatchGenerating" component={BatchGeneratingScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

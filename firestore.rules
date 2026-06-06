@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isAuthed() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function isMember(wid) {
+      return exists(/databases/$(database)/documents/workspaces/$(wid)/members/$(uid()));
+    }
+    function isOwner(wid) {
+      return get(/databases/$(database)/documents/workspaces/$(wid)/members/$(uid())).data.role == 'owner';
+    }
+
+    // User profile (self-only)
+    match /users/{userId} {
+      allow read, write: if isAuthed() && uid() == userId;
+    }
+
+    // Workspaces
+    match /workspaces/{wid} {
+      allow read: if isAuthed() && isMember(wid);
+      allow create: if isAuthed();
+      allow update, delete: if isAuthed() && isOwner(wid);
+
+      match /members/{memberId} {
+        allow read: if isAuthed() && isMember(wid);
+        allow write: if isAuthed() && (isOwner(wid) || uid() == memberId);
+      }
+
+      // Batches: client can READ, but only server (Admin SDK bypasses rules) writes.
+      match /batches/{bid} {
+        allow read: if isAuthed() && isMember(wid);
+        allow write: if false;
+
+        match /ads/{adId} {
+          allow read: if isAuthed() && isMember(wid);
+          allow write: if false;
+
+          match /revisions/{rid} {
+            allow read: if isAuthed() && isMember(wid);
+            allow write: if false;
+          }
+        }
+      }
+
+      match /aggregates/{doc} {
+        allow read: if isAuthed() && isMember(wid);
+        allow write: if false;
+      }
+    }
+
+    // Server-only collections
+    match /personaCache/{hash} {
+      allow read, write: if false;
+    }
+    match /config/{doc} {
+      allow read: if isAuthed();
+      allow write: if false;
+    }
+  }
+}

@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AdForge AI - Batch Generation Wizard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.8);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(226, 232, 240, 1);
+    }
+    .platform-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .platform-card:active {
+      scale: 0.98;
+    }
+    .ai-shimmer {
+      position: relative;
+      overflow: hidden;
+    }
+    .ai-shimmer::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(45deg, transparent, rgba(79, 70, 229, 0.05), transparent);
+      transform: rotate(45deg);
+      animation: shimmer 3s infinite;
+    }
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(45deg); }
+      100% { transform: translateX(100%) rotate(45deg); }
+    }
+  </style>
+<script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          "colors": {
+                  "surface-container-lowest": "#ffffff",
+                  "on-surface": "#0b1c30",
+                  "on-tertiary-fixed-variant": "#7b2f00",
+                  "primary-fixed": "#e2dfff",
+                  "on-secondary-fixed-variant": "#6800b4",
+                  "on-tertiary": "#ffffff",
+                  "on-primary-fixed": "#0f0069",
+                  "tertiary-fixed-dim": "#ffb695",
+                  "tertiary": "#7e3000",
+                  "surface-dim": "#cbdbf5",
+                  "on-secondary-container": "#fffbff",
+                  "on-error": "#ffffff",
+                  "tertiary-fixed": "#ffdbcc",
+                  "surface": "#f8f9ff",
+                  "inverse-on-surface": "#eaf1ff",
+                  "inverse-primary": "#c3c0ff",
+                  "secondary": "#831ada",
+                  "surface-variant": "#d3e4fe",
+                  "outline": "#777587",
+                  "secondary-fixed": "#f0dbff",
+                  "outline-variant": "#c7c4d8",
+                  "on-secondary-fixed": "#2c0051",
+                  "on-tertiary-container": "#ffd2be",
+                  "primary": "#3525cd",
+                  "on-error-container": "#93000a",
+                  "on-background": "#0b1c30",
+                  "secondary-container": "#9e41f5",
+                  "secondary-fixed-dim": "#ddb8ff",
+                  "background": "#f8f9ff",
+                  "on-surface-variant": "#464555",
+                  "on-primary-fixed-variant": "#3323cc",
+                  "error": "#ba1a1a",
+                  "primary-fixed-dim": "#c3c0ff",
+                  "surface-container": "#e5eeff",
+                  "on-secondary": "#ffffff",
+                  "primary-container": "#4f46e5",
+                  "tertiary-container": "#a44100",
+                  "error-container": "#ffdad6",
+                  "surface-container-low": "#eff4ff",
+                  "surface-tint": "#4d44e3",
+                  "on-tertiary-fixed": "#351000",
+                  "on-primary-container": "#dad7ff",
+                  "surface-container-high": "#dce9ff",
+                  "inverse-surface": "#213145",
+                  "surface-container-highest": "#d3e4fe",
+                  "on-primary": "#ffffff",
+                  "surface-bright": "#f8f9ff"
+          },
+          "borderRadius": {
+                  "DEFAULT": "0.25rem",
+                  "lg": "0.5rem",
+                  "xl": "0.75rem",
+                  "full": "9999px"
+          },
+          "spacing": {
+                  "lg": "24px",
+                  "sm": "8px",
+                  "margin-desktop": "32px",
+                  "md": "16px",
+                  "base": "4px",
+                  "margin-mobile": "16px",
+                  "xs": "4px",
+                  "xl": "40px",
+                  "gutter": "16px"
+          },
+          "fontFamily": {
+                  "display-lg-mobile": ["Inter"],
+                  "display-lg": ["Inter"],
+                  "label-caps": ["JetBrains Mono"],
+                  "headline-md": ["Inter"],
+                  "body-sm": ["Inter"],
+                  "body-base": ["Inter"]
+          },
+          "fontSize": {
+                  "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                  "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                  "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                  "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                  "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}]
+          }
+        },
+      },
+    }
+  </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-base min-h-screen">
+<!-- TopAppBar Anchor -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex items-center justify-between px-margin-mobile md:px-margin-desktop h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary-container flex items-center justify-center text-white">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">workspaces</span>
+</div>
+<h1 class="font-display-lg-mobile text-display-lg-mobile font-bold tracking-tight text-primary">AdForge AI</h1>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center hover:bg-surface-container-high transition-colors active:scale-95 duration-100">
+<span class="material-symbols-outlined text-on-surface-variant">search</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile max-w-4xl mx-auto">
+<!-- Stepper Context -->
+<div class="mb-xl">
+<div class="flex justify-between items-center mb-sm">
+<span class="font-label-caps text-label-caps text-primary uppercase tracking-widest">Step 3 of 6</span>
+<span class="font-label-caps text-label-caps text-on-surface-variant">50% Complete</span>
+</div>
+<div class="w-full h-1 bg-surface-container rounded-full overflow-hidden">
+<div class="w-1/2 h-full bg-primary transition-all duration-500 ease-out"></div>
+</div>
+<h2 class="font-headline-md text-headline-md mt-lg text-on-surface">Offer &amp; Platforms</h2>
+<p class="text-on-surface-variant font-body-sm mt-xs">Define your value proposition and select the channels for deployment.</p>
+</div>
+<!-- Content Sections: Bento Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg">
+<!-- Offer Details (Large Section) -->
+<section class="md:col-span-12 glass-card rounded-xl p-lg ai-shimmer">
+<div class="flex items-center gap-2 mb-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase">Creative Hook &amp; Offer</h3>
+</div>
+<div class="relative">
+<textarea class="w-full min-h-[140px] bg-surface-container-lowest border border-outline-variant rounded-xl p-md focus:ring-2 focus:ring-primary/15 focus:border-primary transition-all font-body-base resize-none" placeholder="Describe your offer... e.g., '20% off Summer Collection for new subscribers only. Limited time until July 31st.'"></textarea>
+<div class="absolute bottom-3 right-3 flex items-center gap-2">
+<span class="text-[10px] font-label-caps text-on-surface-variant/50">AI OPTIMIZED</span>
+<div class="w-1.5 h-1.5 rounded-full bg-secondary"></div>
+</div>
+</div>
+<p class="text-[12px] text-on-surface-variant/70 mt-sm italic">Pro-tip: Clear, concise offers perform 40% better on mobile platforms.</p>
+</section>
+<!-- Platforms Selection (Grid) -->
+<section class="md:col-span-12">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant uppercase mb-md px-1">Target Platforms</h3>
+<div class="grid grid-cols-2 md:grid-cols-3 gap-md">
+<!-- Facebook -->
+<button class="platform-card glass-card rounded-xl p-md flex flex-col items-center gap-3 border-transparent hover:border-outline-variant group" onclick="togglePlatform(this, '#1877F2')">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center transition-colors group-hover:bg-[#1877F2]/10">
+<span class="material-symbols-outlined text-[#1877F2]">face_nod</span>
+</div>
+<span class="font-label-caps text-label-caps">Facebook</span>
+</button>
+<!-- Instagram -->
+<button class="platform-card glass-card rounded-xl p-md flex flex-col items-center gap-3 border-transparent hover:border-outline-variant group" onclick="togglePlatform(this, '#E4405F')">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center transition-colors group-hover:bg-[#E4405F]/10">
+<span class="material-symbols-outlined text-[#E4405F]">camera_alt</span>
+</div>
+<span class="font-label-caps text-label-caps">Instagram</span>
+</button>
+<!-- LinkedIn -->
+<button class="platform-card glass-card rounded-xl p-md flex flex-col items-center gap-3 border-transparent hover:border-outline-variant group" onclick="togglePlatform(this, '#0A66C2')">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center transition-colors group-hover:bg-[#0A66C2]/10">
+<span class="material-symbols-outlined text-[#0A66C2]">business_center</span>
+</div>
+<span class="font-label-caps text-label-caps">LinkedIn</span>
+</button>
+<!-- Google -->
+<button class="platform-card glass-card rounded-xl p-md flex flex-col items-center gap-3 border-transparent hover:border-outline-variant group" onclick="togglePlatform(this, '#4285F4')">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center transition-colors group-hover:bg-[#4285F4]/10">
+<span class="material-symbols-outlined text-[#4285F4]">google</span>
+</div>
+<span class="font-label-caps text-label-caps">Google Ads</span>
+</button>
+<!-- TikTok -->
+<button class="platform-card glass-card rounded-xl p-md flex flex-col items-center gap-3 border-transparent hover:border-outline-variant group" onclick="togglePlatform(this, '#000000')">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center transition-colors group-hover:bg-on-surface/10">
+<span class="material-symbols-outlined text-on-surface">brand_family</span>
+</div>
+<span class="font-label-caps text-label-caps">TikTok</span>
+</button>
+<!-- YouTube -->
+<button class="platform-card glass-card rounded-xl p-md flex flex-col items-center gap-3 border-transparent hover:border-outline-variant group" onclick="togglePlatform(this, '#FF0000')">
+<div class="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center transition-colors group-hover:bg-[#FF0000]/10">
+<span class="material-symbols-outlined text-[#FF0000]">play_circle</span>
+</div>
+<span class="font-label-caps text-label-caps">YouTube</span>
+</button>
+</div>
+</section>
+</div>
+</main>
+<!-- Navigation Buttons (Fixed Bottom Bar) -->
+<nav class="fixed bottom-0 w-full bg-surface/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg px-margin-mobile py-lg z-50">
+<div class="max-w-4xl mx-auto flex items-center justify-between">
+<button class="flex items-center gap-2 px-lg py-sm rounded-xl text-on-surface-variant font-label-caps hover:bg-surface-container-high transition-all active:scale-95">
+<span class="material-symbols-outlined">arrow_back</span>
+        Back
+      </button>
+<div class="flex gap-md items-center">
+<button class="hidden md:flex items-center gap-2 px-lg py-sm rounded-xl text-primary font-label-caps hover:bg-primary/5 transition-all">
+          Save Draft
+        </button>
+<button class="bg-gradient-to-b from-primary to-secondary text-white px-xl py-md rounded-xl font-label-caps shadow-md hover:shadow-lg active:scale-95 transition-all flex items-center gap-2">
+          Next Step
+          <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</nav>
+<!-- BottomNavBar Anchor (Mobile Specific Shell Placeholder) -->
+<div class="md:hidden">
+<!-- The prompt requires the navigation shell to be suppressed on task-focused sub-pages like wizards. 
+         However, the system instructions mention rendering BottomNavBar if top-level. 
+         A wizard step 3 is NOT a top-level destination, so it is suppressed in favor of the custom wizard nav. -->
+</div>
+<script>
+    function togglePlatform(element, color) {
+      const isSelected = element.getAttribute('data-selected') === 'true';
+      const iconContainer = element.querySelector('div');
+      
+      if (!isSelected) {
+        element.setAttribute('data-selected', 'true');
+        element.style.borderColor = color;
+        element.style.backgroundColor = color + '08';
+        iconContainer.style.backgroundColor = color;
+        iconContainer.querySelector('span').style.color = 'white';
+        element.classList.add('shadow-md');
+      } else {
+        element.setAttribute('data-selected', 'false');
+        element.style.borderColor = 'transparent';
+        element.style.backgroundColor = '';
+        iconContainer.style.backgroundColor = '';
+        iconContainer.querySelector('span').style.color = color;
+        element.classList.remove('shadow-md');
+      }
+    }
+  </script>
+</body></html>

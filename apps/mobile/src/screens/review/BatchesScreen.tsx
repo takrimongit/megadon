@@ -54,7 +54,11 @@ export default function BatchesScreen() {
             key={batch.id}
             style={styles.batchCard}
             activeOpacity={0.75}
-            onPress={() => navigation.navigate('ReviewBatch', { batchId: batch.id })}
+            onPress={() =>
+              batch.status === 'Generating'
+                ? navigation.navigate('BatchGenerating', { batchId: batch.id })
+                : navigation.navigate('ReviewBatch', { batchId: batch.id })
+            }
           >
             <View style={styles.batchTop}>
               <View style={[styles.statusDot, { backgroundColor: statusColors[batch.status] }]} />

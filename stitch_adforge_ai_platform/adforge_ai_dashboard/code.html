@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>AdForge AI Executive Dashboard</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&amp;family=JetBrains+Mono:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "primary": "#3525cd",
+                    "on-primary-container": "#dad7ff",
+                    "on-background": "#0b1c30",
+                    "surface-bright": "#f8f9ff",
+                    "surface-dim": "#cbdbf5",
+                    "on-secondary-container": "#fffbff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffdbcc",
+                    "outline-variant": "#c7c4d8",
+                    "tertiary-fixed-dim": "#ffb695",
+                    "on-primary-fixed-variant": "#3323cc",
+                    "surface-container-low": "#eff4ff",
+                    "surface-tint": "#4d44e3",
+                    "on-secondary-fixed-variant": "#6800b4",
+                    "outline": "#777587",
+                    "on-primary-fixed": "#0f0069",
+                    "on-error-container": "#93000a",
+                    "error-container": "#ffdad6",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-surface": "#0b1c30",
+                    "surface-container-highest": "#d3e4fe",
+                    "surface": "#f8f9ff",
+                    "secondary-fixed": "#f0dbff",
+                    "on-tertiary-fixed": "#351000",
+                    "primary-container": "#4f46e5",
+                    "secondary": "#831ada",
+                    "surface-container-high": "#dce9ff",
+                    "secondary-container": "#9e41f5",
+                    "on-tertiary-container": "#ffd2be",
+                    "background": "#f8f9ff",
+                    "tertiary": "#7e3000",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "secondary-fixed-dim": "#ddb8ff",
+                    "on-surface-variant": "#464555",
+                    "primary-fixed": "#e2dfff",
+                    "surface-variant": "#d3e4fe",
+                    "surface-container": "#e5eeff",
+                    "inverse-surface": "#213145",
+                    "inverse-primary": "#c3c0ff",
+                    "tertiary-container": "#a44100",
+                    "on-secondary-fixed": "#2c0051",
+                    "on-tertiary-fixed-variant": "#7b2f00"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "margin-mobile": "16px",
+                    "base": "4px",
+                    "sm": "8px",
+                    "md": "16px",
+                    "gutter": "16px",
+                    "xs": "4px",
+                    "lg": "24px",
+                    "xl": "40px",
+                    "margin-desktop": "32px"
+            },
+            "fontFamily": {
+                    "display-lg": ["Inter"],
+                    "display-lg-mobile": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "body-base": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "label-caps": ["JetBrains Mono"]
+            },
+            "fontSize": {
+                    "display-lg": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "display-lg-mobile": ["36px", {"lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "body-base": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .chart-gradient {
+            background: linear-gradient(180deg, rgba(53, 37, 205, 0.1) 0%, rgba(53, 37, 205, 0) 100%);
+        }
+        ::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-background font-body-base antialiased selection:bg-primary/20">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface/80 backdrop-blur-md border-b border-outline-variant/30 shadow-sm flex items-center justify-between px-margin-mobile h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary shadow-inner">
+<span class="material-symbols-outlined text-[20px]">workspace_premium</span>
+</div>
+<h1 class="font-display-lg-mobile text-[20px] font-bold tracking-tight text-primary">AdForge AI</h1>
+</div>
+<button class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-surface-container-high transition-colors active:scale-95 duration-100">
+<span class="material-symbols-outlined text-primary">search</span>
+</button>
+</header>
+<main class="pt-20 pb-24 px-margin-mobile max-w-md mx-auto">
+<!-- Executive Overview Cards -->
+<section class="grid grid-cols-2 gap-sm mb-lg">
+<div class="p-md bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-xs">ACTIVE CAMPAIGNS</p>
+<div class="flex items-baseline gap-xs">
+<span class="font-headline-md text-headline-md text-primary">24</span>
+<span class="text-[12px] text-green-600 font-bold">+12%</span>
+</div>
+</div>
+<div class="p-md bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-xs">ADS GENERATED</p>
+<div class="flex items-baseline gap-xs">
+<span class="font-headline-md text-headline-md text-primary">1.2k</span>
+<span class="text-[12px] text-green-600 font-bold">+5%</span>
+</div>
+</div>
+<div class="p-md bg-primary-container text-on-primary-container rounded-xl shadow-lg col-span-1 border border-primary/20">
+<p class="font-label-caps text-label-caps opacity-80 mb-xs">APPROVAL RATE</p>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold">84%</span>
+<div class="w-full h-1 bg-white/20 rounded-full mt-sm overflow-hidden">
+<div class="h-full bg-white w-[84%]"></div>
+</div>
+</div>
+</div>
+<div class="p-md bg-secondary-container text-on-secondary-container rounded-xl shadow-lg col-span-1 border border-secondary/20">
+<p class="font-label-caps text-label-caps opacity-80 mb-xs">LEARNING CONF.</p>
+<div class="flex flex-col">
+<span class="font-headline-md text-headline-md font-bold">92%</span>
+<div class="w-full h-1 bg-white/20 rounded-full mt-sm overflow-hidden">
+<div class="h-full bg-white w-[92%] shadow-[0_0_8px_white]"></div>
+</div>
+</div>
+</div>
+</section>
+<!-- Ad Performance Trend Chart -->
+<section class="mb-lg">
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl shadow-sm overflow-hidden">
+<div class="p-md flex justify-between items-center">
+<h2 class="font-headline-md text-[18px] text-on-surface">Performance Trend</h2>
+<span class="font-label-caps text-label-caps text-primary bg-primary/10 px-2 py-0.5 rounded-full">LIVE</span>
+</div>
+<div class="h-40 w-full relative px-2">
+<!-- Simple SVG Line Chart representation -->
+<svg class="w-full h-full" viewbox="0 0 400 150">
+<defs>
+<lineargradient id="lineGrad" x1="0%" x2="0%" y1="0%" y2="100%">
+<stop offset="0%" style="stop-color:var(--primary);stop-opacity:0.2"></stop>
+<stop offset="100%" style="stop-color:var(--primary);stop-opacity:0"></stop>
+</lineargradient>
+</defs>
+<path d="M0,120 Q50,110 80,80 T160,90 T240,40 T320,60 T400,30 L400,150 L0,150 Z" fill="url(#lineGrad)"></path>
+<path d="M0,120 Q50,110 80,80 T160,90 T240,40 T320,60 T400,30" fill="none" stroke="#3525cd" stroke-linecap="round" stroke-width="3"></path>
+<circle cx="240" cy="40" fill="#3525cd" r="4"></circle>
+<circle cx="240" cy="40" fill="#3525cd" fill-opacity="0.2" r="8"></circle>
+</svg>
+</div>
+<div class="px-md pb-md flex justify-between text-[10px] font-label-caps text-on-surface-variant">
+<span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+</div>
+</div>
+</section>
+<!-- Recent Activity -->
+<section class="space-y-md">
+<div class="flex items-center justify-between">
+<h2 class="font-headline-md text-[18px] text-on-surface">Recent Activity</h2>
+<button class="text-primary font-label-caps text-[12px] hover:underline">VIEW ALL</button>
+</div>
+<!-- Newly Generated Batches -->
+<div class="space-y-sm">
+<p class="font-label-caps text-[10px] text-outline tracking-widest px-1">NEWLY GENERATED BATCHES</p>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden shadow-sm">
+<div class="p-md flex items-center gap-md border-b border-outline-variant/10 active:bg-surface-container-low transition-colors">
+<img class="w-12 h-12 rounded-lg object-cover" data-alt="A macro close-up of high-tech digital displays showing vibrant ad creative concepts. The image features sharp neon details against a sleek dark navy blue background, using cool lighting to emphasize professional AI-driven innovation. The composition is dynamic, with glowing grid patterns and abstract data visualizations that feel futuristic and high-speed." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBlUzFvaVjYL1LPsZopOyn7VqgjaJCl15xg9dYqlf1bJsGsRO8ifVwM10Y9ymzivG_u6BBQzUQxwRRp4OiCp_7XsHs64JvJmYP5jvy2HBswBTWF_1sz1t57u9BXrlF-p35fREEuRq4_Rw0C1K7nXL0gC_gDeKE_4mtv_y2BPckooDjin0MEJhoLxe0TSwZSb6Dc_XUAzp-2ICXYa3ccVhtHXCGYai4ooKdRg7V-5FK0CMEm6WDxWpMIeh0WZ3uYOgD4tvTSNMfQqosJ"/>
+<div class="flex-1">
+<p class="font-body-base font-semibold text-on-surface">Summer Kickoff v2</p>
+<p class="font-body-sm text-[12px] text-on-surface-variant">48 Assets • Created 2h ago</p>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+<div class="p-md flex items-center gap-md active:bg-surface-container-low transition-colors">
+<img class="w-12 h-12 rounded-lg object-cover" data-alt="Abstract artistic representation of a marketing campaign flow with sleek holographic lines and nodes. The visual style is premium corporate modern with a restricted palette of deep indigo and soft lavenders. High-key lighting highlights the polished glass-like textures of the interface elements, conveying a sense of organized data and creative flow." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCjsgdkBrfmM8UmLVCDI619x5pHuTT2aYiOTT2mvwnCAdW9Cn-MCw7pl8INDh9ngNdfrNht4fNbVFr0IpdllMNPamuU6cdSTToDmnc0oEZxyVCCOV5hi1XdpEwxynJ9dPbAQFbM38tbBdC_Ld_mE7oGcNA_600jbs5JYtgmyymfJeZtdrmwtn9j3UBIo11Ajg3dEruKAhIQ6YRcHdxuWx45Nb2MAsL50IAu91uD7NMEwAOXCxt60L_E0kNOfp8bnjsukMOalKJ2aUX8"/>
+<div class="flex-1">
+<p class="font-body-base font-semibold text-on-surface">Brand Refresh A/B</p>
+<p class="font-body-sm text-[12px] text-on-surface-variant">12 Assets • Created 5h ago</p>
+</div>
+<span class="material-symbols-outlined text-outline">chevron_right</span>
+</div>
+</div>
+</div>
+<!-- Pending Reviews -->
+<div class="space-y-sm">
+<p class="font-label-caps text-[10px] text-outline tracking-widest px-1">PENDING REVIEWS</p>
+<div class="bg-surface-container-lowest border border-outline-variant/30 rounded-xl overflow-hidden shadow-sm">
+<div class="p-md flex items-center gap-md active:bg-surface-container-low transition-colors">
+<div class="w-12 h-12 rounded-lg bg-error-container/20 flex items-center justify-center text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">priority_high</span>
+</div>
+<div class="flex-1">
+<p class="font-body-base font-semibold text-on-surface">High CTR Alert: Tech Pack</p>
+<p class="font-body-sm text-[12px] text-error">Requires Manager Approval</p>
+</div>
+<button class="bg-primary text-on-primary px-3 py-1.5 rounded-lg text-[12px] font-bold shadow-sm active:scale-95 transition-transform">REVIEW</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-xl bg-surface/90 dark:bg-surface-container-lowest/90 backdrop-blur-xl border-t border-outline-variant/20 shadow-lg flex justify-around items-center pt-2 pb-6 px-4">
+<a class="flex flex-col items-center justify-center text-primary dark:text-primary-fixed bg-primary-container/20 rounded-xl px-3 py-1 active:scale-90 duration-200 transition-all" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">dashboard</span>
+<span class="font-label-caps text-[10px] mt-0.5">Dashboard</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">layers</span>
+<span class="font-label-caps text-[10px] mt-0.5">Batches</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">rule</span>
+<span class="font-label-caps text-[10px] mt-0.5">Queue</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant/70 hover:text-primary transition-all active:scale-90 duration-200" href="#">
+<span class="material-symbols-outlined">school</span>
+<span class="font-label-caps text-[10px] mt-0.5">Learn</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for cards
+        document.querySelectorAll('.active\\:scale-95').forEach(button => {
+            button.addEventListener('touchstart', () => button.style.transform = 'scale(0.95)');
+            button.addEventListener('touchend', () => button.style.transform = 'scale(1)');
+        });
+
+        // Simple light/dark mode persistence check (default light based on prompt)
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            // document.documentElement.classList.add('dark');
+        }
+    </script>
+</body></html>

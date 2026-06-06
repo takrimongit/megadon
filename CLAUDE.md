@@ -77,3 +77,48 @@ Follows `stitch_adforge_ai_platform/high_velocity_intelligence/DESIGN.md`.
 2. Fill in `eas.json`: `appleTeamId` and `ascAppId`
 3. `eas build --platform ios --profile preview`
 4. `eas submit --platform ios`
+
+---
+
+## Backend API (`apps/api`)
+
+Fastify + TypeScript on Cloud Run. Firebase Auth, Firestore, Cloud Storage, Cloud Tasks. See [docs/backend-design.md](docs/backend-design.md) for the full design.
+
+### Commands
+
+```bash
+# From repo root
+npm install                        # Installs all workspaces
+
+# Dev (with emulators)
+npm run dev:emulators              # Boots Auth + Firestore + Storage emulators
+npm run dev:api                    # Starts Fastify against emulators
+npm run typecheck                  # Typecheck across all workspaces
+
+# Build / deploy
+cd apps/api && npm run build       # Compile TS → dist/
+gcloud builds submit --config apps/api/cloudbuild.yaml
+```
+
+### Architecture
+
+- **Two roles, one image.** `ROLE=api` boots the public API + worker routes. `ROLE=worker` only registers `/internal/jobs/*` for Cloud Tasks delivery. Same Docker image, different env var.
+- **`src/server.ts`** — Fastify entry: helmet, CORS, request ID, error handler that maps `AppError` and `ZodError` to envelope.
+- **`src/routes/`** — REST endpoints under `/v1` (workspaces, wizard, batches, ads, reads/stubs) and `/internal/jobs/*` for Cloud Tasks.
+- **`src/jobs/`** — Worker handlers (`generateAd`, `pollHiggsfield`, `reviseAd`). Each is idempotent and assumes Cloud Tasks retry/backoff.
+- **`src/providers/`** — `CopyProvider` (OpenAI) and `CreativeProvider` (Higgsfield) interfaces. `getCreativeProvider()` returns a fake provider in emulator mode.
+- **`src/middleware/`** — `requireAuth` (verifies Firebase ID token), `requireWorkspace` (verifies membership via `x-workspace-id`), `requireCloudTasks` (verifies OIDC caller email).
+
+### Read pattern
+
+Mobile reads batches/ads **directly from Firestore** via the Web SDK under security rules. The `BatchGeneratingScreen` watches `workspaces/{wid}/batches/{bid}` for real-time progress updates — no polling endpoint exists.
+
+### Analytics stubs
+
+`/v1/campaigns/:id/metrics`, `/v1/ads/:id/intelligence`, `/v1/playbook`, `/v1/insights` return deterministic mock data with the real schema shape. Swap implementations later without changing the mobile contract.
+
+---
+
+## Shared Types (`packages/types`)
+
+Zod schemas + TS types imported by both `apps/api` and `apps/mobile` via the `@megadon/types` workspace alias. Single source of truth for `Brief`, `Batch`, `Ad`, `Revision`, error codes, and request/response shapes.
