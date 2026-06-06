@@ -10,4 +10,6 @@ process.env.FIREBASE_STORAGE_EMULATOR_HOST = process.env.FIREBASE_STORAGE_EMULAT
 process.env.PORT = '0';
 process.env.WORKER_URL = 'http://localhost:0';
 // Provider keys: not required; we mock the OpenAI module per-test.
-process.env.OPENAI_API_KEY = 'test-key';
+process.env.KIE_API_KEY = 'test-key';
+process.env.KIE_BASE_URL = 'http://localhost:0/mock';
+process.env.KIE_MODEL = 'gpt-4o-mini';

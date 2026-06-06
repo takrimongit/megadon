@@ -30,7 +30,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 12. `POST /v1/workspaces` — create workspace; caller becomes `owner`. Bootstraps default workspace on first sign-in.
 13. `GET /v1/workspaces` — list workspaces the caller is a member of.
 14. `POST /v1/workspaces/:id/members` (owner-only) — invite by email (stub: just adds membership if user exists).
-15. `POST /v1/personas/suggest` — wizard step 3 helper. Input: `{ ageGroups, interests, personaDescription }`. Calls OpenAI (`gpt-4o-mini`) with a structured-output schema → returns 3 `Persona` candidates `{ id, name, desc, tags[], reach }`. Cached by input hash for 24h in Firestore `personaCache`.
+15. `POST /v1/personas/suggest` — wizard step 3 helper. Input: `{ ageGroups, interests, personaDescription }`. Calls kie.ai (`gpt-4o-mini` by default, configurable via `KIE_MODEL`) with a structured-output schema → returns 3 `Persona` candidates `{ id, name, desc, tags[], reach }`. Cached by input hash for 24h in Firestore `personaCache`.
 16. `GET /v1/wizard/options` — returns static option sets (goals, age groups, interests catalog, platforms, visual styles, tones) so the mobile app stops hard-coding them. Backed by a single config doc `config/wizardOptions`.
 
 ## Phase 4 — Batch Generation Pipeline *(depends on Phase 3)*
@@ -38,7 +38,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 17. `POST /v1/batches` — accepts complete `Brief` (validated with Zod). Creates `batches/{bid}` doc with `status: 'queued'`, `progress: { total: brief.batchSize, completed: 0 }`, snapshots the brief. Creates `batchSize` placeholder `ads/{adId}` docs in `status: 'generating'`. Enqueues one Cloud Task per ad to `POST /internal/jobs/generate-ad` (OIDC-authenticated, header-scoped). Returns `{ batchId, estimatedSeconds }`.
 18. `POST /internal/jobs/generate-ad` — Cloud Tasks handler (verifies OIDC token issued for the service account). Steps per ad:
     a. Load batch + brief.
-    b. Call OpenAI to produce `{ headline, body, hook, cta }` (structured output, prompt templated from brief + platform).
+    b. Call kie.ai to produce `{ headline, body, hook, cta }` (structured output, prompt templated from brief + platform).
     c. Call Higgsfield to produce image/video; poll job until done or hand off to a follow-up task if long-running (see step 19).
     d. Download asset → upload to Cloud Storage at `workspaces/{wid}/batches/{bid}/ads/{adId}/v1.{ext}`.
     e. Patch ad doc with copy fields, `assetPath`, `score` (stub: random 60–95), `status: 'pending'`.
@@ -52,7 +52,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 22. `PATCH /v1/ads/:adId` body `{ status: 'approved' | 'rejected' }` — single-ad decision (used by `RapidReviewScreen` swipes). Validates the caller can write this ad's workspace; updates ad doc and increments `batch.counters.{approved|rejected}`.
 23. `POST /v1/batches/:batchId/decisions` — bulk variant for `ReviewBatchScreen`'s "Submit Approvals". Body: `{ decisions: [{ adId, status }] }`. Single transactional batched write.
 24. `POST /v1/ads/:adId/revisions` — body `{ instruction: string }`. Creates `revisions/{rid}` doc in `status: 'queued'`, enqueues Cloud Task `POST /internal/jobs/revise-ad`. Returns `{ revisionId }`. Mobile subscribes to the revision doc for the streamed result.
-25. `POST /internal/jobs/revise-ad` — loads ad + instruction, calls OpenAI with revise prompt (current copy + brief context + instruction → structured output), writes revised `{ headline, body, cta }` to the revision doc, sets `status: 'ready'`. Does **not** mutate the ad until the user accepts.
+25. `POST /internal/jobs/revise-ad` — loads ad + instruction, calls kie.ai with revise prompt (current copy + brief context + instruction → structured output), writes revised `{ headline, body, cta }` to the revision doc, sets `status: 'ready'`. Does **not** mutate the ad until the user accepts.
 26. `POST /v1/ads/:adId/revisions/:rid/accept` — applies revision fields to ad doc, flips `ad.status` to `approved`, marks revision `accepted: true`, keeps prior copy in `ad.history[]`.
 27. Counters/derived state: when `batch.counters.approved + rejected === batch.progress.total`, automatically flip `batch.status` to `approved` (if any approved) or `archived` (if all rejected). Triggered inside the Firestore transaction in steps 22/23.
 
@@ -72,7 +72,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 32. Add `Dockerfile` (multi-stage: build → distroless Node 20 runtime, non-root).
 33. Add `cloudbuild.yaml`: build image → push to Artifact Registry → deploy to Cloud Run with `--no-allow-unauthenticated` for `/internal/*` (handled via path-based IAM is impossible on Cloud Run; instead deploy two services: `api` public + `worker` internal, sharing the same image with env flag `ROLE=api|worker`).
 34. Cloud Tasks queue `ad-generation` with rate caps (`maxDispatchesPerSecond=10`, `maxConcurrentDispatches=20`) targeting the worker service URL with OIDC auth (service account: `tasks-invoker@<proj>.iam`).
-35. Secret Manager entries: `OPENAI_API_KEY`, `HIGGSFIELD_API_KEY`. Mounted to Cloud Run as env vars.
+35. Secret Manager entries: `KIE_API_KEY`, `HIGGSFIELD_API_KEY` (suffixed `_STAGING` / `_PROD` per env). Mounted to Cloud Run as env vars.
 36. Smoke test plan in §Verification.
 
 ---
@@ -86,7 +86,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 - `workspaces/{wid}/batches/{bid}/ads/{adId}` — `{ headline, body, hook, cta, platform, format, status, score, assetPath, providerJobIds, error, history[], createdAt, updatedAt }`
 - `workspaces/{wid}/batches/{bid}/ads/{adId}/revisions/{rid}` — `{ instruction, status, headline?, body?, cta?, accepted, createdBy, createdAt }`
 - `workspaces/{wid}/aggregates/dashboard` — denormalized stats doc updated on batch finalize
-- `personaCache/{hash}` — wizard step-3 OpenAI cache
+- `personaCache/{hash}` — wizard step-3 kie.ai response cache
 - `config/wizardOptions` — static option sets (goals, interests, platforms, styles, tones)
 
 **Indexes:** `batches` by `(workspaceId, status, createdAt desc)`; `ads` by `(batchId, status)`; collection-group on `ads` by `(workspaceId, status)`.
@@ -101,7 +101,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 | GET | `/workspaces` | List my workspaces |
 | POST | `/workspaces/:id/members` | Add member |
 | GET | `/wizard/options` | Static option sets |
-| POST | `/personas/suggest` | Wizard step 3 — OpenAI personas |
+| POST | `/personas/suggest` | Wizard step 3 — kie.ai personas |
 | POST | `/batches` | Submit brief → enqueue generation |
 | PATCH | `/ads/:adId` | Approve / reject single ad |
 | POST | `/batches/:batchId/decisions` | Bulk approve/reject |
@@ -125,7 +125,7 @@ All responses wrapped as `{ data, error: null }` or `{ data: null, error: { code
 ## Relevant files / locations to create
 
 - `apps/api/` — Fastify service (handlers, providers, jobs, middleware, schemas)
-- `apps/api/src/providers/openai.ts` — OpenAI client with structured-output helpers
+- `apps/api/src/providers/kie.ts` — kie.ai client (OpenAI-compatible) with structured-output helpers
 - `apps/api/src/providers/higgsfield.ts` — Higgsfield client (kickoff + poll)
 - `apps/api/src/providers/types.ts` — `CreativeProvider` interface so swapping providers is one file
 - `apps/api/src/jobs/generateAd.ts`, `reviseAd.ts`, `pollHiggsfield.ts`
@@ -160,7 +160,7 @@ All responses wrapped as `{ data, error: null }` or `{ data: null, error: { code
 - **Read pattern**: Firestore SDK directly on mobile under security rules. Free real-time progress for `GeneratingBatchScreen`; eliminates ~10 list endpoints from the REST surface.
 - **Tenancy**: Workspaces from day one, `workspaces/{wid}` as root of every resource (path-based isolation that maps cleanly to rules and IAM).
 - **Auth**: Firebase Auth on mobile (email/password + Sign in with Apple for TestFlight). API verifies ID tokens via Admin SDK.
-- **AI providers**: OpenAI (`gpt-4o-mini` for copy & personas, structured outputs) + Higgsfield (images/video). Both behind a `CreativeProvider`/`CopyProvider` interface; swappable.
+- **AI providers**: kie.ai (OpenAI-compatible gateway, default model `gpt-4o-mini`; configurable via `KIE_MODEL` to any model kie.ai exposes) for copy & personas + Higgsfield (images/video). Both behind a `CreativeProvider`/`CopyProvider` interface; swappable.
 - **Analytics endpoints**: Schema defined, returns mock data in MVP. UI stays functional; pipelines wired later.
 - **No backend performance ingestion in MVP** (per "stub it" answer). `ad.score`/`roas` filled with deterministic mocks.
 - **Out of scope (MVP)**: real ad-network publishing, billing/Stripe, role permissions beyond owner/editor/viewer, learning-loop training, push notifications.

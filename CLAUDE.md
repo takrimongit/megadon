@@ -112,7 +112,7 @@ gcloud builds submit --config apps/api/cloudbuild.yaml
 - **`src/server.ts`** — Fastify entry: helmet, CORS, request ID, error handler that maps `AppError` and `ZodError` to envelope.
 - **`src/routes/`** — REST endpoints under `/v1` (workspaces, wizard, batches, ads, reads/stubs) and `/internal/jobs/*` for Cloud Tasks.
 - **`src/jobs/`** — Worker handlers (`generateAd`, `pollHiggsfield`, `reviseAd`). Each is idempotent and assumes Cloud Tasks retry/backoff.
-- **`src/providers/`** — `CopyProvider` (OpenAI) and `CreativeProvider` (Higgsfield) interfaces. `getCreativeProvider()` returns a fake provider in emulator mode.
+- **`src/providers/`** — `CopyProvider` (kie.ai via OpenAI-compatible SDK) and `CreativeProvider` (Higgsfield) interfaces. `getCreativeProvider()` returns a fake provider in emulator mode.
 - **`src/middleware/`** — `requireAuth` (verifies Firebase ID token), `requireWorkspace` (verifies membership via `x-workspace-id`), `requireCloudTasks` (verifies OIDC caller email).
 
 ### Read pattern
@@ -142,4 +142,4 @@ npm run test                 # Skip the boot step if emulators are already runni
 
 `tests/helpers/app.ts` — boots Fastify in-process via `buildApp()` and exposes a `call({ method, url, idToken, workspaceId, body })` helper.
 `tests/helpers/auth.ts` — `createTestUser(email)` mints emulator users + ID tokens; `clearFirestore()` wipes between tests.
-`tests/helpers/mocks.ts` — `mockOpenAI()` vi.mock helper that swaps the OpenAI provider for deterministic responses (no real API calls).
+`tests/helpers/mocks.ts` — `mockCopyProvider()` vi.mock helper that swaps the kie.ai provider for deterministic responses (no real API calls).

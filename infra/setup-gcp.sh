@@ -169,7 +169,7 @@ ensure_secret() {
 
 log "Setting up Secret Manager entries"
 for env in STAGING PROD; do
-  ensure_secret "OPENAI_API_KEY_${env}"
+  ensure_secret "KIE_API_KEY_${env}"
   ensure_secret "HIGGSFIELD_API_KEY_${env}"
 done
 done_msg "Secrets configured"
@@ -233,8 +233,8 @@ GCP_DEPLOYER_SA:      $(sa_email "${DEPLOYER_SA}")
 
 Next:
   1. Populate the secrets in Secret Manager:
-     gcloud secrets versions add OPENAI_API_KEY_STAGING --data-file=<(echo -n "<your-key>")
-     gcloud secrets versions add OPENAI_API_KEY_PROD    --data-file=<(echo -n "<your-key>")
+     gcloud secrets versions add KIE_API_KEY_STAGING --data-file=<(echo -n "<your-key>")
+     gcloud secrets versions add KIE_API_KEY_PROD    --data-file=<(echo -n "<your-key>")
      (Same for HIGGSFIELD_API_KEY_STAGING / _PROD)
   2. Set the GitHub secrets above.
   3. Push to main → the deploy workflow will run.

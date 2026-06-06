@@ -1,5 +1,5 @@
 import { db, bucket, FieldValue } from '../lib/firebase.js';
-import { openaiProvider } from '../providers/openai.js';
+import { kieProvider } from '../providers/kie.js';
 import { getCreativeProvider } from '../providers/higgsfield.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import type { Brief, Platform } from '@megadon/types';
@@ -27,7 +27,7 @@ export async function runGenerateAd(payload: JobPayload) {
     }
 
     // 2. Copy generation.
-    const copy = await openaiProvider.generateCopy(brief, ad.platform as Platform);
+    const copy = await kieProvider.generateCopy(brief, ad.platform as Platform);
 
     // 3. Creative generation.
     const provider = getCreativeProvider();

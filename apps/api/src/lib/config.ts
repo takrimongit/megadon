@@ -12,7 +12,11 @@ export const config = {
   workerUrl: process.env.WORKER_URL ?? 'http://localhost:8080',
   tasksInvokerSA: process.env.TASKS_INVOKER_SA ?? '',
 
-  openaiKey: process.env.OPENAI_API_KEY ?? '',
+  // kie.ai — OpenAI-compatible AI gateway. https://kie.ai
+  kieKey: process.env.KIE_API_KEY ?? '',
+  kieBaseUrl: process.env.KIE_BASE_URL ?? 'https://api.kie.ai/v1',
+  kieModel: process.env.KIE_MODEL ?? 'gpt-4o-mini',
+
   higgsfieldKey: process.env.HIGGSFIELD_API_KEY ?? '',
 
   emulators: {

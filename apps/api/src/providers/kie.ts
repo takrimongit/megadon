@@ -5,7 +5,12 @@ import { AppError } from '../lib/errors.js';
 import type { CopyProvider, CopyResult } from './types.js';
 import type { Brief, Persona, Platform } from '@megadon/types';
 
-const client = new OpenAI({ apiKey: config.openaiKey });
+// kie.ai exposes an OpenAI-compatible chat completions endpoint.
+// We reuse the OpenAI SDK with a custom baseURL + key.
+const client = new OpenAI({
+  apiKey: config.kieKey,
+  baseURL: config.kieBaseUrl,
+});
 
 const CopySchema = z.object({
   headline: z.string(),
@@ -24,13 +29,11 @@ const PersonasSchema = z.object({
   })).length(3),
 });
 
-const MODEL = 'gpt-4o-mini';
-
 async function callJson<T>(schema: z.ZodSchema<T>, system: string, user: string): Promise<T> {
-  if (!config.openaiKey) throw AppError.provider('OPENAI_API_KEY not set');
+  if (!config.kieKey) throw AppError.provider('KIE_API_KEY not set');
   try {
     const resp = await client.chat.completions.create({
-      model: MODEL,
+      model: config.kieModel,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user },
@@ -41,11 +44,11 @@ async function callJson<T>(schema: z.ZodSchema<T>, system: string, user: string)
     const raw = resp.choices[0]?.message?.content ?? '{}';
     return schema.parse(JSON.parse(raw));
   } catch (e) {
-    throw AppError.provider(`OpenAI: ${(e as Error).message}`);
+    throw AppError.provider(`kie.ai: ${(e as Error).message}`);
   }
 }
 
-export const openaiProvider: CopyProvider = {
+export const kieProvider: CopyProvider = {
   async generateCopy(brief: Brief, platform: Platform): Promise<CopyResult> {
     const system = `You write high-conversion ad copy. Return JSON: {headline, body, hook, cta}. Match the platform format.`;
     const user = `Platform: ${platform}\nGoal: ${brief.goal}\nOffer: ${brief.offer}\nStyle: ${brief.creativeStyle}\nTone: ${brief.tones.join(', ')}\nAudience: ${brief.audience.selectedPersona?.name ?? brief.audience.personaDescription ?? brief.audience.interests.join(', ')}`;

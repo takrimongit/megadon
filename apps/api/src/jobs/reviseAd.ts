@@ -1,5 +1,5 @@
 import { db } from '../lib/firebase.js';
-import { openaiProvider } from '../providers/openai.js';
+import { kieProvider } from '../providers/kie.js';
 import type { CopyResult } from '../providers/types.js';
 
 interface JobPayload {
@@ -31,7 +31,7 @@ export async function runReviseAd(payload: JobPayload) {
       hook: ad.hook ?? '',
       cta: ad.cta ?? '',
     };
-    const revised = await openaiProvider.reviseCopy(current, rev.instruction, brief);
+    const revised = await kieProvider.reviseCopy(current, rev.instruction, brief);
     await revRef.update({
       headline: revised.headline,
       body: revised.body,

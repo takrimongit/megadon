@@ -4,7 +4,7 @@ import { db } from '../lib/firebase.js';
 import { requireAuth } from '../middleware/auth.js';
 import { ok } from '../lib/envelope.js';
 import { defaultWizardOptions } from '../lib/wizardOptions.js';
-import { openaiProvider } from '../providers/openai.js';
+import { kieProvider } from '../providers/kie.js';
 import { SuggestPersonasBody, type Persona } from '@megadon/types';
 
 const CACHE_TTL_HOURS = 24;
@@ -34,7 +34,7 @@ export async function wizardRoutes(app: FastifyInstance) {
         return ok(reply, data.personas as Persona[]);
       }
     }
-    const personas = await openaiProvider.suggestPersonas(body);
+    const personas = await kieProvider.suggestPersonas(body);
     await cacheRef.set({ personas, cachedAt: new Date().toISOString() });
     return ok(reply, personas);
   });

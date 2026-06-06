@@ -16,9 +16,9 @@ export const fakePersonas: Persona[] = [
   { id: 'p3', name: 'Professional', desc: 'Career-focused', tags: ['li'], reach: '1.5M' },
 ];
 
-export function mockOpenAI() {
-  vi.mock('../../src/providers/openai.js', () => ({
-    openaiProvider: {
+export function mockCopyProvider() {
+  vi.mock('../../src/providers/kie.js', () => ({
+    kieProvider: {
       generateCopy: vi.fn().mockResolvedValue(fakeCopy),
       reviseCopy: vi.fn().mockResolvedValue({ ...fakeCopy, headline: 'Revised Headline' }),
       suggestPersonas: vi.fn().mockResolvedValue(fakePersonas),

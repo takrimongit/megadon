@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, beforeEach, afterAll } from 'vitest';
-import { mockOpenAI } from './helpers/mocks.js';
+import { mockCopyProvider } from './helpers/mocks.js';
 
-mockOpenAI();
+mockCopyProvider();
 
 import { call, closeApp } from './helpers/app.js';
 import { clearFirestore, createTestUser } from './helpers/auth.js';

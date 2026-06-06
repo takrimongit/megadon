@@ -30,10 +30,10 @@ The script is **idempotent** — safe to re-run. At the end it prints the values
 The bootstrap creates secret names but leaves them empty. Set actual values:
 
 ```bash
-echo -n "sk-..." | gcloud secrets versions add OPENAI_API_KEY_STAGING --data-file=-
-echo -n "sk-..." | gcloud secrets versions add OPENAI_API_KEY_PROD --data-file=-
-echo -n "hf-..." | gcloud secrets versions add HIGGSFIELD_API_KEY_STAGING --data-file=-
-echo -n "hf-..." | gcloud secrets versions add HIGGSFIELD_API_KEY_PROD --data-file=-
+echo -n "<kie-key>" | gcloud secrets versions add KIE_API_KEY_STAGING --data-file=-
+echo -n "<kie-key>" | gcloud secrets versions add KIE_API_KEY_PROD --data-file=-
+echo -n "<hf-key>"  | gcloud secrets versions add HIGGSFIELD_API_KEY_STAGING --data-file=-
+echo -n "<hf-key>"  | gcloud secrets versions add HIGGSFIELD_API_KEY_PROD --data-file=-
 ```
 
 ### 3. GitHub repo configuration
