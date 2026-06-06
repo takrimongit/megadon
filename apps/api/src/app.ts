@@ -41,7 +41,8 @@ export async function buildApp(): Promise<FastifyInstance> {
     return fail(reply, 'INTERNAL', message, 500);
   });
 
-  app.get('/healthz', async () => ({ ok: true, role: config.role }));
+  // Note: /healthz is reserved by Cloud Run's GFE — use /health instead.
+  app.get('/health', async () => ({ ok: true, role: config.role }));
 
   if (config.role === 'api') {
     await app.register(workspaceRoutes, { prefix: '/v1' });

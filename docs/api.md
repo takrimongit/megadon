@@ -58,7 +58,7 @@ Always check `error` first before reading `data`. The mobile client (`apps/mobil
 
 ### Health
 
-#### `GET /healthz`
+#### `GET /health`
 No auth. Returns `{ ok: true, role: 'api' | 'worker' }`.
 
 ---

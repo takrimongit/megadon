@@ -63,7 +63,7 @@ test → build → deploy-staging
 
 1. **test** — typecheck all workspaces, run API integration tests against Firebase emulators (boots emulators via `firebase emulators:exec`).
 2. **build** — authenticate via WIF, push image to Artifact Registry with tag `:<short-sha>` and `:latest`. Uses GHA cache.
-3. **deploy-staging** — deploy worker (internal-only) first to capture its URL, grant `tasks-invoker` SA permission to invoke worker, then deploy api with `WORKER_URL` pointing at the worker. Smoke-test `/healthz` at the end.
+3. **deploy-staging** — deploy worker (internal-only) first to capture its URL, grant `tasks-invoker` SA permission to invoke worker, then deploy api with `WORKER_URL` pointing at the worker. Smoke-test `/health` at the end.
 
 ### Promoting to prod
 

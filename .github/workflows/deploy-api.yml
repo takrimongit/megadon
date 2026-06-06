@@ -153,11 +153,11 @@ jobs:
             --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
 
-      - name: Smoke test /healthz
+      - name: Smoke test /health
         run: |
           API_URL="$(gcloud run services describe "api-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
           echo "API URL: $API_URL"
-          curl -fsS "${API_URL}/healthz"
+          curl -fsS "${API_URL}/health"
 
   deploy-prod:
     name: Deploy → prod (manual)
@@ -212,8 +212,8 @@ jobs:
             --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
 
-      - name: Smoke test /healthz
+      - name: Smoke test /health
         run: |
           API_URL="$(gcloud run services describe "api-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
           echo "API URL: $API_URL"
-          curl -fsS "${API_URL}/healthz"
+          curl -fsS "${API_URL}/health"

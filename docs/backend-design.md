@@ -15,7 +15,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 3. Wire root `package.json` workspaces (npm workspaces) so `apps/mobile`, `apps/api`, `packages/types` share TS types via path mapping.
 4. Install Firebase Emulator Suite (Auth, Firestore, Storage, Functions emulator unused) and document `npm run dev:emulators` in `apps/api`.
 5. Add `firebase.json`, `firestore.rules`, `firestore.indexes.json`, `storage.rules` at repo root.
-6. Stand up the Fastify server skeleton with: request-id middleware, Pino logger, Zod validation, error envelope, `/healthz`, Firebase Admin SDK init (ADC in prod, emulator host in dev).
+6. Stand up the Fastify server skeleton with: request-id middleware, Pino logger, Zod validation, error envelope, `/health`, Firebase Admin SDK init (ADC in prod, emulator host in dev).
 7. Auth middleware: verify Firebase ID token from `Authorization: Bearer <jwt>` → attach `{ uid, email }` to request. Workspace middleware: read `x-workspace-id` header, verify caller is a member, attach `{ workspaceId, role }`.
 
 ## Phase 2 — Data Model & Security *(depends on Phase 1)*
@@ -116,7 +116,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 | POST | `/internal/jobs/generate-ad` | Cloud Tasks → worker (OIDC) |
 | POST | `/internal/jobs/poll-creative` | Cloud Tasks → worker (OIDC) |
 | POST | `/internal/jobs/revise-ad` | Cloud Tasks → worker (OIDC) |
-| GET | `/healthz` | Liveness |
+| GET | `/health` | Liveness |
 
 All responses wrapped as `{ data, error: null }` or `{ data: null, error: { code, message } }`. Errors use stable codes (`AUTH_REQUIRED`, `WORKSPACE_FORBIDDEN`, `VALIDATION_FAILED`, `RATE_LIMITED`, `PROVIDER_FAILED`, `NOT_FOUND`).
 
@@ -148,7 +148,7 @@ All responses wrapped as `{ data, error: null }` or `{ data: null, error: { code
 3. Integration tests with Vitest hitting emulators: workspace creation, brief submission creates correct number of `ads` docs, fake provider in test mode finalizes batch, decisions transition batch status.
 4. Security-rules tests via `@firebase/rules-unit-testing`: cross-workspace read blocked; client write to `batches/*` blocked; member of workspace can read own batches.
 5. End-to-end smoke from mobile against emulators: complete wizard, watch `BatchGeneratingScreen` flip via Firestore listener, approve ads in `RapidReviewScreen`, batch becomes `approved`.
-6. Cloud Run deploy dry-run: `gcloud run deploy --no-traffic` for both `api` and `worker`; hit `/healthz` on the public URL.
+6. Cloud Run deploy dry-run: `gcloud run deploy --no-traffic` for both `api` and `worker`; hit `/health` on the public URL.
 7. Cloud Tasks loop test: post a real brief in staging with a stubbed `CreativeProvider` returning a static asset → batch finalizes in <30s.
 
 ---

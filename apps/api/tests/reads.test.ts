@@ -16,7 +16,7 @@ describe('Read endpoints', () => {
   afterAll(async () => { await closeApp(); });
 
   it('healthz', async () => {
-    const res = await call({ method: 'GET', url: '/healthz' });
+    const res = await call({ method: 'GET', url: '/health' });
     expect(res.status).toBe(200);
   });
 
