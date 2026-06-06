@@ -9,9 +9,10 @@ interface Props {
   onBack?: () => void;
   rightIcon?: keyof typeof MaterialIcons.glyphMap;
   onRightPress?: () => void;
+  onSignOut?: () => void;
 }
 
-export default function AppHeader({ title, showBack, onBack, rightIcon, onRightPress }: Props) {
+export default function AppHeader({ title, showBack, onBack, rightIcon, onRightPress, onSignOut }: Props) {
   return (
     <View style={styles.container}>
       <View style={styles.inner}>
@@ -30,15 +31,23 @@ export default function AppHeader({ title, showBack, onBack, rightIcon, onRightP
 
         {title ? <Text style={styles.title}>{title}</Text> : null}
 
-        {rightIcon ? (
-          <TouchableOpacity onPress={onRightPress} style={styles.iconBtn} activeOpacity={0.7}>
-            <MaterialIcons name={rightIcon} size={24} color={Colors.primary} />
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.iconBtn} activeOpacity={0.7}>
-            <MaterialIcons name="search" size={24} color={Colors.primary} />
-          </TouchableOpacity>
-        )}
+        <View style={styles.rightGroup}>
+          {rightIcon ? (
+            <TouchableOpacity onPress={onRightPress} style={styles.iconBtn} activeOpacity={0.7}>
+              <MaterialIcons name={rightIcon} size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+          {onSignOut ? (
+            <TouchableOpacity onPress={onSignOut} style={styles.iconBtn} activeOpacity={0.7} accessibilityLabel="Sign out">
+              <MaterialIcons name="logout" size={22} color={Colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+          {!rightIcon && !onSignOut ? (
+            <TouchableOpacity style={styles.iconBtn} activeOpacity={0.7}>
+              <MaterialIcons name="search" size={24} color={Colors.primary} />
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
     </View>
   );
@@ -86,5 +95,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 12,
+  },
+  rightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
 });
