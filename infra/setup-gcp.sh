@@ -124,6 +124,22 @@ else
 fi
 done_msg "Firestore ready"
 
+# ============ Step 5b: Identity Platform (Firebase Auth backend) ============
+log "Initializing Identity Platform (Firebase Auth)"
+init_resp=$(curl -sS -X POST -H "Authorization: Bearer $(gcloud auth print-access-token)" \
+  -H "Content-Type: application/json" \
+  -H "x-goog-user-project: ${PROJECT_ID}" \
+  "https://identitytoolkit.googleapis.com/v2/projects/${PROJECT_ID}/identityPlatform:initializeAuth" \
+  -d '{}' 2>&1) || warn "Identity Platform init may have already been done"
+case "$init_resp" in
+  *ALREADY_EXISTS*|*"already been initialized"*|"{}")
+    done_msg "Identity Platform ready"
+    ;;
+  *)
+    warn "Identity Platform init returned unexpected response: $init_resp"
+    ;;
+esac
+
 # ============ Step 6: Cloud Storage buckets (per env) ============
 for env in staging prod; do
   bucket="${PROJECT_ID}-${env}-assets"
