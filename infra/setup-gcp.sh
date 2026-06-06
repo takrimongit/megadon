@@ -62,6 +62,7 @@ gcloud services enable \
   cloudtasks.googleapis.com \
   firestore.googleapis.com \
   firebase.googleapis.com \
+  identitytoolkit.googleapis.com \
   iamcredentials.googleapis.com \
   secretmanager.googleapis.com \
   storage.googleapis.com \
