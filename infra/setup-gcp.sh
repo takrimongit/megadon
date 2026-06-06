@@ -113,6 +113,14 @@ done
 
 # tasks-invoker needs only the right to call Cloud Run worker via OIDC.
 grant "${TASKS_SA}" "roles/run.invoker"
+
+# api + worker need to actAs tasks-invoker when enqueuing OIDC-signed tasks.
+for sa in "${API_SA}" "${WORKER_SA}"; do
+  gcloud iam service-accounts add-iam-policy-binding "$(sa_email "${TASKS_SA}")" \
+    --role="roles/iam.serviceAccountUser" \
+    --member="serviceAccount:$(sa_email "$sa")" \
+    --quiet >/dev/null
+done
 done_msg "Runtime roles granted"
 
 # ============ Step 5: Firestore database ============

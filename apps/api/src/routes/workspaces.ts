@@ -46,11 +46,11 @@ export async function workspaceRoutes(app: FastifyInstance) {
     return ok(reply, ws, 201);
   });
 
-  // List my workspaces (via membership lookup)
+  // List my workspaces. uid is the member doc id, so scan the members
+  // collection group and filter in memory by doc id. Inefficient for large
+  // datasets; revisit when there are >1k workspaces total.
   app.get('/workspaces', async (req, reply) => {
     const uid = req.user!.uid;
-    const memberships = await db().collectionGroup('members').where('uid', '==', uid).get();
-    // Note: we store role on the doc but uid is the doc id. Use parent path instead.
     const ids = new Set<string>();
     const all = await db().collectionGroup('members').get();
     all.forEach((doc) => {
