@@ -230,6 +230,13 @@ gcloud iam service-accounts add-iam-policy-binding "$(sa_email "${DEPLOYER_SA}")
   --role="roles/iam.workloadIdentityUser" \
   --member="${WIF_PRINCIPAL}" \
   --quiet >/dev/null
+
+# Allow the deployer SA to sign blobs on its own behalf (needed by Admin
+# SDK to mint custom tokens for e2e tests, since there's no local key).
+gcloud iam service-accounts add-iam-policy-binding "$(sa_email "${DEPLOYER_SA}")" \
+  --role="roles/iam.serviceAccountTokenCreator" \
+  --member="serviceAccount:$(sa_email "${DEPLOYER_SA}")" \
+  --quiet >/dev/null
 done_msg "Deployer SA + WIF binding ready"
 
 # ============ Step 11: print GitHub secrets ============
