@@ -121,6 +121,15 @@ for sa in "${API_SA}" "${WORKER_SA}"; do
     --member="serviceAccount:$(sa_email "$sa")" \
     --quiet >/dev/null
 done
+
+# Runtime SAs need to sign blobs on their own behalf to mint signed URLs
+# for Cloud Storage assets (no local private key in Cloud Run).
+for sa in "${API_SA}" "${WORKER_SA}"; do
+  gcloud iam service-accounts add-iam-policy-binding "$(sa_email "$sa")" \
+    --role="roles/iam.serviceAccountTokenCreator" \
+    --member="serviceAccount:$(sa_email "$sa")" \
+    --quiet >/dev/null
+done
 done_msg "Runtime roles granted"
 
 # ============ Step 5: Firestore database ============

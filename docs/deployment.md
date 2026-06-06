@@ -59,13 +59,20 @@ The `production` environment gating is how manual prod promotes get approved.
 Every push to `main` that touches `apps/api/**`, `packages/types/**`, `.github/workflows/deploy-api.yml`, or `infra/**` triggers `.github/workflows/deploy-api.yml`:
 
 ```
+# on push to main
 test → build → deploy-staging → e2e-staging
+
+# on workflow_dispatch (prod promote)
+build → e2e-full-staging → deploy-prod   (with reviewer approval)
 ```
 
-1. **test** — typecheck all workspaces, run API integration tests against Firebase emulators (boots emulators via `firebase emulators:exec`).
+1. **test** — typecheck all workspaces. Runs against Firebase emulators:
+   - 18 API integration tests (handler logic, validation, status transitions)
+   - 14 Firestore security rules tests via `@firebase/rules-unit-testing` (cross-tenant isolation, server-only writes)
 2. **build** — authenticate via WIF, push image to Artifact Registry with tag `:<short-sha>` and `:latest`. Uses GHA cache.
 3. **deploy-staging** — deploy worker (internal-only) first to capture its URL, grant `tasks-invoker` SA permission to invoke worker, then deploy api with `WORKER_URL` pointing at the worker. Smoke-test `/health` at the end.
-4. **e2e-staging** — runs `apps/api/tests/e2e/*.e2e.test.ts` against the live staging URL. Mints real Firebase Auth users via Admin SDK (CI is auth'd as the deployer SA via WIF), exercises auth/workspace/batch flows on real GCP infra, cleans up its own test data. **Does not** call kie.ai (would cost real money on every push), so only sync API paths are validated end-to-end.
+4. **e2e-staging** — runs `apps/api/tests/e2e/*.e2e.test.ts` against the live staging URL. Mints real Firebase Auth users via Admin SDK, exercises auth/workspace/batch + signed asset URL flows on real GCP infra, cleans up its own test data. **Does not** call kie.ai (would cost real money on every push) — only sync API paths.
+5. **e2e-full-staging** (workflow_dispatch only) — runs the paid `*.full.e2e.test.ts` suite which submits a real Brief, waits ≤90s for the worker to call kie.ai + upload to Cloud Storage + flip the batch to `pending_review`, and verifies the signed URL returns a real image. Costs ~$0.001 per run. Gates prod promotion.
 
 ### Promoting to prod
 

@@ -198,10 +198,51 @@ jobs:
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
         run: npm run test:e2e
 
+  e2e-full-staging:
+    name: E2E full pipeline (real kie.ai → staging)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Resolve staging API URL
+        id: url
+        run: |
+          URL="$(gcloud run services describe api-staging --region=${REGION} --format='value(status.url)')"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Run full pipeline test (spends real money on kie.ai)
+        working-directory: apps/api
+        env:
+          STAGING_API_URL: ${{ steps.url.outputs.url }}
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        run: npm run test:e2e:full
+
   deploy-prod:
     name: Deploy → prod (manual)
-    needs: build
-    if: github.event_name == 'workflow_dispatch'
+    needs: [build, e2e-full-staging]
+    if: |
+      github.event_name == 'workflow_dispatch' &&
+      needs.e2e-full-staging.result == 'success' &&
+      (needs.build.result == 'success' || needs.build.result == 'skipped')
     runs-on: ubuntu-latest
     environment: production   # configure required reviewers on this GH environment
     env:
