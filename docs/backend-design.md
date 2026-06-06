@@ -39,11 +39,11 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 18. `POST /internal/jobs/generate-ad` — Cloud Tasks handler (verifies OIDC token issued for the service account). Steps per ad:
     a. Load batch + brief.
     b. Call kie.ai to produce `{ headline, body, hook, cta }` (structured output, prompt templated from brief + platform).
-    c. Call Higgsfield to produce image/video; poll job until done or hand off to a follow-up task if long-running (see step 19).
+    c. Call kie.ai's image generation endpoint (`/v1/images/generations` with model from `KIE_IMAGE_MODEL`, default `flux-schnell`). Image responses are synchronous; the polling path in step 19 is reserved for future async video models.
     d. Download asset → upload to Cloud Storage at `workspaces/{wid}/batches/{bid}/ads/{adId}/v1.{ext}`.
     e. Patch ad doc with copy fields, `assetPath`, `score` (stub: random 60–95), `status: 'pending'`.
     f. Atomically increment batch `progress.completed`; if `completed === total`, set batch `status: 'pending_review'`.
-19. Long-running creative jobs: if Higgsfield returns an async job ID, persist it on the ad doc and enqueue a delayed Cloud Task (`scheduleTime` = now + 30s) hitting `POST /internal/jobs/poll-higgsfield` until terminal status; same retry/backoff config.
+19. Long-running creative jobs (reserved for future video models): if the provider returns an async job ID instead of an inline asset URL, persist it on the ad doc and enqueue a delayed Cloud Task (`scheduleTime` = now + 30s) hitting `POST /internal/jobs/poll-creative` until terminal status; same retry/backoff config. Current kie.ai image generation is synchronous and skips this path.
 20. Retry/error handling: Cloud Tasks max 5 attempts with exponential backoff (`minBackoff=10s`, `maxBackoff=300s`). On final failure, ad doc → `status: 'failed'` with `error.code/message`; batch doc tracks `progress.failed`. Batch finalizes when `completed + failed === total`.
 21. Mobile progress UX: `GeneratingBatchScreen` and `BatchGeneratingScreen` subscribe to `batches/{bid}` via Firestore SDK — no polling endpoint needed.
 
@@ -72,7 +72,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 32. Add `Dockerfile` (multi-stage: build → distroless Node 20 runtime, non-root).
 33. Add `cloudbuild.yaml`: build image → push to Artifact Registry → deploy to Cloud Run with `--no-allow-unauthenticated` for `/internal/*` (handled via path-based IAM is impossible on Cloud Run; instead deploy two services: `api` public + `worker` internal, sharing the same image with env flag `ROLE=api|worker`).
 34. Cloud Tasks queue `ad-generation` with rate caps (`maxDispatchesPerSecond=10`, `maxConcurrentDispatches=20`) targeting the worker service URL with OIDC auth (service account: `tasks-invoker@<proj>.iam`).
-35. Secret Manager entries: `KIE_API_KEY`, `HIGGSFIELD_API_KEY` (suffixed `_STAGING` / `_PROD` per env). Mounted to Cloud Run as env vars.
+35. Secret Manager entry: `KIE_API_KEY` (suffixed `_STAGING` / `_PROD` per env). Mounted to Cloud Run as an env var. Single key powers both copy and image generation.
 36. Smoke test plan in §Verification.
 
 ---
@@ -114,7 +114,7 @@ Architectural pattern: **Hybrid REST + Firestore listeners**. Writes and AI-touc
 | GET | `/insights` | **STUB** |
 | GET | `/assets/:adId/signed-url` | Signed Cloud Storage URL |
 | POST | `/internal/jobs/generate-ad` | Cloud Tasks → worker (OIDC) |
-| POST | `/internal/jobs/poll-higgsfield` | Cloud Tasks → worker (OIDC) |
+| POST | `/internal/jobs/poll-creative` | Cloud Tasks → worker (OIDC) |
 | POST | `/internal/jobs/revise-ad` | Cloud Tasks → worker (OIDC) |
 | GET | `/healthz` | Liveness |
 
@@ -126,9 +126,9 @@ All responses wrapped as `{ data, error: null }` or `{ data: null, error: { code
 
 - `apps/api/` — Fastify service (handlers, providers, jobs, middleware, schemas)
 - `apps/api/src/providers/kie.ts` — kie.ai client (OpenAI-compatible) with structured-output helpers
-- `apps/api/src/providers/higgsfield.ts` — Higgsfield client (kickoff + poll)
+- `apps/api/src/providers/creative.ts` — kie.ai image-gen client (kickoff + poll, poll is a no-op for sync image responses)
 - `apps/api/src/providers/types.ts` — `CreativeProvider` interface so swapping providers is one file
-- `apps/api/src/jobs/generateAd.ts`, `reviseAd.ts`, `pollHiggsfield.ts`
+- `apps/api/src/jobs/generateAd.ts`, `reviseAd.ts`, `pollCreative.ts`
 - `apps/api/src/lib/firebase.ts` — Admin SDK init (emulator vs prod)
 - `apps/api/src/lib/cloudTasks.ts` — enqueue helper, OIDC config
 - `apps/api/src/lib/auth.ts` — token verification, workspace guard
@@ -160,7 +160,7 @@ All responses wrapped as `{ data, error: null }` or `{ data: null, error: { code
 - **Read pattern**: Firestore SDK directly on mobile under security rules. Free real-time progress for `GeneratingBatchScreen`; eliminates ~10 list endpoints from the REST surface.
 - **Tenancy**: Workspaces from day one, `workspaces/{wid}` as root of every resource (path-based isolation that maps cleanly to rules and IAM).
 - **Auth**: Firebase Auth on mobile (email/password + Sign in with Apple for TestFlight). API verifies ID tokens via Admin SDK.
-- **AI providers**: kie.ai (OpenAI-compatible gateway, default model `gpt-4o-mini`; configurable via `KIE_MODEL` to any model kie.ai exposes) for copy & personas + Higgsfield (images/video). Both behind a `CreativeProvider`/`CopyProvider` interface; swappable.
+- **AI providers**: kie.ai (OpenAI-compatible gateway) for everything. Chat completions for copy + personas (default `gpt-4o-mini`, override via `KIE_MODEL`); image generations for ad creatives (default `flux-schnell`, override via `KIE_IMAGE_MODEL`). Both behind `CopyProvider`/`CreativeProvider` interfaces so swapping providers is one file.
 - **Analytics endpoints**: Schema defined, returns mock data in MVP. UI stays functional; pipelines wired later.
 - **No backend performance ingestion in MVP** (per "stub it" answer). `ad.score`/`roas` filled with deterministic mocks.
 - **Out of scope (MVP)**: real ad-network publishing, billing/Stripe, role permissions beyond owner/editor/viewer, learning-loop training, push notifications.
@@ -168,5 +168,5 @@ All responses wrapped as `{ data, error: null }` or `{ data: null, error: { code
 ## Further Considerations
 
 1. **Function vs Cloud Run** — Cloud Run chosen for long-lived generation worker (up to 60 min timeout, easier local dev with same Node runtime). Alternative: Firebase Functions v2 (also Cloud Run under the hood, but tighter Firebase tooling). *Recommendation: Cloud Run for control; revisit if you want Firebase's deploy ergonomics.*
-2. **Higgsfield async model** — Their video jobs can take minutes. Option A: long-poll inside the worker (Cloud Run requests up to 60 min). Option B: persist `providerJobId`, enqueue a delayed Cloud Task to poll. *Recommendation: Option B (current plan) — survives instance restarts and is cheaper.*
+2. **Async video models** — kie.ai's image endpoint is synchronous, but video models (Veo, Sora) return job IDs. Option A: long-poll inside the worker (Cloud Run requests up to 60 min). Option B: persist `providerJobId`, enqueue a delayed Cloud Task to poll. *Recommendation: Option B (current plan) — survives instance restarts and is cheaper.*
 3. **Default workspace creation** — Auto-create one on first sign-in vs require explicit creation. *Recommendation: auto-create named "Personal" so the wizard is reachable on first launch.*

@@ -32,8 +32,6 @@ The bootstrap creates secret names but leaves them empty. Set actual values:
 ```bash
 echo -n "<kie-key>" | gcloud secrets versions add KIE_API_KEY_STAGING --data-file=-
 echo -n "<kie-key>" | gcloud secrets versions add KIE_API_KEY_PROD --data-file=-
-echo -n "<hf-key>"  | gcloud secrets versions add HIGGSFIELD_API_KEY_STAGING --data-file=-
-echo -n "<hf-key>"  | gcloud secrets versions add HIGGSFIELD_API_KEY_PROD --data-file=-
 ```
 
 ### 3. GitHub repo configuration

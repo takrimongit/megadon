@@ -2,7 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { requireCloudTasks } from '../middleware/oidc.js';
 import { ok } from '../lib/envelope.js';
 import { runGenerateAd } from '../jobs/generateAd.js';
-import { runPollHiggsfield } from '../jobs/pollHiggsfield.js';
+import { runPollCreative } from '../jobs/pollCreative.js';
 import { runReviseAd } from '../jobs/reviseAd.js';
 
 export async function internalRoutes(app: FastifyInstance) {
@@ -13,8 +13,8 @@ export async function internalRoutes(app: FastifyInstance) {
     return ok(reply, { ok: true });
   });
 
-  app.post('/internal/jobs/poll-higgsfield', async (req, reply) => {
-    await runPollHiggsfield(req.body as any);
+  app.post('/internal/jobs/poll-creative', async (req, reply) => {
+    await runPollCreative(req.body as any);
     return ok(reply, { ok: true });
   });
 

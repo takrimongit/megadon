@@ -1,5 +1,5 @@
 import { db } from '../lib/firebase.js';
-import { getCreativeProvider } from '../providers/higgsfield.js';
+import { getCreativeProvider } from '../providers/creative.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { downloadToStorage, finalizeProgress } from './generateAd.js';
 
@@ -12,7 +12,7 @@ interface JobPayload {
   attempt: number;
 }
 
-export async function runPollHiggsfield(payload: JobPayload) {
+export async function runPollCreative(payload: JobPayload) {
   const { workspaceId, batchId, adId, attempt } = payload;
   const batchRef = db().doc(`workspaces/${workspaceId}/batches/${batchId}`);
   const adRef = batchRef.collection('ads').doc(adId);
@@ -34,7 +34,7 @@ export async function runPollHiggsfield(payload: JobPayload) {
       return;
     }
     await enqueueJob({
-      path: '/internal/jobs/poll-higgsfield',
+      path: '/internal/jobs/poll-creative',
       payload: { ...payload, attempt: attempt + 1 },
       delaySeconds: 30,
     });

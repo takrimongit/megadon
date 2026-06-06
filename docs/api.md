@@ -48,7 +48,7 @@ Always check `error` first before reading `data`. The mobile client (`apps/mobil
 | `WORKSPACE_FORBIDDEN` | 403 | Missing `x-workspace-id`, or caller not a member, or insufficient role |
 | `VALIDATION_FAILED` | 400 | Zod schema rejected the request body |
 | `NOT_FOUND` | 404 | Resource id doesn't exist (or not visible to caller) |
-| `PROVIDER_FAILED` | 502 | kie.ai / Higgsfield call failed |
+| `PROVIDER_FAILED` | 502 | kie.ai call failed (chat or image) |
 | `RATE_LIMITED` | 429 | Reserved — not yet emitted |
 | `INTERNAL` | 500 | Uncaught server error |
 
@@ -257,7 +257,7 @@ These return deterministic mock data in MVP. Schema is real so wiring real pipel
 These are not part of the public API. Cloud Tasks dispatches them with OIDC-signed requests; direct calls are rejected.
 
 - `POST /internal/jobs/generate-ad`
-- `POST /internal/jobs/poll-higgsfield`
+- `POST /internal/jobs/poll-creative`
 - `POST /internal/jobs/revise-ad`
 
 ---

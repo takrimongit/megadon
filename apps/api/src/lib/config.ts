@@ -13,11 +13,11 @@ export const config = {
   tasksInvokerSA: process.env.TASKS_INVOKER_SA ?? '',
 
   // kie.ai — OpenAI-compatible AI gateway. https://kie.ai
+  // Single key powers both chat (copy + personas) and images (ad creatives).
   kieKey: process.env.KIE_API_KEY ?? '',
   kieBaseUrl: process.env.KIE_BASE_URL ?? 'https://api.kie.ai/v1',
   kieModel: process.env.KIE_MODEL ?? 'gpt-4o-mini',
-
-  higgsfieldKey: process.env.HIGGSFIELD_API_KEY ?? '',
+  kieImageModel: process.env.KIE_IMAGE_MODEL ?? 'flux-schnell',
 
   emulators: {
     auth: process.env.FIREBASE_AUTH_EMULATOR_HOST,

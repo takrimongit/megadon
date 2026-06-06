@@ -10,7 +10,7 @@ Core loop:
 
 Brief → Batch Ads → AI Creative → Review → Revision → Approval → Performance → Learning → Better Next Batch
 
-The system may internally use Higgsfield AI or other creative generation providers, but the product should not be tightly coupled to one provider.
+The system may internally use kie.ai or other creative generation providers, but the product should not be tightly coupled to one provider.
 
 ---
 
@@ -111,8 +111,8 @@ gcloud builds submit --config apps/api/cloudbuild.yaml
 - **Two roles, one image.** `ROLE=api` boots the public API + worker routes. `ROLE=worker` only registers `/internal/jobs/*` for Cloud Tasks delivery. Same Docker image, different env var.
 - **`src/server.ts`** — Fastify entry: helmet, CORS, request ID, error handler that maps `AppError` and `ZodError` to envelope.
 - **`src/routes/`** — REST endpoints under `/v1` (workspaces, wizard, batches, ads, reads/stubs) and `/internal/jobs/*` for Cloud Tasks.
-- **`src/jobs/`** — Worker handlers (`generateAd`, `pollHiggsfield`, `reviseAd`). Each is idempotent and assumes Cloud Tasks retry/backoff.
-- **`src/providers/`** — `CopyProvider` (kie.ai via OpenAI-compatible SDK) and `CreativeProvider` (Higgsfield) interfaces. `getCreativeProvider()` returns a fake provider in emulator mode.
+- **`src/jobs/`** — Worker handlers (`generateAd`, `pollCreative`, `reviseAd`). Each is idempotent and assumes Cloud Tasks retry/backoff.
+- **`src/providers/`** — `CopyProvider` and `CreativeProvider` interfaces, both backed by kie.ai (chat completions for copy, image generations for creative). `getCreativeProvider()` returns a fake provider in emulator mode.
 - **`src/middleware/`** — `requireAuth` (verifies Firebase ID token), `requireWorkspace` (verifies membership via `x-workspace-id`), `requireCloudTasks` (verifies OIDC caller email).
 
 ### Read pattern

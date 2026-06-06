@@ -1,6 +1,6 @@
 import { db, bucket, FieldValue } from '../lib/firebase.js';
 import { kieProvider } from '../providers/kie.js';
-import { getCreativeProvider } from '../providers/higgsfield.js';
+import { getCreativeProvider } from '../providers/creative.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import type { Brief, Platform } from '@megadon/types';
 
@@ -41,7 +41,7 @@ export async function runGenerateAd(payload: JobPayload) {
         updatedAt: new Date().toISOString(),
       });
       await enqueueJob({
-        path: '/internal/jobs/poll-higgsfield',
+        path: '/internal/jobs/poll-creative',
         payload: { workspaceId, batchId, adId, attempt: 1 },
         delaySeconds: 30,
       });
