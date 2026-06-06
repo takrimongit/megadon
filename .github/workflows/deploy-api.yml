@@ -159,6 +159,45 @@ jobs:
           echo "API URL: $API_URL"
           curl -fsS "${API_URL}/health"
 
+  e2e-staging:
+    name: E2E tests against staging
+    needs: deploy-staging
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Resolve staging API URL
+        id: url
+        run: |
+          URL="$(gcloud run services describe api-staging --region=${REGION} --format='value(status.url)')"
+          echo "url=$URL" >> "$GITHUB_OUTPUT"
+
+      - name: Run e2e tests against staging
+        working-directory: apps/api
+        env:
+          STAGING_API_URL: ${{ steps.url.outputs.url }}
+          GCP_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          GOOGLE_CLOUD_PROJECT: ${{ secrets.GCP_PROJECT_ID }}
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+        run: npm run test:e2e
+
   deploy-prod:
     name: Deploy → prod (manual)
     needs: build

@@ -4,12 +4,9 @@ export default defineConfig({
   test: {
     environment: 'node',
     globals: false,
-    // Default include excludes e2e tests so emulator runs are unaffected.
-    include: ['tests/**/*.test.ts'],
-    exclude: ['tests/e2e/**', 'node_modules/**'],
-    setupFiles: ['./tests/helpers/env.ts'],
+    include: ['tests/e2e/**/*.e2e.test.ts'],
     testTimeout: 30_000,
-    hookTimeout: 30_000,
+    hookTimeout: 60_000,
     pool: 'forks',
     poolOptions: { forks: { singleFork: true } },
     fileParallelism: false,

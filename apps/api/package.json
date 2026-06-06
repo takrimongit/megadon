@@ -10,7 +10,8 @@
     "start": "node dist/server.js",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:emulator": "firebase --project=megadon-test emulators:exec --only auth,firestore,storage 'vitest run'"
+    "test:emulator": "firebase --project=megadon-test emulators:exec --only auth,firestore,storage 'vitest run'",
+    "test:e2e": "vitest run --config vitest.e2e.config.ts"
   },
   "dependencies": {
     "@google-cloud/tasks": "^5.5.1",

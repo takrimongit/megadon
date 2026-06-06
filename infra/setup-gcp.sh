@@ -198,11 +198,14 @@ done_msg "WIF provider ready"
 log "Creating deployer service account '${DEPLOYER_SA}'"
 create_sa "${DEPLOYER_SA}" "GitHub Actions deployer"
 
-log "Granting deployer roles (Cloud Run admin, push to Artifact Registry, act-as runtime SAs)"
+log "Granting deployer roles (Cloud Run admin, push to Artifact Registry, act-as runtime SAs, e2e test data access)"
 grant "${DEPLOYER_SA}" "roles/run.admin"
 grant "${DEPLOYER_SA}" "roles/artifactregistry.writer"
 grant "${DEPLOYER_SA}" "roles/iam.serviceAccountUser"
 grant "${DEPLOYER_SA}" "roles/storage.admin"  # for staging buckets used by Cloud Build cache if any
+# Needed for post-deploy e2e tests against staging:
+grant "${DEPLOYER_SA}" "roles/firebaseauth.admin"   # mint/delete test users
+grant "${DEPLOYER_SA}" "roles/datastore.user"        # seed/cleanup Firestore
 
 # Allow the GitHub repo (via WIF) to impersonate the deployer SA.
 WIF_PRINCIPAL="principalSet://iam.googleapis.com/projects/${PROJECT_NUMBER}/locations/global/workloadIdentityPools/${POOL_ID}/attribute.repository/${GITHUB_REPO}"
@@ -230,11 +233,20 @@ GCP_REGION:           ${REGION}
 GCP_WIF_PROVIDER:     ${WIF_PROVIDER_RESOURCE}
 GCP_DEPLOYER_SA:      $(sa_email "${DEPLOYER_SA}")
 
+FIREBASE_API_KEY (one more GitHub secret — used by e2e tests):
+  Get it by either:
+    (a) Firebase Console → Project Settings → General → "Web API Key"
+    (b) Or list keys: gcloud alpha services api-keys list \\
+          --filter='displayName:"Browser key"' --project=${PROJECT_ID}
+  If you don't have a web app registered yet, run:
+    firebase apps:create WEB adforge-web --project=${PROJECT_ID}
+    firebase apps:sdkconfig WEB --project=${PROJECT_ID}
+
 Next:
   1. Populate the secrets in Secret Manager:
      gcloud secrets versions add KIE_API_KEY_STAGING --data-file=<(echo -n "<your-key>")
      gcloud secrets versions add KIE_API_KEY_PROD    --data-file=<(echo -n "<your-key>")
-  2. Set the GitHub secrets above.
+  2. Set the GitHub secrets above (including FIREBASE_API_KEY).
   3. Push to main → the deploy workflow will run.
 
 EOF

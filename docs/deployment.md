@@ -45,6 +45,7 @@ Add these as **repository secrets** at `https://github.com/<org>/<repo>/settings
 | `GCP_REGION` | `us-central1` |
 | `GCP_WIF_PROVIDER` | (from bootstrap output, format: `projects/.../providers/...`) |
 | `GCP_DEPLOYER_SA` | `github-deployer@<project>.iam.gserviceaccount.com` |
+| `FIREBASE_API_KEY` | Firebase Web API key (used by e2e tests to mint ID tokens). Get from Firebase Console → Project Settings → "Web API Key". Not a true secret — same value embedded in mobile client. |
 
 Create two **environments** at `https://github.com/<org>/<repo>/settings/environments`:
 
@@ -58,12 +59,13 @@ The `production` environment gating is how manual prod promotes get approved.
 Every push to `main` that touches `apps/api/**`, `packages/types/**`, `.github/workflows/deploy-api.yml`, or `infra/**` triggers `.github/workflows/deploy-api.yml`:
 
 ```
-test → build → deploy-staging
+test → build → deploy-staging → e2e-staging
 ```
 
 1. **test** — typecheck all workspaces, run API integration tests against Firebase emulators (boots emulators via `firebase emulators:exec`).
 2. **build** — authenticate via WIF, push image to Artifact Registry with tag `:<short-sha>` and `:latest`. Uses GHA cache.
 3. **deploy-staging** — deploy worker (internal-only) first to capture its URL, grant `tasks-invoker` SA permission to invoke worker, then deploy api with `WORKER_URL` pointing at the worker. Smoke-test `/health` at the end.
+4. **e2e-staging** — runs `apps/api/tests/e2e/*.e2e.test.ts` against the live staging URL. Mints real Firebase Auth users via Admin SDK (CI is auth'd as the deployer SA via WIF), exercises auth/workspace/batch flows on real GCP infra, cleans up its own test data. **Does not** call kie.ai (would cost real money on every push), so only sync API paths are validated end-to-end.
 
 ### Promoting to prod
 
