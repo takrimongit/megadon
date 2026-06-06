@@ -1,37 +1,73 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import type { Batch, BatchStatus } from '@megadon/types';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorView from '../../components/ErrorView';
 import { RootStackParamList } from '../../navigation';
+import { getDb } from '../../lib/firebase';
+import { useAuth } from '../../lib/AuthContext';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const batches = [
-  { id: '402', name: 'Summer Sale — Instagram Reels', status: 'Pending Review', ads: 12, platform: 'Instagram', date: 'Jun 5' },
-  { id: '401', name: 'Brand Awareness — Facebook', status: 'Approved', ads: 8, platform: 'Facebook', date: 'Jun 3' },
-  { id: '400', name: 'Product Launch — TikTok', status: 'Generating', ads: 15, platform: 'TikTok', date: 'Jun 2' },
-  { id: '399', name: 'Retargeting — Multi-platform', status: 'Approved', ads: 20, platform: 'Mixed', date: 'May 30' },
-  { id: '398', name: 'Seasonal Promo — YouTube', status: 'Archived', ads: 10, platform: 'YouTube', date: 'May 28' },
-];
-
-const statusColors: Record<string, string> = {
-  'Pending Review': Colors.warning,
-  'Approved': Colors.success,
-  'Generating': Colors.primary,
-  'Archived': Colors.onSurfaceVariant,
+const statusLabels: Record<BatchStatus, { label: string; color: string }> = {
+  queued: { label: 'Queued', color: Colors.primary },
+  generating: { label: 'Generating', color: Colors.primary },
+  pending_review: { label: 'Pending Review', color: Colors.warning },
+  approved: { label: 'Approved', color: Colors.success },
+  archived: { label: 'Archived', color: Colors.onSurfaceVariant },
+  failed: { label: 'Failed', color: Colors.error },
 };
 
-const filters = ['All', 'Pending Review', 'Approved', 'Generating'];
+const filters: { id: 'all' | BatchStatus; label: string }[] = [
+  { id: 'all', label: 'All' },
+  { id: 'pending_review', label: 'Pending Review' },
+  { id: 'approved', label: 'Approved' },
+  { id: 'generating', label: 'Generating' },
+];
+
+function formatDate(iso?: string): string {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
 
 export default function BatchesScreen() {
   const navigation = useNavigation<Nav>();
-  const [filter, setFilter] = useState('All');
+  const { workspaceId } = useAuth();
+  const [filter, setFilter] = useState<'all' | BatchStatus>('all');
+  const [batches, setBatches] = useState<Batch[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filtered = filter === 'All' ? batches : batches.filter((b) => b.status === filter);
+  useEffect(() => {
+    if (!workspaceId) return;
+    setLoading(true);
+    setError(null);
+    const q = query(
+      collection(getDb(), `workspaces/${workspaceId}/batches`),
+      orderBy('createdAt', 'desc'),
+    );
+    const unsub = onSnapshot(
+      q,
+      (snap) => {
+        setBatches(snap.docs.map((d) => ({ id: d.id, ...d.data() }) as Batch));
+        setLoading(false);
+      },
+      (e) => {
+        setError(e.message);
+        setLoading(false);
+      },
+    );
+    return unsub;
+  }, [workspaceId]);
+
+  const filtered = filter === 'all' ? batches : batches.filter((b) => b.status === filter);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -39,52 +75,70 @@ export default function BatchesScreen() {
       <View style={styles.filterRow}>
         {filters.map((f) => (
           <TouchableOpacity
-            key={f}
-            style={[styles.filterChip, filter === f && styles.filterChipActive]}
-            onPress={() => setFilter(f)}
+            key={f.id}
+            style={[styles.filterChip, filter === f.id && styles.filterChipActive]}
+            onPress={() => setFilter(f.id)}
             activeOpacity={0.8}
           >
-            <Text style={[styles.filterText, filter === f && styles.filterTextActive]}>{f}</Text>
+            <Text style={[styles.filterText, filter === f.id && styles.filterTextActive]}>{f.label}</Text>
           </TouchableOpacity>
         ))}
       </View>
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        {filtered.map((batch) => (
-          <TouchableOpacity
-            key={batch.id}
-            style={styles.batchCard}
-            activeOpacity={0.75}
-            onPress={() =>
-              batch.status === 'Generating'
-                ? navigation.navigate('BatchGenerating', { batchId: batch.id })
-                : navigation.navigate('ReviewBatch', { batchId: batch.id })
-            }
-          >
-            <View style={styles.batchTop}>
-              <View style={[styles.statusDot, { backgroundColor: statusColors[batch.status] }]} />
-              <Text style={styles.batchName} numberOfLines={1}>{batch.name}</Text>
-              <MaterialIcons name="chevron-right" size={20} color={Colors.onSurfaceVariant} />
+      {loading ? (
+        <LoadingSpinner label="Loading batches…" />
+      ) : error ? (
+        <ErrorView message={error} />
+      ) : (
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+          {filtered.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <MaterialIcons name="layers" size={36} color={Colors.outlineVariant} />
+              <Text style={styles.emptyTitle}>No batches yet</Text>
+              <Text style={styles.emptyText}>Tap the + button to generate your first batch.</Text>
             </View>
-            <View style={styles.batchMeta}>
-              <View style={styles.metaItem}>
-                <MaterialIcons name="layers" size={14} color={Colors.onSurfaceVariant} />
-                <Text style={styles.metaText}>{batch.ads} ads</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <MaterialIcons name="devices" size={14} color={Colors.onSurfaceVariant} />
-                <Text style={styles.metaText}>{batch.platform}</Text>
-              </View>
-              <View style={styles.metaItem}>
-                <MaterialIcons name="calendar-today" size={14} color={Colors.onSurfaceVariant} />
-                <Text style={styles.metaText}>{batch.date}</Text>
-              </View>
-              <View style={[styles.statusBadge, { backgroundColor: statusColors[batch.status] + '1A' }]}>
-                <Text style={[styles.statusText, { color: statusColors[batch.status] }]}>{batch.status}</Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        ))}
-      </ScrollView>
+          ) : (
+            filtered.map((batch) => {
+              const sl = statusLabels[batch.status];
+              const platformLabel = batch.brief?.platforms?.join(', ') ?? '—';
+              return (
+                <TouchableOpacity
+                  key={batch.id}
+                  style={styles.batchCard}
+                  activeOpacity={0.75}
+                  onPress={() =>
+                    batch.status === 'generating' || batch.status === 'queued'
+                      ? navigation.navigate('BatchGenerating', { batchId: batch.id })
+                      : navigation.navigate('ReviewBatch', { batchId: batch.id })
+                  }
+                >
+                  <View style={styles.batchTop}>
+                    <View style={[styles.statusDot, { backgroundColor: sl.color }]} />
+                    <Text style={styles.batchName} numberOfLines={1}>{batch.name}</Text>
+                    <MaterialIcons name="chevron-right" size={20} color={Colors.onSurfaceVariant} />
+                  </View>
+                  <View style={styles.batchMeta}>
+                    <View style={styles.metaItem}>
+                      <MaterialIcons name="layers" size={14} color={Colors.onSurfaceVariant} />
+                      <Text style={styles.metaText}>{batch.progress?.total ?? 0} ads</Text>
+                    </View>
+                    <View style={styles.metaItem}>
+                      <MaterialIcons name="devices" size={14} color={Colors.onSurfaceVariant} />
+                      <Text style={styles.metaText} numberOfLines={1}>{platformLabel}</Text>
+                    </View>
+                    <View style={styles.metaItem}>
+                      <MaterialIcons name="calendar-today" size={14} color={Colors.onSurfaceVariant} />
+                      <Text style={styles.metaText}>{formatDate(batch.createdAt)}</Text>
+                    </View>
+                    <View style={[styles.statusBadge, { backgroundColor: sl.color + '1A' }]}>
+                      <Text style={[styles.statusText, { color: sl.color }]}>{sl.label}</Text>
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              );
+            })
+          )}
+        </ScrollView>
+      )}
     </SafeAreaView>
   );
 }
@@ -96,6 +150,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.gutter,
     paddingVertical: Spacing.sm,
     gap: Spacing.sm,
+    flexWrap: 'wrap',
   },
   filterChip: {
     paddingHorizontal: 12,
@@ -126,4 +181,15 @@ const styles = StyleSheet.create({
   metaText: { ...Typography.labelCaps, color: Colors.onSurfaceVariant },
   statusBadge: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.full, marginLeft: 'auto' },
   statusText: { ...Typography.labelCaps, fontSize: 10, fontWeight: '700' },
+  emptyCard: {
+    alignItems: 'center',
+    gap: Spacing.sm,
+    padding: Spacing.xl,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant + '4D',
+  },
+  emptyTitle: { ...Typography.titleMd, color: Colors.onSurface },
+  emptyText: { ...Typography.bodySm, color: Colors.onSurfaceVariant, textAlign: 'center' },
 });

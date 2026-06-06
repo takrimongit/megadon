@@ -1,11 +1,27 @@
-import React, { useState } from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert,
+  KeyboardAvoidingView, Platform,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { doc, onSnapshot } from 'firebase/firestore';
+import type { Ad, Revision } from '@megadon/types';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
 import PrimaryButton from '../../components/PrimaryButton';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorView from '../../components/ErrorView';
+import AdImage from '../../components/AdImage';
+import { RootStackParamList } from '../../navigation';
+import { getDb } from '../../lib/firebase';
+import { useAuth } from '../../lib/AuthContext';
+import { api } from '../../lib/api';
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Route = RouteProp<RootStackParamList, 'AIRevision'>;
 
 const suggestions = [
   'Make the headline more urgent',
@@ -16,71 +32,173 @@ const suggestions = [
 ];
 
 export default function AIRevisionScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<Nav>();
+  const route = useRoute<Route>();
+  const { workspaceId } = useAuth();
+  const { adId, batchId } = route.params;
+  const [ad, setAd] = useState<Ad | null>(null);
+  const [adError, setAdError] = useState<string | null>(null);
   const [instruction, setInstruction] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [revised, setRevised] = useState(false);
+  const [revisionId, setRevisionId] = useState<string | null>(null);
+  const [revision, setRevision] = useState<Revision | null>(null);
+  const [revising, setRevising] = useState(false);
+  const [accepting, setAccepting] = useState(false);
 
-  const handleRevise = () => {
-    setLoading(true);
-    setTimeout(() => { setLoading(false); setRevised(true); }, 2000);
+  // Subscribe to the ad doc.
+  useEffect(() => {
+    if (!workspaceId) return;
+    const ref = doc(getDb(), `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}`);
+    const unsub = onSnapshot(
+      ref,
+      (snap) => {
+        if (snap.exists()) setAd({ id: snap.id, ...snap.data() } as Ad);
+      },
+      (e) => setAdError(e.message),
+    );
+    return unsub;
+  }, [workspaceId, batchId, adId]);
+
+  // Subscribe to the revision doc once one is requested.
+  useEffect(() => {
+    if (!workspaceId || !revisionId) return;
+    const ref = doc(
+      getDb(),
+      `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/revisions/${revisionId}`,
+    );
+    const unsub = onSnapshot(ref, (snap) => {
+      if (snap.exists()) setRevision({ id: snap.id, ...snap.data() } as Revision);
+    });
+    return unsub;
+  }, [workspaceId, batchId, adId, revisionId]);
+
+  const handleRevise = async () => {
+    if (!instruction.trim()) return;
+    setRevising(true);
+    setRevision(null);
+    try {
+      const { revisionId: rid } = await api.requestRevision(adId, instruction.trim());
+      setRevisionId(rid);
+    } catch (e) {
+      Alert.alert('Revision failed', e instanceof Error ? e.message : 'Could not request revision.');
+    } finally {
+      setRevising(false);
+    }
   };
+
+  const handleAccept = async () => {
+    if (!revisionId) return;
+    setAccepting(true);
+    try {
+      await api.acceptRevision(adId, revisionId);
+      navigation.goBack();
+    } catch (e) {
+      Alert.alert('Accept failed', e instanceof Error ? e.message : 'Could not accept revision.');
+    } finally {
+      setAccepting(false);
+    }
+  };
+
+  const revisionReady = revision?.status === 'ready';
+  const revisionFailed = revision?.status === 'failed';
+  const revisionLoading = revisionId !== null && !revisionReady && !revisionFailed;
+
+  const displayHeadline = revisionReady ? revision?.headline ?? ad?.headline ?? '—' : ad?.headline ?? '—';
+  const displayBody = revisionReady ? revision?.body ?? ad?.body : ad?.body;
+  const displayCta = revisionReady ? revision?.cta ?? ad?.cta : ad?.cta;
+
+  if (adError) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+        <AppHeader showBack onBack={() => navigation.goBack()} title="AI Revision" />
+        <ErrorView message={adError} />
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <AppHeader showBack onBack={() => navigation.goBack()} title="AI Revision" />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.adPreview}>
-          <MaterialIcons name="image" size={40} color={Colors.outlineVariant} />
-          <Text style={styles.adHeadline}>{revised ? 'Limited Time Only — 30% Off Ends Tonight!' : 'Limited Time: 30% Off'}</Text>
-          <Text style={styles.adBody}>{revised
-            ? 'Over 10,000 shoppers grabbed their favorites this week. Join them before it\'s gone. ⏰'
-            : 'Shop our summer collection with exclusive discounts.'
-          }</Text>
-          <View style={styles.ctaRow}>
-            <View style={styles.ctaBtn}><Text style={styles.ctaText}>Shop Now</Text></View>
-          </View>
-        </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+          {!ad ? (
+            <LoadingSpinner label="Loading ad…" />
+          ) : (
+            <>
+              <View style={styles.adPreview}>
+                <AdImage adId={ad.id} hasAsset={!!ad.assetPath} style={styles.adImage} fallbackIconSize={40} />
+                <Text style={styles.adHeadline}>{displayHeadline}</Text>
+                {displayBody ? <Text style={styles.adBody}>{displayBody}</Text> : null}
+                {displayCta ? (
+                  <View style={styles.ctaRow}>
+                    <View style={styles.ctaBtn}><Text style={styles.ctaText}>{displayCta}</Text></View>
+                  </View>
+                ) : null}
+              </View>
 
-        {revised && (
-          <View style={styles.revisionNote}>
-            <MaterialIcons name="auto-awesome" size={16} color={Colors.secondary} />
-            <Text style={styles.revisionNoteText}>AI added urgency language and social proof based on your instruction.</Text>
-          </View>
-        )}
+              {revisionLoading && (
+                <View style={styles.loadingNote}>
+                  <LoadingSpinner label="Revising with AI…" style={{ minHeight: 80 }} />
+                </View>
+              )}
 
-        <Text style={styles.fieldLabel}>QUICK SUGGESTIONS</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.suggestionsScroll}>
-          <View style={styles.suggestionsRow}>
-            {suggestions.map((s) => (
-              <TouchableOpacity key={s} style={styles.suggestionChip} onPress={() => setInstruction(s)} activeOpacity={0.8}>
-                <Text style={styles.suggestionText}>{s}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </ScrollView>
+              {revisionReady && (
+                <View style={styles.revisionNote}>
+                  <MaterialIcons name="auto-awesome" size={16} color={Colors.secondary} />
+                  <Text style={styles.revisionNoteText}>AI updated this ad based on your instruction.</Text>
+                </View>
+              )}
 
-        <Text style={styles.fieldLabel}>CUSTOM INSTRUCTION</Text>
-        <TextInput
-          style={styles.input}
-          value={instruction}
-          onChangeText={setInstruction}
-          placeholder="Tell AI what to change..."
-          placeholderTextColor={Colors.onSurfaceVariant + '80'}
-          multiline
-          numberOfLines={3}
-        />
+              {revisionFailed && (
+                <View style={[styles.revisionNote, { backgroundColor: Colors.error + '0F', borderColor: Colors.error + '33' }]}>
+                  <MaterialIcons name="error-outline" size={16} color={Colors.error} />
+                  <Text style={[styles.revisionNoteText, { color: Colors.error }]}>The revision failed. Try a different instruction.</Text>
+                </View>
+              )}
 
-        <View style={styles.actions}>
-          <PrimaryButton label={loading ? 'Revising...' : 'Revise with AI'} onPress={handleRevise} loading={loading} disabled={!instruction} style={{ flex: 1 }} />
-          {revised && (
-            <TouchableOpacity style={styles.approveBtn} onPress={() => navigation.goBack()}>
-              <MaterialIcons name="check" size={20} color={Colors.success} />
-              <Text style={styles.approveBtnText}>Approve</Text>
-            </TouchableOpacity>
+              <Text style={styles.fieldLabel}>QUICK SUGGESTIONS</Text>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.suggestionsScroll}>
+                <View style={styles.suggestionsRow}>
+                  {suggestions.map((s) => (
+                    <TouchableOpacity key={s} style={styles.suggestionChip} onPress={() => setInstruction(s)} activeOpacity={0.8}>
+                      <Text style={styles.suggestionText}>{s}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </ScrollView>
+
+              <Text style={styles.fieldLabel}>CUSTOM INSTRUCTION</Text>
+              <TextInput
+                style={styles.input}
+                value={instruction}
+                onChangeText={setInstruction}
+                placeholder="Tell AI what to change..."
+                placeholderTextColor={Colors.onSurfaceVariant + '80'}
+                multiline
+                numberOfLines={3}
+              />
+
+              <View style={styles.actions}>
+                <PrimaryButton
+                  label={revising ? 'Revising…' : revisionReady ? 'Revise again' : 'Revise with AI'}
+                  onPress={handleRevise}
+                  loading={revising}
+                  disabled={!instruction.trim() || revising || revisionLoading}
+                  style={{ flex: 1 }}
+                />
+                {revisionReady && (
+                  <TouchableOpacity style={styles.approveBtn} onPress={handleAccept} disabled={accepting}>
+                    <MaterialIcons name="check" size={20} color={Colors.success} />
+                    <Text style={styles.approveBtnText}>{accepting ? 'Saving…' : 'Accept'}</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            </>
           )}
-        </View>
-      </ScrollView>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -98,6 +216,11 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: Colors.outlineVariant + '4D',
   },
+  adImage: {
+    width: 160,
+    height: 160,
+    borderRadius: Radius.md,
+  },
   adHeadline: { ...Typography.titleMd, color: Colors.onSurface, textAlign: 'center' },
   adBody: { ...Typography.bodySm, color: Colors.onSurfaceVariant, textAlign: 'center' },
   ctaRow: { marginTop: Spacing.sm },
@@ -106,6 +229,11 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.primary, borderRadius: Radius.DEFAULT,
   },
   ctaText: { ...Typography.titleMd, color: Colors.onPrimary },
+  loadingNote: {
+    padding: Spacing.md,
+    backgroundColor: Colors.primaryFixed,
+    borderRadius: Radius.md,
+  },
   revisionNote: {
     flexDirection: 'row',
     alignItems: 'flex-start',

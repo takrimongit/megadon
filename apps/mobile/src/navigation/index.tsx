@@ -30,7 +30,7 @@ export type RootStackParamList = {
   ReviewBatch: { batchId: string };
   BatchGenerating: { batchId: string };
   RapidReview: { batchId: string };
-  AIRevision: { adId: string };
+  AIRevision: { adId: string; batchId: string };
   CampaignInsights: { campaignId: string };
   AdIntelligence: { adId: string };
   BrandPlaybook: undefined;
