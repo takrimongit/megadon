@@ -1,15 +1,21 @@
 import { db } from '../lib/firebase.js';
 import { kieProvider } from '../providers/kie.js';
+import { getCreativeProvider } from '../providers/creative.js';
+import { enqueueJob } from '../lib/cloudTasks.js';
+import { downloadRevisionAsset } from './pollRevisionCreative.js';
 import type { CopyResult } from '../providers/types.js';
+import type { Platform } from '@megadon/types';
 
 interface JobPayload {
   workspaceId: string;
+  batchId: string;
+  adId: string;
   adPath: string; // full firestore path to the ad doc
   revisionId: string;
 }
 
 export async function runReviseAd(payload: JobPayload) {
-  const { adPath, revisionId } = payload;
+  const { workspaceId, adPath, revisionId } = payload;
   const adRef = db().doc(adPath);
   const revRef = adRef.collection('revisions').doc(revisionId);
 
@@ -21,10 +27,12 @@ export async function runReviseAd(payload: JobPayload) {
   await revRef.update({ status: 'generating' });
 
   const batchRef = adRef.parent.parent!;
+  const batchId = batchRef.id;
   const batchSnap = await batchRef.get();
   const brief = batchSnap.data()!.brief;
 
   try {
+    // 1. Revise copy.
     const current: CopyResult = {
       headline: ad.headline ?? '',
       body: ad.body ?? '',
@@ -36,8 +44,39 @@ export async function runReviseAd(payload: JobPayload) {
       headline: revised.headline,
       body: revised.body,
       cta: revised.cta,
-      status: 'ready',
     });
+
+    // 2. Regenerate creative using revised copy + the user's instruction.
+    const provider = getCreativeProvider();
+    const platform = (ad.platform as Platform) ?? 'facebook';
+    const revisedBrief = {
+      ...brief,
+      creativeStyle: `${brief.creativeStyle}. Revision note: ${rev.instruction}`,
+    };
+    const kickoff = await provider.kickoff(revisedBrief, platform, revised);
+
+    if (kickoff.jobId && !kickoff.assetUrl) {
+      // Async — store provider job id, enqueue poll.
+      await revRef.update({ providerJobId: kickoff.jobId });
+      await enqueueJob({
+        path: '/internal/jobs/poll-revision-creative',
+        payload: { workspaceId, batchId, adId: ad.id, revisionId, attempt: 1 },
+        delaySeconds: 10,
+      });
+      return;
+    }
+
+    if (!kickoff.assetUrl) throw new Error('Provider returned neither asset nor job id');
+
+    // Sync — download and finalize.
+    const assetPath = await downloadRevisionAsset(
+      kickoff.assetUrl,
+      workspaceId,
+      batchId,
+      ad.id,
+      revisionId,
+    );
+    await revRef.update({ assetPath, status: 'ready' });
   } catch (err) {
     await revRef.update({
       status: 'failed',

@@ -27,9 +27,13 @@ async function request<T>(
 ): Promise<T> {
   const token = await getAuthToken();
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
     ...((init.headers as Record<string, string>) ?? {}),
   };
+  // Only declare JSON content-type when we're actually sending a body.
+  // Fastify's strict JSON parser rejects an empty body with this header set.
+  if (init.body != null) {
+    headers['Content-Type'] = 'application/json';
+  }
   if (token) headers['Authorization'] = `Bearer ${token}`;
   if (opts.requireWorkspace !== false) {
     const wid = getWorkspaceId();
@@ -85,6 +89,8 @@ export const api = {
   // Reads
   dashboardStats: () => request<DashboardStats>('/dashboard/stats'),
   signedUrl: (adId: string) => request<{ url: string; expiresIn: number }>(`/assets/${adId}/signed-url`),
+  revisionSignedUrl: (adId: string, revisionId: string) =>
+    request<{ url: string; expiresIn: number }>(`/ads/${adId}/revisions/${revisionId}/signed-url`),
 
   // Stubs
   campaignMetrics: (id: string, period: '7d' | '30d' | '90d' = '30d') =>

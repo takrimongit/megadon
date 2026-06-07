@@ -33,7 +33,13 @@ export default function WizardOfferPlatformsScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <AppHeader showBack onBack={() => navigation.goBack()} />
       <WizardProgress currentStep={4} totalSteps={6} stepLabel="Offer & Platforms" />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <Text style={styles.title}>What's your offer?</Text>
         <Text style={styles.subtitle}>Tell AI about your product or promotion to craft the right message.</Text>
 

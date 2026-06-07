@@ -149,6 +149,8 @@ export const Revision = z.object({
   headline: z.string().optional(),
   body: z.string().optional(),
   cta: z.string().optional(),
+  assetPath: z.string().optional(),
+  providerJobId: z.string().optional(),
   accepted: z.boolean().default(false),
   createdBy: z.string(),
   createdAt: z.string(),

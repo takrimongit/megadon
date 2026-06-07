@@ -12,8 +12,8 @@
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDh88VqJ2mgoE62rpmWbApAAko_bmKbYsw",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "megadon.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "megadon",
-        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon-staging-assets",
-        "EXPO_PUBLIC_FIREBASE_APP_ID": ""
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:771319500294:web:d8dfa0d7b44d3f26833d87"
       }
     },
     "preview": {
@@ -26,8 +26,8 @@
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDh88VqJ2mgoE62rpmWbApAAko_bmKbYsw",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "megadon.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "megadon",
-        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon-staging-assets",
-        "EXPO_PUBLIC_FIREBASE_APP_ID": ""
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:771319500294:web:d8dfa0d7b44d3f26833d87"
       }
     },
     "testflight": {
@@ -41,8 +41,8 @@
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDh88VqJ2mgoE62rpmWbApAAko_bmKbYsw",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "megadon.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "megadon",
-        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon-staging-assets",
-        "EXPO_PUBLIC_FIREBASE_APP_ID": ""
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:771319500294:web:d8dfa0d7b44d3f26833d87"
       }
     },
     "production": {
@@ -55,8 +55,8 @@
         "EXPO_PUBLIC_FIREBASE_API_KEY": "AIzaSyDh88VqJ2mgoE62rpmWbApAAko_bmKbYsw",
         "EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN": "megadon.firebaseapp.com",
         "EXPO_PUBLIC_FIREBASE_PROJECT_ID": "megadon",
-        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon-staging-assets",
-        "EXPO_PUBLIC_FIREBASE_APP_ID": ""
+        "EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET": "megadon.firebasestorage.app",
+        "EXPO_PUBLIC_FIREBASE_APP_ID": "1:771319500294:web:d8dfa0d7b44d3f26833d87"
       }
     }
   },

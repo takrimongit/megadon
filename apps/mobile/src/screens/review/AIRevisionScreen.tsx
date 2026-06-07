@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert,
-  KeyboardAvoidingView, Platform,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -41,6 +40,7 @@ export default function AIRevisionScreen() {
   const [instruction, setInstruction] = useState('');
   const [revisionId, setRevisionId] = useState<string | null>(null);
   const [revision, setRevision] = useState<Revision | null>(null);
+  const [revisionImageUrl, setRevisionImageUrl] = useState<string | null>(null);
   const [revising, setRevising] = useState(false);
   const [accepting, setAccepting] = useState(false);
 
@@ -71,10 +71,28 @@ export default function AIRevisionScreen() {
     return unsub;
   }, [workspaceId, batchId, adId, revisionId]);
 
+  // Fetch the revision's regenerated image URL once it's ready.
+  useEffect(() => {
+    if (!revisionId || revision?.status !== 'ready' || !revision?.assetPath) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const { url } = await api.revisionSignedUrl(adId, revisionId);
+        if (!cancelled) setRevisionImageUrl(url);
+      } catch {
+        // Fall back to the ad's original image.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [adId, revisionId, revision?.status, revision?.assetPath]);
+
   const handleRevise = async () => {
     if (!instruction.trim()) return;
     setRevising(true);
     setRevision(null);
+    setRevisionImageUrl(null);
     try {
       const { revisionId: rid } = await api.requestRevision(adId, instruction.trim());
       setRevisionId(rid);
@@ -118,17 +136,30 @@ export default function AIRevisionScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <AppHeader showBack onBack={() => navigation.goBack()} title="AI Revision" />
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
       >
-        <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
           {!ad ? (
             <LoadingSpinner label="Loading ad…" />
           ) : (
             <>
               <View style={styles.adPreview}>
-                <AdImage adId={ad.id} hasAsset={!!ad.assetPath} style={styles.adImage} fallbackIconSize={40} />
+                <AdImage
+                  adId={ad.id}
+                  hasAsset={!!ad.assetPath}
+                  style={styles.adImage}
+                  imageStyle={styles.adImageInner}
+                  fallbackIconSize={48}
+                  zoomable
+                  urlOverride={revisionImageUrl}
+                />
+                {ad.assetPath ? (
+                  <Text style={styles.zoomHint}>Tap image to zoom</Text>
+                ) : null}
                 <Text style={styles.adHeadline}>{displayHeadline}</Text>
                 {displayBody ? <Text style={styles.adBody}>{displayBody}</Text> : null}
                 {displayCta ? (
@@ -191,14 +222,13 @@ export default function AIRevisionScreen() {
                 {revisionReady && (
                   <TouchableOpacity style={styles.approveBtn} onPress={handleAccept} disabled={accepting}>
                     <MaterialIcons name="check" size={20} color={Colors.success} />
-                    <Text style={styles.approveBtnText}>{accepting ? 'Saving…' : 'Accept'}</Text>
+                    <Text style={styles.approveBtnText}>{accepting ? 'Saving…' : 'Accept & approve'}</Text>
                   </TouchableOpacity>
                 )}
               </View>
             </>
           )}
-        </ScrollView>
-      </KeyboardAvoidingView>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -217,9 +247,19 @@ const styles = StyleSheet.create({
     borderColor: Colors.outlineVariant + '4D',
   },
   adImage: {
-    width: 160,
-    height: 160,
+    width: '100%',
+    aspectRatio: 1,
     borderRadius: Radius.md,
+    position: 'relative',
+  },
+  adImageInner: {
+    resizeMode: 'contain',
+  },
+  zoomHint: {
+    ...Typography.labelCaps,
+    color: Colors.onSurfaceVariant,
+    textTransform: 'uppercase',
+    marginTop: -Spacing.xs,
   },
   adHeadline: { ...Typography.titleMd, color: Colors.onSurface, textAlign: 'center' },
   adBody: { ...Typography.bodySm, color: Colors.onSurfaceVariant, textAlign: 'center' },

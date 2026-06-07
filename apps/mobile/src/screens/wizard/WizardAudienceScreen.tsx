@@ -39,7 +39,13 @@ export default function WizardAudienceScreen() {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <AppHeader showBack onBack={() => navigation.goBack()} />
       <WizardProgress currentStep={2} totalSteps={6} stepLabel="Target Audience" />
-      <ScrollView style={styles.scroll} contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        style={styles.scroll}
+        contentContainerStyle={styles.content}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
+        automaticallyAdjustKeyboardInsets
+      >
         <Text style={styles.title}>Who are you targeting?</Text>
         <Text style={styles.subtitle}>Define your ideal audience so AI can craft the right message.</Text>
 

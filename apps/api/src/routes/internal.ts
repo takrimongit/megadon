@@ -4,6 +4,7 @@ import { ok } from '../lib/envelope.js';
 import { runGenerateAd } from '../jobs/generateAd.js';
 import { runPollCreative } from '../jobs/pollCreative.js';
 import { runReviseAd } from '../jobs/reviseAd.js';
+import { runPollRevisionCreative } from '../jobs/pollRevisionCreative.js';
 
 export async function internalRoutes(app: FastifyInstance) {
   app.addHook('preHandler', requireCloudTasks);
@@ -20,6 +21,11 @@ export async function internalRoutes(app: FastifyInstance) {
 
   app.post('/internal/jobs/revise-ad', async (req, reply) => {
     await runReviseAd(req.body as any);
+    return ok(reply, { ok: true });
+  });
+
+  app.post('/internal/jobs/poll-revision-creative', async (req, reply) => {
+    await runPollRevisionCreative(req.body as any);
     return ok(reply, { ok: true });
   });
 }

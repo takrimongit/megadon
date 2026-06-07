@@ -1,5 +1,5 @@
 import type { FastifyInstance } from 'fastify';
-import { db } from '../lib/firebase.js';
+import { db, bucket } from '../lib/firebase.js';
 import { requireAuth, requireWorkspace } from '../middleware/auth.js';
 import { ok } from '../lib/envelope.js';
 import { AppError } from '../lib/errors.js';
@@ -75,10 +75,34 @@ export async function adRoutes(app: FastifyInstance) {
 
     await enqueueJob({
       path: '/internal/jobs/revise-ad',
-      payload: { workspaceId, adPath: adDoc.ref.path, revisionId: revRef.id },
+      payload: {
+        workspaceId,
+        batchId: adDoc.ref.parent.parent!.id,
+        adId,
+        adPath: adDoc.ref.path,
+        revisionId: revRef.id,
+      },
     });
 
     return ok(reply, { revisionId: revRef.id }, 201);
+  });
+
+  // Signed read URL for a revision's regenerated asset
+  app.get('/ads/:adId/revisions/:rid/signed-url', async (req, reply) => {
+    const { adId, rid } = req.params as { adId: string; rid: string };
+    const { id: workspaceId } = req.workspace!;
+
+    const adDoc = await findAd(workspaceId, adId);
+    const revSnap = await adDoc.ref.collection('revisions').doc(rid).get();
+    if (!revSnap.exists) throw AppError.notFound('Revision not found');
+    const { assetPath } = revSnap.data()!;
+    if (!assetPath) throw AppError.notFound('Revision asset not generated yet');
+
+    const [url] = await bucket().file(assetPath).getSignedUrl({
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000,
+    });
+    return ok(reply, { url, expiresIn: 900 });
   });
 
   // Accept revision
@@ -101,17 +125,21 @@ export async function adRoutes(app: FastifyInstance) {
         headline: ad.headline,
         body: ad.body,
         cta: ad.cta,
+        assetPath: ad.assetPath,
         revisedAt: new Date().toISOString(),
       });
 
-      tx.update(adDoc.ref, {
+      const update: Record<string, unknown> = {
         headline: rev.headline,
         body: rev.body,
         cta: rev.cta,
         status: 'approved',
         history,
         updatedAt: new Date().toISOString(),
-      });
+      };
+      if (rev.assetPath) update.assetPath = rev.assetPath;
+
+      tx.update(adDoc.ref, update);
       tx.update(revRef, { accepted: true });
     });
 
