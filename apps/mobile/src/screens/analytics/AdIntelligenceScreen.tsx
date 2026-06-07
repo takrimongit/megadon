@@ -1,82 +1,105 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
 import PrimaryButton from '../../components/PrimaryButton';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorView from '../../components/ErrorView';
+import { RootStackParamList } from '../../navigation';
+import { api, AdIntelligenceResponse } from '../../lib/api';
 
-const breakdowns = [
-  { label: 'Age 25–34', share: 42 },
-  { label: 'Age 18–24', share: 28 },
-  { label: 'Age 35–44', share: 18 },
-  { label: 'Other', share: 12 },
-];
-
-const aiNotes = [
-  'Urgency language ("Limited Time") drove a 1.8× higher CTR than non-urgent variants',
-  'The summer color palette resonated strongly with the 25–34 segment',
-  'Short-form video (≤15s) outperformed static images by 2.3×',
-];
+type Route = RouteProp<RootStackParamList, 'AdIntelligence'>;
 
 export default function AdIntelligenceScreen() {
   const navigation = useNavigation();
+  const route = useRoute<Route>();
+  const { adId } = route.params;
+  const [data, setData] = useState<AdIntelligenceResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const resp = await api.adIntelligence(adId);
+      setData(resp);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load intelligence');
+    } finally {
+      setLoading(false);
+    }
+  }, [adId]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <AppHeader showBack onBack={() => navigation.goBack()} title="Ad Intelligence" />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.adCard}>
-          <View style={styles.adPlaceholder}>
-            <MaterialIcons name="image" size={36} color={Colors.outlineVariant} />
-          </View>
-          <Text style={styles.adHeadline}>Limited Time: 30% Off</Text>
-          <Text style={styles.adBody}>Shop our summer collection with exclusive discounts.</Text>
-        </View>
-
-        <View style={styles.metricsRow}>
-          {[
-            { label: 'ROAS', value: '4.1×' },
-            { label: 'CTR', value: '5.8%' },
-            { label: 'IMPRESSIONS', value: '48K' },
-            { label: 'CONVERSIONS', value: '87' },
-          ].map((m) => (
-            <View key={m.label} style={styles.metricBox}>
-              <Text style={styles.metricLabel}>{m.label}</Text>
-              <Text style={styles.metricValue}>{m.value}</Text>
-            </View>
-          ))}
-        </View>
-
-        <Text style={styles.sectionTitle}>Audience Breakdown</Text>
-        <View style={styles.breakdownCard}>
-          {breakdowns.map((b) => (
-            <View key={b.label} style={styles.breakdownRow}>
-              <Text style={styles.breakdownLabel}>{b.label}</Text>
-              <View style={styles.barTrack}>
-                <View style={[styles.barFill, { width: `${b.share}%` }]} />
+        {error ? (
+          <ErrorView message={error} onRetry={load} style={{ minHeight: 300 }} />
+        ) : loading || !data ? (
+          <LoadingSpinner style={{ minHeight: 300 }} />
+        ) : (
+          <>
+            <View style={styles.adCard}>
+              <View style={styles.adPlaceholder}>
+                <MaterialIcons name="image" size={36} color={Colors.outlineVariant} />
               </View>
-              <Text style={styles.breakdownShare}>{b.share}%</Text>
+              <Text style={styles.adHeadline}>Ad #{data.adId}</Text>
+              <Text style={styles.adBody}>Performance breakdown and learnings.</Text>
             </View>
-          ))}
-        </View>
 
-        <Text style={styles.sectionTitle}>AI Analysis</Text>
-        <View style={styles.aiCard}>
-          <View style={styles.aiBadge}>
-            <MaterialIcons name="auto-awesome" size={14} color={Colors.secondary} />
-            <Text style={styles.aiBadgeText}>AI Insights</Text>
-          </View>
-          {aiNotes.map((note, i) => (
-            <View key={i} style={styles.noteRow}>
-              <View style={styles.noteDot} />
-              <Text style={styles.noteText}>{note}</Text>
+            <View style={styles.metricsRow}>
+              {[
+                { label: 'ROAS', value: data.metrics.roas },
+                { label: 'CTR', value: data.metrics.ctr },
+                { label: 'IMPRESSIONS', value: data.metrics.impressions },
+                { label: 'CONVERSIONS', value: String(data.metrics.conversions) },
+              ].map((m) => (
+                <View key={m.label} style={styles.metricBox}>
+                  <Text style={styles.metricLabel}>{m.label}</Text>
+                  <Text style={styles.metricValue}>{m.value}</Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
 
-        <PrimaryButton label="Use Learnings in Next Batch" onPress={() => navigation.navigate('WizardGoal' as never)} />
+            <Text style={styles.sectionTitle}>Audience Breakdown</Text>
+            <View style={styles.breakdownCard}>
+              {data.audienceBreakdown.map((b) => (
+                <View key={b.label} style={styles.breakdownRow}>
+                  <Text style={styles.breakdownLabel}>{b.label}</Text>
+                  <View style={styles.barTrack}>
+                    <View style={[styles.barFill, { width: `${b.share}%` }]} />
+                  </View>
+                  <Text style={styles.breakdownShare}>{b.share}%</Text>
+                </View>
+              ))}
+            </View>
+
+            <Text style={styles.sectionTitle}>AI Analysis</Text>
+            <View style={styles.aiCard}>
+              <View style={styles.aiBadge}>
+                <MaterialIcons name="auto-awesome" size={14} color={Colors.secondary} />
+                <Text style={styles.aiBadgeText}>AI Insights</Text>
+              </View>
+              {data.aiNotes.map((note, i) => (
+                <View key={i} style={styles.noteRow}>
+                  <View style={styles.noteDot} />
+                  <Text style={styles.noteText}>{note}</Text>
+                </View>
+              ))}
+            </View>
+
+            <PrimaryButton label="Use Learnings in Next Batch" onPress={() => navigation.navigate('WizardGoal' as never)} />
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

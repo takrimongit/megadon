@@ -88,10 +88,56 @@ export const api = {
 
   // Stubs
   campaignMetrics: (id: string, period: '7d' | '30d' | '90d' = '30d') =>
-    request<any>(`/campaigns/${id}/metrics?period=${period}`),
-  adIntelligence: (adId: string) => request<any>(`/ads/${adId}/intelligence`),
-  playbook: () => request<any>('/playbook'),
-  insights: () => request<any>('/insights'),
+    request<CampaignMetricsResponse>(`/campaigns/${id}/metrics?period=${period}`),
+  adIntelligence: (adId: string) =>
+    request<AdIntelligenceResponse>(`/ads/${adId}/intelligence`),
+  playbook: () => request<PlaybookResponse>('/playbook'),
+  insights: () => request<InsightsResponse>('/insights'),
 };
+
+export interface InsightItem {
+  icon: string;
+  label: string;
+  value: string;
+  trend: string;
+  positive: boolean;
+}
+export interface InsightsResponse {
+  insights: InsightItem[];
+}
+
+export interface CampaignMetricsResponse {
+  campaignId: string;
+  period: string;
+  metrics: {
+    impressions: number;
+    clicks: number;
+    ctr: number;
+    roas: number;
+    spend: number;
+    conversions: number;
+  };
+  topAds: { id: string; headline: string; roas: string; ctr: string }[];
+}
+
+export interface AdIntelligenceResponse {
+  adId: string;
+  metrics: { roas: string; ctr: string; impressions: string; conversions: number };
+  audienceBreakdown: { label: string; share: number }[];
+  aiNotes: string[];
+}
+
+export interface PlaybookRule {
+  icon: string;
+  title: string;
+  value: string;
+  confidence: number;
+}
+export interface PlaybookResponse {
+  lastUpdated: string;
+  campaignCount: number;
+  adCount: number;
+  rules: PlaybookRule[];
+}
 
 export { ApiClientError };

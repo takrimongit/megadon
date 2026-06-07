@@ -1,23 +1,42 @@
-import React from 'react';
-import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorView from '../../components/ErrorView';
+import { api, PlaybookResponse } from '../../lib/api';
 
-const rules = [
-  { icon: 'schedule', title: 'Optimal Post Time', value: '7–10 PM weekdays', confidence: 94 },
-  { icon: 'people', title: 'Primary Audience', value: 'Trendsetters, 25–34', confidence: 88 },
-  { icon: 'palette', title: 'Winning Visual Style', value: 'Bold & Energetic', confidence: 82 },
-  { icon: 'text-fields', title: 'Best Copy Length', value: '<15 words headline', confidence: 79 },
-  { icon: 'play-circle', title: 'Top Format', value: 'Short-form Video ≤15s', confidence: 91 },
-  { icon: 'local-offer', title: 'CTA Style', value: 'Urgency + scarcity', confidence: 86 },
-];
+function formatDate(iso?: string): string {
+  if (!iso) return '';
+  return new Date(iso).toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+}
 
 export default function BrandPlaybookScreen() {
   const navigation = useNavigation();
+  const [data, setData] = useState<PlaybookResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const resp = await api.playbook();
+      setData(resp);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load playbook');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -26,35 +45,49 @@ export default function BrandPlaybookScreen() {
         <LinearGradient colors={[Colors.primary, Colors.secondary]} style={styles.hero}>
           <MaterialIcons name="menu-book" size={36} color={Colors.onPrimary} />
           <Text style={styles.heroTitle}>Brand Intelligence Playbook</Text>
-          <Text style={styles.heroSubtitle}>Learned from 24 campaigns · 1,200+ ads · Updated Jun 5</Text>
+          {data ? (
+            <Text style={styles.heroSubtitle}>
+              Learned from {data.campaignCount} campaigns · {data.adCount.toLocaleString()}+ ads · Updated {formatDate(data.lastUpdated)}
+            </Text>
+          ) : (
+            <Text style={styles.heroSubtitle}>Your evolving guide to what works</Text>
+          )}
         </LinearGradient>
 
         <Text style={styles.sectionTitle}>Established Brand Rules</Text>
         <Text style={styles.sectionSubtitle}>Confidence scores based on ad performance data.</Text>
 
-        {rules.map((rule) => (
-          <View key={rule.title} style={styles.ruleCard}>
-            <View style={styles.ruleIcon}>
-              <MaterialIcons name={rule.icon as any} size={20} color={Colors.primary} />
-            </View>
-            <View style={styles.ruleText}>
-              <Text style={styles.ruleTitle}>{rule.title}</Text>
-              <Text style={styles.ruleValue}>{rule.value}</Text>
-            </View>
-            <View style={styles.confidenceBlock}>
-              <Text style={styles.confidenceValue}>{rule.confidence}%</Text>
-              <Text style={styles.confidenceLabel}>confidence</Text>
-              <View style={styles.confidenceBar}>
-                <View style={[styles.confidenceFill, { width: `${rule.confidence}%` }]} />
+        {error ? (
+          <ErrorView message={error} onRetry={load} style={{ minHeight: 200 }} />
+        ) : loading || !data ? (
+          <LoadingSpinner style={{ minHeight: 200 }} />
+        ) : (
+          <>
+            {data.rules.map((rule) => (
+              <View key={rule.title} style={styles.ruleCard}>
+                <View style={styles.ruleIcon}>
+                  <MaterialIcons name={rule.icon as keyof typeof MaterialIcons.glyphMap} size={20} color={Colors.primary} />
+                </View>
+                <View style={styles.ruleText}>
+                  <Text style={styles.ruleTitle}>{rule.title}</Text>
+                  <Text style={styles.ruleValue}>{rule.value}</Text>
+                </View>
+                <View style={styles.confidenceBlock}>
+                  <Text style={styles.confidenceValue}>{rule.confidence}%</Text>
+                  <Text style={styles.confidenceLabel}>confidence</Text>
+                  <View style={styles.confidenceBar}>
+                    <View style={[styles.confidenceFill, { width: `${rule.confidence}%` }]} />
+                  </View>
+                </View>
               </View>
-            </View>
-          </View>
-        ))}
+            ))}
 
-        <View style={styles.updateNote}>
-          <MaterialIcons name="autorenew" size={16} color={Colors.primary} />
-          <Text style={styles.updateText}>This playbook auto-updates after each batch approval cycle.</Text>
-        </View>
+            <View style={styles.updateNote}>
+              <MaterialIcons name="autorenew" size={16} color={Colors.primary} />
+              <Text style={styles.updateText}>This playbook auto-updates after each batch approval cycle.</Text>
+            </View>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

@@ -1,35 +1,66 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorView from '../../components/ErrorView';
 import { RootStackParamList } from '../../navigation';
+import { api, CampaignMetricsResponse } from '../../lib/api';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
+type Route = RouteProp<RootStackParamList, 'CampaignInsights'>;
 
-const metrics = [
-  { label: 'IMPRESSIONS', value: '284K', delta: '+18%', positive: true },
-  { label: 'CLICKS', value: '12.4K', delta: '+22%', positive: true },
-  { label: 'CTR', value: '4.36%', delta: '+0.8%', positive: true },
-  { label: 'ROAS', value: '3.2×', delta: '+0.4×', positive: true },
-  { label: 'SPEND', value: '$4,200', delta: '+5%', positive: false },
-  { label: 'CONVERSIONS', value: '342', delta: '+31%', positive: true },
-];
+const periods: Array<'7d' | '30d' | '90d'> = ['7d', '30d', '90d'];
 
-const topAds = [
-  { id: 'ad-1', headline: 'Shop the Summer Drop', roas: '4.8×', ctr: '6.2%' },
-  { id: 'ad-2', headline: 'Limited Time: 30% Off', roas: '4.1×', ctr: '5.8%' },
-  { id: 'ad-3', headline: "Don't Miss Out", roas: '3.7×', ctr: '5.1%' },
-];
+function formatCompact(n: number): string {
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return String(n);
+}
 
-const periods = ['7d', '30d', '90d'];
+function formatMetrics(m: CampaignMetricsResponse['metrics']) {
+  return [
+    { label: 'IMPRESSIONS', value: formatCompact(m.impressions) },
+    { label: 'CLICKS', value: formatCompact(m.clicks) },
+    { label: 'CTR', value: `${(m.ctr * 100).toFixed(2)}%` },
+    { label: 'ROAS', value: `${m.roas.toFixed(1)}×` },
+    { label: 'SPEND', value: `$${m.spend.toLocaleString()}` },
+    { label: 'CONVERSIONS', value: String(m.conversions) },
+  ];
+}
 
 export default function CampaignInsightsScreen() {
   const navigation = useNavigation<Nav>();
-  const [period, setPeriod] = useState('30d');
+  const route = useRoute<Route>();
+  const { campaignId } = route.params;
+  const [period, setPeriod] = useState<'7d' | '30d' | '90d'>('30d');
+  const [data, setData] = useState<CampaignMetricsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const resp = await api.campaignMetrics(campaignId, period);
+      setData(resp);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load metrics');
+    } finally {
+      setLoading(false);
+    }
+  }, [campaignId, period]);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const metrics = data ? formatMetrics(data.metrics) : [];
+  const topAds = data?.topAds ?? [];
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -47,18 +78,25 @@ export default function CampaignInsightsScreen() {
           ))}
         </View>
 
-        <View style={styles.metricsGrid}>
-          {metrics.map((m) => (
-            <View key={m.label} style={styles.metricCard}>
-              <Text style={styles.metricLabel}>{m.label}</Text>
-              <Text style={styles.metricValue}>{m.value}</Text>
-              <Text style={[styles.metricDelta, { color: m.positive ? Colors.success : Colors.error }]}>{m.delta}</Text>
+        {error ? (
+          <ErrorView message={error} onRetry={load} style={{ minHeight: 160 }} />
+        ) : loading || !data ? (
+          <LoadingSpinner style={{ minHeight: 160 }} />
+        ) : (
+          <>
+            <View style={styles.metricsGrid}>
+              {metrics.map((m) => (
+                <View key={m.label} style={styles.metricCard}>
+                  <Text style={styles.metricLabel}>{m.label}</Text>
+                  <Text style={styles.metricValue}>{m.value}</Text>
+                </View>
+              ))}
             </View>
-          ))}
-        </View>
 
-        <Text style={styles.sectionTitle}>Top Performing Ads</Text>
-        {topAds.map((ad, i) => (
+            <Text style={styles.sectionTitle}>Top Performing Ads</Text>
+          </>
+        )}
+        {!error && !loading && data && topAds.map((ad, i) => (
           <TouchableOpacity
             key={ad.id}
             style={styles.adRow}

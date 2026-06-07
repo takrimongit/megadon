@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, ScrollView, StyleSheet, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -7,19 +7,35 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { LinearGradient } from 'expo-linear-gradient';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
+import LoadingSpinner from '../../components/LoadingSpinner';
+import ErrorView from '../../components/ErrorView';
 import { RootStackParamList } from '../../navigation';
+import { api, InsightItem } from '../../lib/api';
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
-const insights = [
-  { icon: 'schedule', label: 'Best posting time', value: '7–10 PM', trend: '+2.4× CTR', positive: true },
-  { icon: 'people', label: 'Top audience segment', value: 'The Trendsetter', trend: '3.1× ROAS', positive: true },
-  { icon: 'palette', label: 'Best visual style', value: 'Bold & Energetic', trend: '+18% engagement', positive: true },
-  { icon: 'campaign', label: 'Worst-performing goal', value: 'Brand Awareness', trend: '-0.8× ROAS', positive: false },
-];
-
 export default function LearnScreen() {
   const navigation = useNavigation<Nav>();
+  const [insights, setInsights] = useState<InsightItem[] | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const load = useCallback(async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      const data = await api.insights();
+      setInsights(data.insights);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to load insights');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -40,20 +56,26 @@ export default function LearnScreen() {
         </TouchableOpacity>
 
         <Text style={styles.sectionTitle}>Key Learnings</Text>
-        {insights.map((item) => (
-          <View key={item.label} style={styles.insightCard}>
-            <View style={styles.insightIcon}>
-              <MaterialIcons name={item.icon as any} size={20} color={Colors.primary} />
+        {error ? (
+          <ErrorView message={error} onRetry={load} style={{ minHeight: 160 }} />
+        ) : loading || !insights ? (
+          <LoadingSpinner style={{ minHeight: 160 }} />
+        ) : (
+          insights.map((item) => (
+            <View key={item.label} style={styles.insightCard}>
+              <View style={styles.insightIcon}>
+                <MaterialIcons name={item.icon as keyof typeof MaterialIcons.glyphMap} size={20} color={Colors.primary} />
+              </View>
+              <View style={styles.insightText}>
+                <Text style={styles.insightLabel}>{item.label}</Text>
+                <Text style={styles.insightValue}>{item.value}</Text>
+              </View>
+              <View style={[styles.trendBadge, { backgroundColor: item.positive ? Colors.success + '1A' : Colors.error + '1A' }]}>
+                <Text style={[styles.trendText, { color: item.positive ? Colors.success : Colors.error }]}>{item.trend}</Text>
+              </View>
             </View>
-            <View style={styles.insightText}>
-              <Text style={styles.insightLabel}>{item.label}</Text>
-              <Text style={styles.insightValue}>{item.value}</Text>
-            </View>
-            <View style={[styles.trendBadge, { backgroundColor: item.positive ? Colors.success + '1A' : Colors.error + '1A' }]}>
-              <Text style={[styles.trendText, { color: item.positive ? Colors.success : Colors.error }]}>{item.trend}</Text>
-            </View>
-          </View>
-        ))}
+          ))
+        )}
 
         <TouchableOpacity style={styles.campaignBtn} onPress={() => navigation.navigate('CampaignInsights', { campaignId: '1' })}>
           <Text style={styles.campaignBtnText}>View Campaign Insights →</Text>
