@@ -36,9 +36,14 @@ function unwrapJson(raw: string): string {
   return fenced ? fenced[1] : raw;
 }
 
+// gpt-5-2 is a reasoning model that often spends all output tokens on
+// reasoning and returns empty `content`. Gemini Flash is more reliable
+// for elaborate structured-output prompts. Override via KIE_ANALYZE_MODEL.
+const ANALYZE_MODEL = process.env.KIE_ANALYZE_MODEL ?? 'gemini-2.5-flash';
+
 async function callKieJson<T>(schema: z.ZodSchema<T>, system: string, user: string): Promise<T> {
   if (!config.kieKey) throw AppError.provider('KIE_API_KEY not set');
-  const url = `https://api.kie.ai/${config.kieChatModel}/v1/chat/completions`;
+  const url = `https://api.kie.ai/${ANALYZE_MODEL}/v1/chat/completions`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -46,7 +51,7 @@ async function callKieJson<T>(schema: z.ZodSchema<T>, system: string, user: stri
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: config.kieChatModel,
+      model: ANALYZE_MODEL,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user },
@@ -57,8 +62,19 @@ async function callKieJson<T>(schema: z.ZodSchema<T>, system: string, user: stri
     throw AppError.provider(`kie.ai analysis ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
   }
   const json = (await resp.json()) as { choices?: Array<{ message?: { content?: string } }> };
-  const raw = json.choices?.[0]?.message?.content ?? '{}';
-  return schema.parse(JSON.parse(unwrapJson(raw)));
+  const raw = json.choices?.[0]?.message?.content;
+  if (!raw) {
+    throw AppError.provider(
+      `kie.ai analysis (${ANALYZE_MODEL}) returned empty content: ${JSON.stringify(json).slice(0, 300)}`,
+    );
+  }
+  try {
+    return schema.parse(JSON.parse(unwrapJson(raw)));
+  } catch (e) {
+    throw AppError.provider(
+      `kie.ai analysis parse failed: ${(e as Error).message} — raw: ${raw.slice(0, 300)}`,
+    );
+  }
 }
 
 export async function runAnalyzeBrand(payload: JobPayload) {

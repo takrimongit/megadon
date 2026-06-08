@@ -76,6 +76,12 @@ describe('e2e: full brand analyze pipeline (real kie.ai)', () => {
       await new Promise((r) => setTimeout(r, 1000));
     }
 
+    if (finalStatus !== 'ready') {
+      // Surface what the worker captured so CI logs are diagnostic.
+      throw new Error(
+        `analyze did not reach 'ready' — status=${finalStatus} error=${JSON.stringify(finalData?.error)}`,
+      );
+    }
     expect(finalStatus).toBe('ready');
 
     const analysis = finalData!.analysis!;
