@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
-import type { CopyProvider, CopyResult } from './types.js';
+import type { CopyProvider, CopyResult, BrandContext } from './types.js';
 import type { Brief, Persona, Platform } from '@megadon/types';
 
 // kie.ai chat completions are per-model: POST to
@@ -69,15 +69,29 @@ async function callJson<T>(schema: z.ZodSchema<T>, system: string, user: string)
   }
 }
 
+function brandSystemAddendum(brand?: BrandContext | null): string {
+  if (!brand?.analysis) return '';
+  const a = brand.analysis;
+  const lines: string[] = ['', '## Brand Playbook (use this in every response):'];
+  if (brand.info?.companyName) lines.push(`- Brand: ${brand.info.companyName} (${brand.info.industry})`);
+  if (a.toneOfVoice) lines.push(`- Tone of voice: ${a.toneOfVoice}`);
+  if (a.messagingStyle) lines.push(`- Messaging style: ${a.messagingStyle}`);
+  if (a.targetAudience) lines.push(`- Target audience: ${a.targetAudience}`);
+  if (a.personality?.length) lines.push(`- Brand personality: ${a.personality.join(', ')}`);
+  if (a.brandRules?.length) lines.push(`- Brand rules: ${a.brandRules.join('; ')}`);
+  if (a.ctaPreferences?.length) lines.push(`- Preferred CTA styles: ${a.ctaPreferences.join(', ')}`);
+  return lines.join('\n');
+}
+
 export const kieProvider: CopyProvider = {
-  async generateCopy(brief: Brief, platform: Platform): Promise<CopyResult> {
-    const system = `You write high-conversion ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}. Match the platform's format.`;
+  async generateCopy(brief: Brief, platform: Platform, brand?: BrandContext | null): Promise<CopyResult> {
+    const system = `You write high-conversion ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}. Match the platform's format.${brandSystemAddendum(brand)}`;
     const user = `Platform: ${platform}\nGoal: ${brief.goal}\nOffer: ${brief.offer}\nStyle: ${brief.creativeStyle}\nTone: ${brief.tones.join(', ')}\nAudience: ${brief.audience.selectedPersona?.name ?? brief.audience.personaDescription ?? brief.audience.interests.join(', ')}`;
     return callJson(CopySchema, system, user);
   },
 
-  async reviseCopy(current, instruction, brief) {
-    const system = `Revise ad copy per the user's instruction. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}.`;
+  async reviseCopy(current, instruction, brief, brand?: BrandContext | null) {
+    const system = `Revise ad copy per the user's instruction. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}.${brandSystemAddendum(brand)}`;
     const user = `Current: ${JSON.stringify(current)}\nInstruction: ${instruction}\nBrief offer: ${brief.offer}\nStyle: ${brief.creativeStyle}`;
     return callJson(CopySchema, system, user);
   },

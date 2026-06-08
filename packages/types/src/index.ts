@@ -216,3 +216,108 @@ export const WizardOptions = z.object({
   tones: z.array(z.string()),
 });
 export type WizardOptions = z.infer<typeof WizardOptions>;
+
+// ============ Brand Playbook ============
+
+export const BrandAssetType = z.enum([
+  'logo',
+  'guideline',     // PDF
+  'image',         // general brand image
+  'product',
+  'previous_ad',
+  'social',
+]);
+export type BrandAssetType = z.infer<typeof BrandAssetType>;
+
+export const BrandAsset = z.object({
+  id: z.string(),
+  type: BrandAssetType,
+  path: z.string(),       // GCS object path
+  mimeType: z.string(),
+  filename: z.string().optional(),
+  uploadedAt: z.string(),
+});
+export type BrandAsset = z.infer<typeof BrandAsset>;
+
+export const BrandInfo = z.object({
+  companyName: z.string().min(1),
+  websiteUrl: z.string().optional(),
+  industry: z.string().min(1),
+  description: z.string().min(10),
+});
+export type BrandInfo = z.infer<typeof BrandInfo>;
+
+export const BrandColor = z.object({
+  hex: z.string(),
+  name: z.string(),
+  role: z.string().optional(),     // e.g. "primary", "accent"
+});
+export type BrandColor = z.infer<typeof BrandColor>;
+
+export const BrandConfidence = z.object({
+  colors: z.number().min(0).max(1).default(0),
+  personality: z.number().min(0).max(1).default(0),
+  toneOfVoice: z.number().min(0).max(1).default(0),
+  visualStyle: z.number().min(0).max(1).default(0),
+  audience: z.number().min(0).max(1).default(0),
+});
+export type BrandConfidence = z.infer<typeof BrandConfidence>;
+
+export const BrandAnalysis = z.object({
+  colors: z.array(BrandColor).default([]),
+  personality: z.array(z.string()).default([]),       // ["Innovative", "Trustworthy", ...]
+  toneOfVoice: z.string().default(''),                 // free-form
+  visualStyle: z.string().default(''),
+  targetAudience: z.string().default(''),
+  creativeStyles: z.array(z.string()).default([]),     // approved style chips
+  brandRules: z.array(z.string()).default([]),         // dos / don'ts
+  messagingStyle: z.string().default(''),
+  ctaPreferences: z.array(z.string()).default([]),
+  confidence: BrandConfidence.default({
+    colors: 0, personality: 0, toneOfVoice: 0, visualStyle: 0, audience: 0,
+  }),
+});
+export type BrandAnalysis = z.infer<typeof BrandAnalysis>;
+
+export const BrandPlaybookStatus = z.enum([
+  'empty',         // no info yet (default state for a workspace)
+  'draft',         // info saved, no analysis yet
+  'analyzing',     // worker is running
+  'ready',         // analysis done, awaiting user review/approval
+  'approved',      // user signed off; used in ad generation
+  'failed',
+]);
+export type BrandPlaybookStatus = z.infer<typeof BrandPlaybookStatus>;
+
+export const BrandPlaybook = z.object({
+  workspaceId: z.string(),
+  status: BrandPlaybookStatus,
+  info: BrandInfo.nullable().default(null),
+  assets: z.array(BrandAsset).default([]),
+  analysis: BrandAnalysis.nullable().default(null),
+  error: z.object({ code: z.string(), message: z.string() }).optional(),
+  createdAt: z.string(),
+  updatedAt: z.string(),
+  approvedAt: z.string().nullable().default(null),
+});
+export type BrandPlaybook = z.infer<typeof BrandPlaybook>;
+
+// Request bodies
+export const UpdateBrandInfoBody = BrandInfo;
+
+export const RequestUploadUrlBody = z.object({
+  type: BrandAssetType,
+  mimeType: z.string().min(1),
+  filename: z.string().optional(),
+});
+
+export const RegisterAssetBody = z.object({
+  type: BrandAssetType,
+  path: z.string().min(1),
+  mimeType: z.string().min(1),
+  filename: z.string().optional(),
+});
+
+export const UpdatePlaybookBody = z.object({
+  analysis: BrandAnalysis.partial().optional(),
+});

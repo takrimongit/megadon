@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>AI Brand Analysis - Step 4 of 5</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@100..800&amp;family=Hanken+Grotesk:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        .shimmer-sweep {
+            animation: shimmer 2s infinite linear;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid #e2e8f0;
+        }
+        .ai-gradient-text {
+            background: linear-gradient(135deg, #2a14b4 0%, #6b38d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface antialiased">
+<!-- TopAppBar from Shared Components -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-colors p-2 rounded-full Active: opacity-80 scale-95 transition-all">
+                arrow_back
+            </button>
+<h1 class="font-headline-sm text-headline-sm dark:text-inverse-on-surface">Build Your Brand Profile</h1>
+</div>
+<div class="flex items-center gap-4">
+<span class="font-label-md text-label-md text-on-surface-variant">Step 4 of 5</span>
+<button class="material-symbols-outlined text-primary dark:text-primary-fixed-dim hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-colors p-2 rounded-full Active: opacity-80 scale-95 transition-all">
+                close
+            </button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<!-- STATE 1: LOADING EXPERIENCE (Visible by default, hidden by JS) -->
+<section class="flex flex-col items-center justify-center min-h-[530px] py-lg" id="loading-state">
+<div class="w-full max-w-2xl text-center space-y-md">
+<div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-surface-container-high mb-md relative overflow-hidden">
+<span class="material-symbols-outlined text-primary text-4xl animate-pulse">psychology</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg ai-gradient-text">Analyzing Brand Identity...</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Our AI is distilling your assets into a cohesive advertising strategy.</p>
+<div class="relative w-full h-1 bg-surface-container rounded-full overflow-hidden mt-xl">
+<div class="absolute top-0 left-0 h-full bg-primary-container transition-all duration-500 ease-out" id="progress-bar" style="width: 15%;">
+<div class="absolute inset-0 shimmer-sweep"></div>
+</div>
+</div>
+<div class="mt-md space-y-sm text-left px-md">
+<div class="font-label-md text-label-md text-on-surface-variant" id="status-lines">
+<div class="flex items-center gap-2 py-1 transition-opacity duration-300 opacity-100" id="status-1">
+<span class="material-symbols-outlined text-primary text-sm">check_circle</span>
+<span>Parsing uploaded brand assets...</span>
+</div>
+<div class="flex items-center gap-2 py-1 transition-opacity duration-300 opacity-40" id="status-2">
+<span class="material-symbols-outlined text-primary text-sm animate-spin">refresh</span>
+<span>Extracting core color palette...</span>
+</div>
+<div class="flex items-center gap-2 py-1 transition-opacity duration-300 opacity-40" id="status-3">
+<span class="material-symbols-outlined text-outline text-sm">radio_button_unchecked</span>
+<span>Evaluating visual style consistency...</span>
+</div>
+<div class="flex items-center gap-2 py-1 transition-opacity duration-300 opacity-40" id="status-4">
+<span class="material-symbols-outlined text-outline text-sm">radio_button_unchecked</span>
+<span>Defining tone of voice &amp; personality...</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- STATE 2: RESULTS VIEW (Hidden by default) -->
+<section class="hidden animate-in fade-in slide-in-from-bottom-4 duration-700" id="results-view">
+<header class="mb-lg flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div class="max-w-2xl">
+<span class="font-label-md text-label-md text-secondary-container bg-secondary-fixed px-3 py-1 rounded-full">AI Analysis Complete</span>
+<h2 class="font-headline-lg text-headline-lg mt-sm">Your AI Brand Intelligence</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mt-xs">We've identified the core DNA of your brand. Review the findings below before finalizing your playbook.</p>
+</div>
+<button class="flex items-center gap-2 px-md py-sm bg-primary text-on-primary rounded-xl font-label-md transition-all hover:shadow-lg active:scale-95" onclick="window.location.reload()">
+                    Review Brand Playbook
+                    <span class="material-symbols-outlined">arrow_forward</span>
+</button>
+</header>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Brand Colors -->
+<div class="md:col-span-4 glass-card p-md rounded-xl space-y-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">palette</span>
+<h3 class="font-headline-sm text-headline-sm">Brand Colors</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 rounded-full bg-surface-container text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span> 98% Confidence
+                        </span>
+</div>
+<div class="grid grid-cols-2 gap-sm">
+<div class="space-y-1">
+<div class="h-16 w-full rounded-lg bg-primary"></div>
+<span class="font-label-sm text-label-sm block">Primary Indigo</span>
+<span class="text-[10px] text-outline">#2A14B4</span>
+</div>
+<div class="space-y-1">
+<div class="h-16 w-full rounded-lg bg-secondary"></div>
+<span class="font-label-sm text-label-sm block">Kinetic Purple</span>
+<span class="text-[10px] text-outline">#6B38D4</span>
+</div>
+<div class="space-y-1">
+<div class="h-16 w-full rounded-lg bg-tertiary"></div>
+<span class="font-label-sm text-label-sm block">Deep Forest</span>
+<span class="text-[10px] text-outline">#00414D</span>
+</div>
+<div class="space-y-1">
+<div class="h-16 w-full rounded-lg bg-surface-variant"></div>
+<span class="font-label-sm text-label-sm block">Soft Sky</span>
+<span class="text-[10px] text-outline">#D3E4FE</span>
+</div>
+</div>
+</div>
+<!-- Brand Personality -->
+<div class="md:col-span-4 glass-card p-md rounded-xl space-y-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">person_celebrate</span>
+<h3 class="font-headline-sm text-headline-sm">Personality</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 rounded-full bg-surface-container text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span> 92% Confidence
+                        </span>
+</div>
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md">Professional</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md">Innovative</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md">Reliable</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md">Modern</span>
+<span class="px-3 py-1 bg-surface-container-high rounded-full font-label-md text-label-md">Data-Driven</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">The brand projects a sophisticated image that balances high-tech capability with accessible, human-centric design.</p>
+</div>
+<!-- Tone of Voice -->
+<div class="md:col-span-4 glass-card p-md rounded-xl space-y-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">record_voice_over</span>
+<h3 class="font-headline-sm text-headline-sm">Tone of Voice</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 rounded-full bg-surface-container text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span> 85% Confidence
+                        </span>
+</div>
+<div class="space-y-sm">
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md">Empathetic</span>
+<div class="w-24 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 80%"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md">Authoritative</span>
+<div class="w-24 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 65%"></div>
+</div>
+</div>
+<div class="flex items-center justify-between">
+<span class="font-label-md text-label-md">Playful</span>
+<div class="w-24 h-1.5 bg-surface-container rounded-full overflow-hidden">
+<div class="bg-primary h-full" style="width: 25%"></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Style Card -->
+<div class="md:col-span-6 glass-card p-md rounded-xl space-y-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">visibility</span>
+<h3 class="font-headline-sm text-headline-sm">Visual Style</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 rounded-full bg-surface-container text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span> 96%
+                        </span>
+</div>
+<div class="flex gap-md overflow-hidden">
+<div class="w-32 h-32 rounded-lg bg-surface-container flex-shrink-0 relative group">
+<img alt="Abstract 3D flow" class="w-full h-full object-cover rounded-lg" data-alt="A macro photograph of smooth, flowing liquid metallic ribbons in deep indigo and violet colors. The lighting is crisp and highlights the satin texture of the curves, creating a sophisticated and modern abstract visual. The atmosphere is calm, high-end, and technologically advanced, fitting a professional advertising brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDYLWXh15i-1FflCw8z2eOh6vLPNrnV_HnrRh7kLyoJoPFI6f1wetxoewndsn4E6EPvE9w5nVGNWP0ytzL-lEX_da3ADB2RcIvdO-2RxRe9TK0EDxkBvQvBDV4OlGLaEJ96meTYPC8b0OUgNTofcktF7XMj40Ol3h-IF287TMf9Lv_mqEeA9sRrWF-KisToUEvm3F_2Qi64GtxfIDM-Lv_S57TZy-fWjj7V1zt0WsEfwAiFnujaVpnEpEaJBSSu8Om0ORs-zKaF4I0"/>
+</div>
+<div class="flex-1">
+<h4 class="font-label-md text-label-md">Minimalist High-Tech</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">Utilizes clean lines, spacious layouts, and a mixture of matte and glass surfaces. High contrast is used to direct user focus toward core data points and call-to-actions.</p>
+</div>
+</div>
+</div>
+<!-- Target Audience -->
+<div class="md:col-span-6 glass-card p-md rounded-xl space-y-md">
+<div class="flex justify-between items-start">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">groups</span>
+<h3 class="font-headline-sm text-headline-sm">Target Audience</h3>
+</div>
+<span class="font-label-sm text-label-sm px-2 py-1 rounded-full bg-surface-container text-on-surface-variant flex items-center gap-1">
+<span class="material-symbols-outlined text-xs" style="font-variation-settings: 'FILL' 1;">star</span> 91%
+                        </span>
+</div>
+<div class="space-y-sm">
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary bg-secondary-fixed p-1 rounded-md text-lg">corporate_fare</span>
+<div>
+<span class="font-label-md text-label-md block">Mid-to-Enterprise CMOs</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Focus on ROI, efficiency, and brand safety in digital channels.</p>
+</div>
+</div>
+<div class="flex items-start gap-3">
+<span class="material-symbols-outlined text-secondary bg-secondary-fixed p-1 rounded-md text-lg">bolt</span>
+<div>
+<span class="font-label-md text-label-md block">Agile Growth Hackers</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Seeking rapid testing and scalable creative solutions.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Recommended Creative Styles -->
+<div class="md:col-span-8 glass-card p-md rounded-xl space-y-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+<h3 class="font-headline-sm text-headline-sm">Recommended Creative Styles</h3>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+<div class="p-sm bg-surface rounded-lg border border-outline-variant space-y-xs">
+<span class="font-label-md text-label-md ai-gradient-text">Motion Infographics</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Best for conveying complex technical data simply.</p>
+</div>
+<div class="p-sm bg-surface rounded-lg border border-outline-variant space-y-xs">
+<span class="font-label-md text-label-md ai-gradient-text">Studio-lit Product</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Emphasizes quality and precision craftsmanship.</p>
+</div>
+<div class="p-sm bg-surface rounded-lg border border-outline-variant space-y-xs">
+<span class="font-label-md text-label-md ai-gradient-text">Abstract Glassmorphism</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Signals future-forward, transparent operations.</p>
+</div>
+</div>
+</div>
+<!-- Suggested Brand Rules -->
+<div class="md:col-span-4 glass-card p-md rounded-xl space-y-md">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">rule</span>
+<h3 class="font-headline-sm text-headline-sm">Brand Rules</h3>
+</div>
+<ul class="space-y-sm">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-sm mt-0.5">block</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Avoid generic stock photography of people shaking hands.</p>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-error text-sm mt-0.5">block</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Do not use gradients with more than 3 distinct colors.</p>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-primary text-sm mt-0.5">check_circle</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Ensure minimum 24px padding around the main logo.</p>
+</li>
+</ul>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar from Shared Components -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-surface-container-lowest dark:bg-on-surface border-t border-outline-variant dark:border-outline shadow-lg dark:shadow-none rounded-t-xl">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim Active: scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">start</span>
+<span class="font-label-sm text-label-sm">Welcome</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim Active: scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">business_center</span>
+<span class="font-label-sm text-label-sm">Details</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim Active: scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="font-label-sm text-label-sm">Assets</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-2xl px-4 py-1 Active: scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-sm text-label-sm">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim Active: scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-sm text-label-sm">Review</span>
+</a>
+</nav>
+<script>
+        // Simulate the analysis process
+        const progressBar = document.getElementById('progress-bar');
+        const loadingState = document.getElementById('loading-state');
+        const resultsView = document.getElementById('results-view');
+        
+        let progress = 15;
+        const statusIds = ['status-1', 'status-2', 'status-3', 'status-4'];
+        let currentStatusIndex = 0;
+
+        const interval = setInterval(() => {
+            progress += Math.floor(Math.random() * 10) + 5;
+            if (progress >= 100) {
+                progress = 100;
+                clearInterval(interval);
+                setTimeout(showResults, 800);
+            }
+            progressBar.style.width = `${progress}%`;
+
+            // Update status lines
+            if (progress > 25 && currentStatusIndex === 0) updateStatus(0);
+            if (progress > 50 && currentStatusIndex === 1) updateStatus(1);
+            if (progress > 75 && currentStatusIndex === 2) updateStatus(2);
+            if (progress === 100 && currentStatusIndex === 3) updateStatus(3);
+        }, 500);
+
+        function updateStatus(index) {
+            const current = document.getElementById(statusIds[index]);
+            const next = document.getElementById(statusIds[index + 1]);
+
+            if (current) {
+                current.style.opacity = '1';
+                current.querySelector('.material-symbols-outlined').textContent = 'check_circle';
+                current.querySelector('.material-symbols-outlined').classList.remove('animate-spin');
+            }
+            if (next) {
+                next.style.opacity = '1';
+                next.querySelector('.material-symbols-outlined').textContent = 'refresh';
+                next.querySelector('.material-symbols-outlined').classList.add('animate-spin');
+            }
+            currentStatusIndex++;
+        }
+
+        function showResults() {
+            loadingState.classList.add('hidden');
+            resultsView.classList.remove('hidden');
+        }
+    </script>
+</body></html>

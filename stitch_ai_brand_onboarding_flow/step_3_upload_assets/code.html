@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Step 3: Upload Brand Assets</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(203, 213, 225, 0.5);
+        }
+        .upload-shimmer {
+            background: linear-gradient(90deg, #F1F5F9 0%, #E2E8F0 50%, #F1F5F9 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .step-indicator-active {
+            width: 24px;
+            transition: all 0.3s ease;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#372abf",
+                        "on-secondary-container": "#fffbff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-tint": "#5148d7",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4ad5f4",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#acedff",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#23005c",
+                        "secondary-container": "#8455ef",
+                        "inverse-surface": "#213145",
+                        "surface-container-low": "#eff4ff",
+                        "on-primary-fixed": "#100069",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-container": "#e5eeff",
+                        "primary-container": "#4338ca",
+                        "surface": "#f8f9ff",
+                        "outline-variant": "#c7c4d7",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-surface-variant": "#464554",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "secondary": "#6b38d4",
+                        "outline": "#777586",
+                        "on-primary-container": "#c1beff",
+                        "secondary-fixed": "#e9ddff",
+                        "primary": "#2a14b4",
+                        "tertiary-fixed-dim": "#4cd7f6",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary": "#00414d",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#e3dfff",
+                        "tertiary-container": "#005a6a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "lg": "40px",
+                        "xl": "64px",
+                        "md": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "32px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Sora"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Sora"],
+                        "headline-sm": ["Sora"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-md": ["Sora"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-lg": ["Sora"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface font-body-md antialiased overflow-x-hidden">
+<!-- Top Navigation Bar (JSON Shell) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-4">
+<button aria-label="Go back" class="p-2 rounded-full hover:bg-surface-container-low transition-colors text-primary">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm dark:text-inverse-on-surface hidden md:block">Build Your Brand Profile</h1>
+<h1 class="font-headline-sm text-headline-sm dark:text-inverse-on-surface md:hidden">Assets</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex gap-2">
+<div class="h-1.5 w-4 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-4 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-8 rounded-full bg-primary"></div>
+<div class="h-1.5 w-4 rounded-full bg-primary/20"></div>
+<div class="h-1.5 w-4 rounded-full bg-primary/20"></div>
+</div>
+<button aria-label="Close" class="p-2 rounded-full hover:bg-surface-container-low transition-colors text-on-surface-variant">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<!-- Header Section -->
+<section class="mb-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md">
+<div>
+<span class="font-label-md text-label-md text-secondary mb-2 block">Step 3 of 5</span>
+<h2 class="font-headline-lg text-headline-lg-mobile md:text-headline-lg text-on-surface tracking-tight mb-2">Upload Brand Assets</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+                        The more examples you provide, the better AI can understand your visual identity and marketing style.
+                    </p>
+</div>
+<button class="hidden md:flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-label-md shadow-lg hover:opacity-90 active:scale-95 transition-all">
+                    Analyze My Brand
+                    <span class="material-symbols-outlined text-[18px]">auto_awesome</span>
+</button>
+</div>
+</section>
+<!-- Upload Grid -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-gutter">
+<!-- Primary Left Column: Logo & Main Images -->
+<div class="lg:col-span-8 space-y-gutter">
+<!-- Logo Zone -->
+<div class="glass-card rounded-xl p-md">
+<h3 class="font-headline-sm text-headline-sm mb-4">Main Brand Logo</h3>
+<div class="relative group border-2 border-dashed border-outline-variant hover:border-primary bg-surface-container-low rounded-xl p-8 transition-all flex flex-col items-center justify-center min-h-[200px] cursor-pointer">
+<input accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer" type="file"/>
+<div class="bg-primary/10 p-4 rounded-full text-primary mb-4 group-hover:scale-110 transition-transform">
+<span class="material-symbols-outlined text-4xl">cloud_upload</span>
+</div>
+<p class="font-label-md text-label-md text-on-surface">Click to upload or drag logo here</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant mt-1">SVG, PNG, or AI (Max 5MB)</p>
+</div>
+</div>
+<!-- Brand Images Grid Zone -->
+<div class="glass-card rounded-xl p-md">
+<div class="flex items-center justify-between mb-4">
+<h3 class="font-headline-sm text-headline-sm">Brand Images <span class="text-on-surface-variant text-body-sm font-normal ml-2">(3-10 recommended)</span></h3>
+<span class="bg-surface-container-high text-primary px-3 py-1 rounded-full text-label-sm">4 Uploaded</span>
+</div>
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+<!-- Sample Preview Thumbnails -->
+<div class="aspect-square relative rounded-lg overflow-hidden border border-outline-variant group">
+<img class="w-full h-full object-cover" data-alt="A vibrant abstract studio photograph featuring clean, geometric shapes in shades of deep indigo and soft violet, reflecting a professional and innovative corporate aesthetic. The lighting is soft and diffused, creating subtle shadows that provide depth and a high-end feel consistent with a modern AI-powered tech ecosystem." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAjgABIIRPQ832_ENXygCfKikNiHQxML_iaWwsTnGOe6el1NZHbIMB5FtB17jm7HpzZpUpbq0u8dKZujnhng4R4OOv_GHSrCvtry-NFKGNM7CU_2XqwxumV2uVJD1_IvQeS_Yx4EGy1KnwEnxnkOKmjyaKXGmBMAFeBQ1V1-6LAmtYt78q_19hahrop_QCK7Dq8JXGzcUuKAcjoBQscvCG5pHF8Dc1eJwj8zo_2qRrtMQcV6OaVQZHSiwFoNL_EkO8g3KEOxWRjYkU"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+<button class="p-2 bg-white rounded-full text-error"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+<button class="p-2 bg-white rounded-full text-primary"><span class="material-symbols-outlined text-[20px]">visibility</span></button>
+</div>
+</div>
+<div class="aspect-square relative rounded-lg overflow-hidden border border-outline-variant group">
+<img class="w-full h-full object-cover" data-alt="A sleek, modern workplace setting with a focus on a glass-topped desk and high-end minimalist office accessories. The color palette consists of cool slate grays and crisp white, with a soft indigo atmospheric glow in the background to suggest a digital-first, futuristic workspace environment for professional branding." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcd_mefw1MT-RcSCy4Bgfhv27p9ObsR3vhSs1-ywwR0HfAkVIDMnwo9MiTe0kWj5SIL3B3ZZDQ9SfGMOSLwtyMh1oZ488zQQEb4Za_rIaMf2VQAc2Ia5xEwyiqCDVJZVZqiINerzp8dBbRJed51o8jhQWnuo1WpQd3tkCNJGWA_ZfqG0og2Vz60oH51M8hF4cmSB0EzWYYsab3AywVlBJm0UoskHOdJljjgCD322JAeC-KXw09NyDiHUX95ffBYebqPRzlGxKrs7A"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="p-2 bg-white rounded-full text-error"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+</div>
+<div class="aspect-square relative rounded-lg overflow-hidden border border-outline-variant group">
+<img class="w-full h-full object-cover" data-alt="A sophisticated digital artwork featuring fluid, liquid-like ribbons of purple and blue gradient light flowing across a dark charcoal background. The style is ultra-modern and technical, suggesting high performance and digital intelligence, perfectly aligned with a professional AI brand identity." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAfhG5B4z1q4evvscx9PEb9RsW5Sc6foRBogStUtStuSi5NoP09olFAo0gjlI70_msHibKSShRS1mmXPGPfFRH6JS4sczwtaq_zbvgKTDbs7D_1WPYxHhEB7B_wVj02A-W_LCPShLpZDpj9JQHhD_2h2S-73j7Z9FEdljDn7uy-SpBX734ZDRDlJIOf1pQ9NAXSXYdUKn43RdCKs0B1ZczisM8bhhbBkSKlusZ1kZguEXS4EcL1LcDh75GOOcpy8BawobM5o20Uzd4"/>
+<div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+<button class="p-2 bg-white rounded-full text-error"><span class="material-symbols-outlined text-[20px]">delete</span></button>
+</div>
+</div>
+<!-- Upload Slot / Empty State -->
+<div class="aspect-square border-2 border-dashed border-outline-variant rounded-lg flex flex-col items-center justify-center bg-surface-container-low hover:bg-surface-container transition-colors cursor-pointer group">
+<span class="material-symbols-outlined text-primary group-hover:scale-110 transition-transform">add_circle</span>
+<span class="text-label-sm mt-1">Add More</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Secondary Right Column: Optional Assets -->
+<div class="lg:col-span-4 space-y-gutter">
+<div class="glass-card rounded-xl p-md">
+<h3 class="font-headline-sm text-headline-sm mb-4">Supporting Materials</h3>
+<div class="space-y-4">
+<!-- Guideline PDF -->
+<div class="flex items-center gap-4 p-3 border border-outline-variant rounded-xl hover:bg-surface-container-low transition-colors cursor-pointer group">
+<div class="w-12 h-12 flex-shrink-0 bg-error/10 text-error rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined">picture_as_pdf</span>
+</div>
+<div class="flex-grow min-w-0">
+<p class="font-label-md text-label-md truncate">Brand Guidelines.pdf</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">4.2 MB • Optional</p>
+</div>
+<button class="text-on-surface-variant hover:text-error transition-colors"><span class="material-symbols-outlined">delete</span></button>
+</div>
+<!-- Product Zone -->
+<div class="p-4 border-2 border-dashed border-outline-variant rounded-xl hover:border-primary transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">inventory_2</span>
+<div>
+<p class="font-label-md text-label-md">Product Images</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Catalog photos &amp; cutouts</p>
+</div>
+</div>
+</div>
+<!-- Previous Ads -->
+<div class="p-4 border-2 border-dashed border-outline-variant rounded-xl hover:border-primary transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">campaign</span>
+<div>
+<p class="font-label-md text-label-md">Past Advertisements</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Performance references</p>
+</div>
+</div>
+</div>
+<!-- Social Screens -->
+<div class="p-4 border-2 border-dashed border-outline-variant rounded-xl hover:border-primary transition-all cursor-pointer">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary">screenshot</span>
+<div>
+<p class="font-label-md text-label-md">Social Media Presence</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">IG, LinkedIn, or FB screenshots</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- AI Info Tip -->
+<div class="bg-primary/5 rounded-xl p-md border border-primary/10">
+<div class="flex gap-3">
+<span class="material-symbols-outlined text-primary" data-weight="fill">info</span>
+<p class="font-body-sm text-body-sm text-primary-fixed-dim bg-primary px-3 py-2 rounded-lg text-white">
+                            Our AI engine analyzes color contrast, font pairings, and imagery sentiment to ensure generated ads feel native to your brand.
+                        </p>
+</div>
+</div>
+</div>
+</div>
+<!-- Mobile CTA (Sticky) -->
+<div class="md:hidden fixed bottom-20 left-0 w-full p-4 bg-background/80 backdrop-blur-md border-t border-outline-variant z-40">
+<button class="w-full py-4 bg-gradient-to-r from-primary to-secondary text-white rounded-xl font-headline-sm shadow-lg flex items-center justify-center gap-3">
+                Analyze My Brand
+                <span class="material-symbols-outlined">auto_awesome</span>
+</button>
+</div>
+</main>
+<!-- Bottom Navigation Bar (JSON Shell) -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-surface-container-lowest dark:bg-on-surface border-t border-outline-variant dark:border-outline shadow-lg dark:shadow-none">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">start</span>
+<span class="font-label-sm text-label-sm">Welcome</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">business_center</span>
+<span class="font-label-sm text-label-sm">Details</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-2xl px-4 py-1 scale-95 duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">cloud_upload</span>
+<span class="font-label-sm text-label-sm">Assets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-sm text-label-sm">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-colors" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-sm text-label-sm">Review</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for upload zones
+        const uploadZones = document.querySelectorAll('.border-dashed');
+        uploadZones.forEach(zone => {
+            zone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                zone.classList.add('bg-primary/5', 'border-primary');
+            });
+            zone.addEventListener('dragleave', () => {
+                zone.classList.remove('bg-primary/5', 'border-primary');
+            });
+            zone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                zone.classList.remove('bg-primary/5', 'border-primary');
+                // Potential logic for handling file drop
+            });
+        });
+
+        // Atmospheric parallax or hover effects
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.glass-card');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            cards.forEach(card => {
+                const shiftX = (x - 0.5) * 10;
+                const shiftY = (y - 0.5) * 10;
+                // card.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+            });
+        });
+    </script>
+</body></html>

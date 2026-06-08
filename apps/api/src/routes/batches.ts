@@ -39,6 +39,14 @@ export async function batchRoutes(app: FastifyInstance) {
     const batchRef = db().collection(`workspaces/${workspaceId}/batches`).doc();
     const slots = distributePlatforms(body.brief);
 
+    // Snapshot the approved brand playbook (if any) so generation has stable
+    // brand context even if the playbook changes later.
+    const playbookSnap = await db().doc(`workspaces/${workspaceId}/brandPlaybook/current`).get();
+    const playbook = playbookSnap.exists ? playbookSnap.data() : null;
+    const brandContext = playbook?.status === 'approved'
+      ? { info: playbook.info, analysis: playbook.analysis }
+      : null;
+
     // Create batch + placeholder ads in a single batched write.
     const writer = db().batch();
     writer.set(batchRef, {
@@ -47,6 +55,7 @@ export async function batchRoutes(app: FastifyInstance) {
       name: body.name,
       status: 'queued',
       brief: body.brief,
+      brandContext,
       progress: { total: body.brief.batchSize, completed: 0, failed: 0 },
       counters: { approved: 0, rejected: 0 },
       createdBy: uid,

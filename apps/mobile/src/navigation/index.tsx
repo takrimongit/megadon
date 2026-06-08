@@ -25,6 +25,15 @@ import WizardFinalReviewSummaryScreen from '../screens/wizard/WizardFinalReviewS
 import GeneratingBatchScreen from '../screens/wizard/GeneratingBatchScreen';
 import BatchGeneratingScreen from '../screens/review/BatchGeneratingScreen';
 
+import OnboardingWelcomeScreen from '../screens/onboarding/OnboardingWelcomeScreen';
+import OnboardingBrandInfoScreen from '../screens/onboarding/OnboardingBrandInfoScreen';
+import OnboardingUploadAssetsScreen from '../screens/onboarding/OnboardingUploadAssetsScreen';
+import OnboardingAnalysisScreen from '../screens/onboarding/OnboardingAnalysisScreen';
+import OnboardingReviewScreen from '../screens/onboarding/OnboardingReviewScreen';
+
+import { useOnboarding } from '../lib/OnboardingContext';
+import Splash from '../screens/auth/SplashScreen';
+
 export type RootStackParamList = {
   MainTabs: undefined;
   ReviewBatch: { batchId: string };
@@ -42,6 +51,12 @@ export type RootStackParamList = {
   WizardFinalReview: undefined;
   WizardFinalReviewSummary: { batchId: string; estimatedSeconds?: number };
   GeneratingBatch: { batchId: string };
+
+  OnboardingWelcome: undefined;
+  OnboardingBrandInfo: undefined;
+  OnboardingUploadAssets: undefined;
+  OnboardingAnalysis: undefined;
+  OnboardingReview: undefined;
 };
 
 export type TabParamList = {
@@ -73,7 +88,7 @@ function TabNavigator() {
           fontSize: 10,
           marginTop: 2,
         },
-        tabBarIcon: ({ color, size }) => {
+        tabBarIcon: ({ color }) => {
           const icons: Record<string, keyof typeof MaterialIcons.glyphMap> = {
             Dashboard: 'dashboard',
             Batches: 'layers',
@@ -92,11 +107,39 @@ function TabNavigator() {
   );
 }
 
+/** Pick the initial route based on the brand playbook status. */
+function pickInitialRoute(status: string | undefined): keyof RootStackParamList {
+  switch (status) {
+    case 'approved': return 'MainTabs';
+    case 'analyzing': return 'OnboardingAnalysis';
+    case 'ready': return 'OnboardingReview';
+    case 'draft':
+    case 'empty':
+    case 'failed':
+    default:
+      return 'OnboardingWelcome';
+  }
+}
+
 export default function Navigation() {
+  const { playbook, loading } = useOnboarding();
+  if (loading && !playbook) {
+    return <Splash label="Loading your brand…" />;
+  }
+  const initial = pickInitialRoute(playbook?.status);
+
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
+      <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initial}>
         <Stack.Screen name="MainTabs" component={TabNavigator} />
+
+        {/* Onboarding flow */}
+        <Stack.Screen name="OnboardingWelcome" component={OnboardingWelcomeScreen} />
+        <Stack.Screen name="OnboardingBrandInfo" component={OnboardingBrandInfoScreen} />
+        <Stack.Screen name="OnboardingUploadAssets" component={OnboardingUploadAssetsScreen} />
+        <Stack.Screen name="OnboardingAnalysis" component={OnboardingAnalysisScreen} />
+        <Stack.Screen name="OnboardingReview" component={OnboardingReviewScreen} />
+
         <Stack.Screen name="ReviewBatch" component={ReviewBatchScreen} />
         <Stack.Screen name="RapidReview" component={RapidReviewScreen} />
         <Stack.Screen name="AIRevision" component={AIRevisionScreen} />

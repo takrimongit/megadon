@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Analysis Complete | Brand Intelligence</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&amp;family=Hanken+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "surface-container": "#e5eeff",
+                    "on-tertiary-fixed": "#001f26",
+                    "on-secondary-container": "#fffbff",
+                    "on-background": "#0b1c30",
+                    "surface-variant": "#d3e4fe",
+                    "primary-fixed": "#e3dfff",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-secondary-fixed": "#23005c",
+                    "on-primary-container": "#c1beff",
+                    "on-surface-variant": "#464554",
+                    "on-surface": "#0b1c30",
+                    "tertiary-fixed": "#acedff",
+                    "surface-tint": "#5148d7",
+                    "error-container": "#ffdad6",
+                    "surface-dim": "#cbdbf5",
+                    "tertiary-container": "#005a6a",
+                    "tertiary": "#00414d",
+                    "primary-container": "#4338ca",
+                    "primary": "#2a14b4",
+                    "inverse-surface": "#213145",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed-dim": "#4cd7f6",
+                    "primary-fixed-dim": "#c3c0ff",
+                    "secondary": "#6b38d4",
+                    "outline-variant": "#c7c4d7",
+                    "on-error": "#ffffff",
+                    "on-secondary-fixed-variant": "#5516be",
+                    "inverse-primary": "#c3c0ff",
+                    "on-primary-fixed-variant": "#372abf",
+                    "surface": "#f8f9ff",
+                    "background": "#f8f9ff",
+                    "secondary-fixed": "#e9ddff",
+                    "outline": "#777586",
+                    "on-primary-fixed": "#100069",
+                    "on-tertiary-fixed-variant": "#004e5c",
+                    "surface-container-lowest": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface-bright": "#f8f9ff",
+                    "surface-container-low": "#eff4ff",
+                    "surface-container-highest": "#d3e4fe",
+                    "secondary-fixed-dim": "#d0bcff",
+                    "surface-container-high": "#dce9ff",
+                    "secondary-container": "#8455ef",
+                    "on-tertiary-container": "#4ad5f4",
+                    "on-error-container": "#93000a"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "md": "24px",
+                    "container-max": "1280px",
+                    "xs": "4px",
+                    "xl": "64px",
+                    "margin-mobile": "16px",
+                    "base": "8px",
+                    "margin-desktop": "32px",
+                    "gutter": "24px",
+                    "sm": "12px",
+                    "lg": "40px"
+            },
+            "fontFamily": {
+                    "headline-md": ["Sora"],
+                    "body-lg": ["Hanken Grotesk"],
+                    "headline-lg-mobile": ["Sora"],
+                    "label-md": ["Hanken Grotesk"],
+                    "headline-xl": ["Sora"],
+                    "body-md": ["Hanken Grotesk"],
+                    "label-sm": ["Hanken Grotesk"],
+                    "body-sm": ["Hanken Grotesk"],
+                    "headline-sm": ["Sora"],
+                    "headline-lg": ["Sora"]
+            },
+            "fontSize": {
+                    "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                    "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                    "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                    "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.6);
+        }
+        .pulse-animation {
+            animation: radar-pulse 4s ease-in-out infinite;
+        }
+        @keyframes radar-pulse {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+            50% { transform: scale(1.05) rotate(5deg); opacity: 1; }
+        }
+        .radar-shape {
+            clip-path: polygon(50% 0%, 90% 20%, 100% 60%, 75% 100%, 25% 100%, 0% 60%, 10% 20%);
+        }
+        .shimmer-bg {
+            background: linear-gradient(90deg, #F1F5F9 0%, #E2E8F0 50%, #F1F5F9 100%);
+            background-size: 200% 100%;
+            animation: shimmer 3s infinite linear;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md selection:bg-primary-container selection:text-white">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<button class="p-2 text-primary hover:bg-surface-container-low transition-colors rounded-full Active:scale-95 transition-all">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm text-on-surface">Build Your Brand Profile</h1>
+</div>
+<button class="p-2 text-primary hover:bg-surface-container-low transition-colors rounded-full Active:scale-95 transition-all">
+<span class="material-symbols-outlined">close</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<!-- Success Header -->
+<section class="flex flex-col items-center text-center mb-lg">
+<div class="relative mb-md">
+<div class="absolute inset-0 bg-primary/10 rounded-full blur-2xl pulse-animation"></div>
+<div class="relative w-20 h-20 bg-primary-container rounded-full flex items-center justify-center shadow-lg">
+<span class="material-symbols-outlined text-white text-4xl" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+</div>
+</div>
+<h2 class="font-headline-lg text-headline-lg mb-xs">Analysis Complete</h2>
+<p class="text-on-surface-variant max-w-2xl mx-auto font-body-lg text-body-lg">Our AI has distilled your brand's core identity. Your professional playbook is ready for deployment.</p>
+</section>
+<!-- Bento Grid Layout -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Left Column: Visual Identity & Persona -->
+<div class="md:col-span-8 flex flex-col gap-gutter">
+<!-- Brand Pulse Visualization (The Radar) -->
+<div class="glass-card rounded-xl p-md overflow-hidden relative min-h-[400px] flex flex-col items-center justify-center">
+<div class="absolute top-4 left-6">
+<h3 class="font-label-md text-label-md text-primary uppercase tracking-wider">Brand Pulse</h3>
+</div>
+<div class="relative w-64 h-64 flex items-center justify-center pulse-animation">
+<!-- Abstract Radar Layers -->
+<div class="absolute inset-0 bg-primary/5 radar-shape scale-110"></div>
+<div class="absolute inset-0 bg-secondary/10 radar-shape scale-90 border border-secondary/20"></div>
+<div class="absolute inset-0 bg-primary-container/20 radar-shape scale-75 border border-primary/30"></div>
+<div class="absolute inset-4 bg-gradient-to-br from-primary to-secondary radar-shape opacity-80 shadow-2xl"></div>
+<!-- Axis Labels -->
+<span class="absolute -top-10 font-label-sm text-label-sm text-outline">Innovative</span>
+<span class="absolute -bottom-10 font-label-sm text-label-sm text-outline">Reliable</span>
+<span class="absolute -left-16 top-1/2 -translate-y-1/2 font-label-sm text-label-sm text-outline">Agile</span>
+<span class="absolute -right-16 top-1/2 -translate-y-1/2 font-label-sm text-label-sm text-outline">Human</span>
+</div>
+<div class="mt-xl grid grid-cols-2 md:grid-cols-4 gap-md w-full">
+<div class="text-center">
+<p class="font-headline-sm text-headline-sm text-primary">94%</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Clarity</p>
+</div>
+<div class="text-center">
+<p class="font-headline-sm text-headline-sm text-secondary">88%</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Market Fit</p>
+</div>
+<div class="text-center">
+<p class="font-headline-sm text-headline-sm text-tertiary">91%</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Trust</p>
+</div>
+<div class="text-center">
+<p class="font-headline-sm text-headline-sm text-primary-container">82%</p>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Agility</p>
+</div>
+</div>
+</div>
+<!-- Tone of Voice Card -->
+<div class="glass-card rounded-xl p-md">
+<h3 class="font-label-md text-label-md text-primary uppercase tracking-wider mb-sm">Tone of Voice</h3>
+<div class="flex gap-4 items-start">
+<div class="w-12 h-12 rounded-lg bg-surface-container-high flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-primary">record_voice_over</span>
+</div>
+<div>
+<p class="font-body-lg text-body-lg italic text-on-surface mb-2">"Authoritative yet accessible, translating complex AI capabilities into human-centric value."</p>
+<p class="text-on-surface-variant text-body-md">Your brand avoids technical jargon in favor of visionary storytelling, positioning itself as a trusted partner rather than just a tool provider.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Palette & Traits -->
+<div class="md:col-span-4 flex flex-col gap-gutter">
+<!-- Color Palette Card -->
+<div class="glass-card rounded-xl p-md">
+<h3 class="font-label-md text-label-md text-primary uppercase tracking-wider mb-md">Extracted Palette</h3>
+<div class="space-y-3">
+<div class="flex items-center gap-3 p-2 hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="w-12 h-12 rounded-lg shadow-sm border border-outline-variant" style="background-color: #2a14b4;"></div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Primary Indigo</p>
+<p class="font-label-sm text-label-sm text-outline">#2A14B4</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="w-12 h-12 rounded-lg shadow-sm border border-outline-variant" style="background-color: #6b38d4;"></div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Kinetic Purple</p>
+<p class="font-label-sm text-label-sm text-outline">#6B38D4</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="w-12 h-12 rounded-lg shadow-sm border border-outline-variant" style="background-color: #00414d;"></div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Deep Teal</p>
+<p class="font-label-sm text-label-sm text-outline">#00414D</p>
+</div>
+</div>
+<div class="flex items-center gap-3 p-2 hover:bg-surface-container-low rounded-lg transition-colors">
+<div class="w-12 h-12 rounded-lg shadow-sm border border-outline-variant" style="background-color: #f8f9ff;"></div>
+<div>
+<p class="font-label-md text-label-md text-on-surface">Atmospheric White</p>
+<p class="font-label-sm text-label-sm text-outline">#F8F9FF</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Personality Traits Card -->
+<div class="glass-card rounded-xl p-md">
+<h3 class="font-label-md text-label-md text-primary uppercase tracking-wider mb-md">Personality Traits</h3>
+<div class="space-y-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">bolt</span>
+<span class="font-body-md text-body-md text-on-surface">Innovative &amp; Forward-Thinking</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">shield</span>
+<span class="font-body-md text-body-md text-on-surface">Reliable &amp; Secure Base</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="font-body-md text-body-md text-on-surface">Intelligent &amp; Sophisticated</span>
+</div>
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+<span class="font-body-md text-body-md text-on-surface">Visionary &amp; Inspirational</span>
+</div>
+</div>
+</div>
+<!-- Action Card -->
+<div class="bg-primary-container rounded-xl p-md text-white shadow-xl relative overflow-hidden group">
+<div class="absolute -right-8 -bottom-8 w-32 h-32 bg-secondary opacity-20 rounded-full blur-xl group-hover:scale-150 transition-transform duration-700"></div>
+<h4 class="font-headline-sm text-headline-sm mb-2 relative z-10">Strategy Unlocked</h4>
+<p class="font-body-sm text-body-sm text-primary-fixed mb-4 relative z-10">Your 42-page brand playbook is ready for download and review.</p>
+<button class="w-full py-3 bg-white text-primary font-label-md text-label-md rounded-lg flex items-center justify-center gap-2 hover:bg-surface-container-low transition-all Active:scale-95 shadow-md relative z-10">
+                        Review Full Playbook
+                        <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-surface-container-lowest border-t border-outline-variant rounded-t-xl shadow-lg">
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">start</span>
+<span class="font-label-sm text-label-sm">Welcome</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">business_center</span>
+<span class="font-label-sm text-label-sm">Details</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="font-label-sm text-label-sm">Assets</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">psychology</span>
+<span class="font-label-sm text-label-sm">Analysis</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-sm text-label-sm">Review</span>
+</div>
+</nav>
+<!-- Micro-interaction Script -->
+<script>
+        document.querySelectorAll('button').forEach(btn => {
+            btn.addEventListener('mousedown', () => {
+                btn.style.transform = 'scale(0.95)';
+            });
+            btn.addEventListener('mouseup', () => {
+                btn.style.transform = 'scale(1)';
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.transform = 'scale(1)';
+            });
+        });
+        
+        // Simulating subtle entrance animation
+        window.addEventListener('DOMContentLoaded', () => {
+            const cards = document.querySelectorAll('.glass-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+    </script>
+</body></html>

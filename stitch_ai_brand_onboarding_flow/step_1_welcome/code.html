@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brand AI Onboarding - Step 1</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;
+            direction: ltr;
+        }
+        
+        .glass-morphism {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .ai-gradient-text {
+            background: linear-gradient(135deg, #2a14b4 0%, #6b38d4 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero-glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(107, 56, 212, 0.15) 0%, rgba(255, 255, 255, 0) 70%);
+            filter: blur(40px);
+            z-index: -1;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#372abf",
+                        "on-secondary-container": "#fffbff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-tint": "#5148d7",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4ad5f4",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#acedff",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#23005c",
+                        "secondary-container": "#8455ef",
+                        "inverse-surface": "#213145",
+                        "surface-container-low": "#eff4ff",
+                        "on-primary-fixed": "#100069",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-container": "#e5eeff",
+                        "primary-container": "#4338ca",
+                        "surface": "#f8f9ff",
+                        "outline-variant": "#c7c4d7",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-surface-variant": "#464554",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "secondary": "#6b38d4",
+                        "outline": "#777586",
+                        "on-primary-container": "#c1beff",
+                        "secondary-fixed": "#e9ddff",
+                        "primary": "#2a14b4",
+                        "tertiary-fixed-dim": "#4cd7f6",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary": "#00414d",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#e3dfff",
+                        "tertiary-container": "#005a6a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "lg": "40px",
+                        "xl": "64px",
+                        "md": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "32px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Sora"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Sora"],
+                        "headline-sm": ["Sora"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-md": ["Sora"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-lg": ["Sora"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen selection:bg-primary-fixed selection:text-primary">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-4">
+<button class="p-2 rounded-full hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-colors active:opacity-80 active:scale-95">
+<span class="material-symbols-outlined text-primary dark:text-primary-fixed-dim">arrow_back</span>
+</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed-dim">Build Your Brand Profile</h1>
+</div>
+<button class="p-2 rounded-full hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-colors active:opacity-80 active:scale-95">
+<span class="material-symbols-outlined text-on-surface-variant dark:text-surface-variant">close</span>
+</button>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto overflow-hidden">
+<div class="flex flex-col lg:flex-row items-center justify-between gap-xl">
+<!-- Left Column: Content -->
+<div class="w-full lg:w-1/2 space-y-md relative z-10">
+<!-- Step Indicator -->
+<div class="inline-flex items-center gap-xs px-sm py-1 rounded-full bg-surface-container border border-outline-variant">
+<span class="font-label-md text-label-md text-primary">Step 1 of 5</span>
+<div class="flex gap-1 ml-2">
+<div class="w-8 h-1.5 rounded-full bg-primary"></div>
+<div class="w-4 h-1.5 rounded-full bg-surface-variant"></div>
+<div class="w-4 h-1.5 rounded-full bg-surface-variant"></div>
+<div class="w-4 h-1.5 rounded-full bg-surface-variant"></div>
+<div class="w-4 h-1.5 rounded-full bg-surface-variant"></div>
+</div>
+</div>
+<h2 class="font-headline-xl text-headline-xl md:text-headline-xl text-headline-lg-mobile text-on-surface max-w-xl">
+                    Let's teach AI about your <span class="ai-gradient-text">brand</span>
+</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-lg">
+                    Upload a few brand assets and we'll automatically generate a brand playbook that will be used for all future ad creation.
+                </p>
+<div class="pt-base flex flex-col sm:flex-row gap-base">
+<button class="px-xl py-md bg-primary text-on-primary rounded-xl font-headline-sm text-headline-sm shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform active:scale-95">
+                        Get Started
+                    </button>
+<button class="px-xl py-md border border-primary text-primary rounded-xl font-headline-sm text-headline-sm hover:bg-primary/5 transition-colors active:scale-95">
+                        Watch Demo
+                    </button>
+</div>
+<!-- Feature Pills -->
+<div class="flex flex-wrap gap-sm pt-lg">
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        Automated Branding
+                    </div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        Visual Consistency
+                    </div>
+<div class="flex items-center gap-2 text-on-surface-variant font-label-md text-label-md">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+                        AI Copywriting
+                    </div>
+</div>
+</div>
+<!-- Right Column: AI-Forward Illustration -->
+<div class="w-full lg:w-1/2 relative flex justify-center items-center py-xl">
+<div class="hero-glow -top-20 -right-20"></div>
+<div class="hero-glow -bottom-20 -left-20"></div>
+<div class="relative w-full max-w-md aspect-square">
+<!-- Glassmorphism Card 1 -->
+<div class="absolute top-0 right-0 w-48 h-48 glass-morphism rounded-3xl p-md shadow-xl float-animation z-20" style="animation-delay: -2s;">
+<div class="w-12 h-12 rounded-xl bg-secondary-container flex items-center justify-center mb-base">
+<span class="material-symbols-outlined text-on-secondary-container">psychology</span>
+</div>
+<div class="h-2 w-full bg-surface-variant rounded-full mb-2"></div>
+<div class="h-2 w-2/3 bg-surface-variant rounded-full mb-4"></div>
+<div class="flex gap-2">
+<div class="w-6 h-6 rounded-full bg-primary-container"></div>
+<div class="w-6 h-6 rounded-full bg-secondary"></div>
+</div>
+</div>
+<!-- Main Hero Image Component -->
+<div class="absolute inset-0 flex items-center justify-center">
+<div class="relative w-72 h-72 rounded-full overflow-hidden border-4 border-white shadow-2xl z-10">
+<img class="w-full h-full object-cover" data-alt="A futuristic and sophisticated digital art composition representing AI intelligence. At the center is a glowing holographic neural network interface with intricate violet and indigo light paths. The surrounding environment is a clean, minimal light-mode space with soft atmospheric blue glows. The visual style is premium and high-tech, emphasizing professional innovation through sharp geometric patterns and soft glassmorphism effects." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCK-fm0gqN2zYzEQtF72UNIqKlCJI7i7N1jxdGWZH4YU4gB5tOfMT87T-VLmWCa1Ys__8nN8AreS4u_X2hsiAwBLm3DTiWsGuQdI-7hGbKJR_JuWOOiIhbVOoKWiISMFvMvqmFtibEHZd6uBNUejKAcAYQYTaCuUE8hKw5gHZeFdgEONRM2RWBb1erg5H4dzsxZgUQuWciKA8vSUqjofpT_THtUPrAQXWLgQhmclyjFUPnRXnMBxKEcxn5PbnO5vImIytd8iYLuNc"/>
+</div>
+</div>
+<!-- Glassmorphism Card 2 -->
+<div class="absolute bottom-4 left-0 w-56 glass-morphism rounded-3xl p-md shadow-xl float-animation z-20">
+<div class="flex items-center gap-base mb-base">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+<span class="font-label-md text-label-md text-on-surface">Generating Playbook</span>
+</div>
+<div class="w-full bg-slate-200 h-1.5 rounded-full overflow-hidden">
+<div class="h-full bg-primary w-2/3"></div>
+</div>
+<p class="mt-2 font-label-sm text-label-sm text-on-surface-variant">Analyzing typography &amp; palette...</p>
+</div>
+<!-- Decorative elements -->
+<div class="absolute -z-10 w-full h-full border-2 border-dashed border-outline-variant rounded-full scale-125 opacity-40"></div>
+<div class="absolute -z-10 w-full h-full border-2 border-dashed border-outline-variant rounded-full scale-150 opacity-20"></div>
+</div>
+</div>
+</div>
+<!-- How it works section -->
+<section class="mt-xl">
+<h3 class="font-headline-sm text-headline-sm text-on-surface-variant mb-lg text-center uppercase tracking-widest">Process Preview</h3>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+<div class="p-md rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-primary mb-sm block text-3xl group-hover:scale-110 transition-transform">cloud_upload</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">1. Upload</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Provide logos and current brand images.</p>
+</div>
+<div class="p-md rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-primary mb-sm block text-3xl group-hover:scale-110 transition-transform">psychology</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">2. Analyze</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">AI extracts colors, fonts, and core style.</p>
+</div>
+<div class="p-md rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-primary mb-sm block text-3xl group-hover:scale-110 transition-transform">fact_check</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">3. Review</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Confirm your brand's AI persona and tone.</p>
+</div>
+<div class="p-md rounded-2xl bg-surface-container-lowest border border-outline-variant hover:border-primary transition-colors group">
+<span class="material-symbols-outlined text-primary mb-sm block text-3xl group-hover:scale-110 transition-transform">rocket_launch</span>
+<h4 class="font-headline-sm text-headline-sm text-on-surface mb-xs">4. Launch</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Start generating high-converting ads.</p>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-surface-container-lowest dark:bg-on-surface border-t border-outline-variant dark:border-outline shadow-lg dark:shadow-none rounded-t-xl">
+<div class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-2xl px-4 py-1 transition-all active:scale-95 duration-200 cursor-pointer">
+<span class="material-symbols-outlined">start</span>
+<span class="font-label-sm text-label-sm">Welcome</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-all active:scale-95 duration-200 cursor-not-allowed opacity-50">
+<span class="material-symbols-outlined">business_center</span>
+<span class="font-label-sm text-label-sm">Details</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-all active:scale-95 duration-200 cursor-not-allowed opacity-50">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="font-label-sm text-label-sm">Assets</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-all active:scale-95 duration-200 cursor-not-allowed opacity-50">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-sm text-label-sm">Analysis</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary dark:hover:text-primary-fixed-dim transition-all active:scale-95 duration-200 cursor-not-allowed opacity-50">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-sm text-label-sm">Review</span>
+</div>
+</nav>
+<script>
+        // Simple micro-interaction for primary button
+        document.querySelector('button.bg-primary').addEventListener('click', function() {
+            this.innerHTML = '<span class="material-symbols-outlined animate-spin mr-2">progress_activity</span>Loading...';
+            setTimeout(() => {
+                alert('Initializing brand analysis engine...');
+                this.innerHTML = 'Get Started';
+            }, 1000);
+        });
+
+        // Interactive mouse glow effect for hero section
+        const heroSection = document.querySelector('main');
+        heroSection.addEventListener('mousemove', (e) => {
+            const glow = document.querySelector('.hero-glow');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            glow.style.transform = `translate(${x * 50}px, ${y * 50}px)`;
+        });
+    </script>
+</body></html>

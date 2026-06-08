@@ -47,6 +47,12 @@ service cloud.firestore {
         allow read: if isAuthed() && isMember(wid);
         allow write: if false;
       }
+
+      // Brand playbook — members read, server writes only.
+      match /brandPlaybook/{doc} {
+        allow read: if isAuthed() && isMember(wid);
+        allow write: if false;
+      }
     }
 
     // Server-only collections

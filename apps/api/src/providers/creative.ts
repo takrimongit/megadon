@@ -42,15 +42,25 @@ async function authedJson<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const kieCreativeProvider: CreativeProvider = {
-  async kickoff(brief, platform, copy) {
-    const prompt = [
+  async kickoff(brief, platform, copy, brand) {
+    const a = brand?.analysis;
+    const promptParts = [
       `Ad creative for ${platform}.`,
       `Headline: ${copy.headline}.`,
       `Body: ${copy.body}.`,
       `Hook: ${copy.hook}.`,
       `Visual style: ${brief.creativeStyle}.`,
       `Tone: ${brief.tones.join(', ')}.`,
-    ].join(' ');
+    ];
+    if (brand?.info?.companyName) promptParts.push(`Brand: ${brand.info.companyName}.`);
+    if (a?.visualStyle) promptParts.push(`Brand visual style: ${a.visualStyle}.`);
+    if (a?.colors?.length) {
+      promptParts.push(`Brand palette: ${a.colors.map((c) => c.hex).slice(0, 5).join(', ')}.`);
+    }
+    if (a?.creativeStyles?.length) {
+      promptParts.push(`Approved creative styles: ${a.creativeStyles.join(', ')}.`);
+    }
+    const prompt = promptParts.join(' ');
 
     const json = await authedJson<CreateTaskResponse>('/jobs/createTask', {
       method: 'POST',

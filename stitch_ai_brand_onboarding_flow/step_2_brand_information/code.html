@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Brand Profile - Step 2</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&amp;family=Hanken+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid #e2e8f0;
+        }
+        .ai-gradient-btn {
+            background: linear-gradient(135deg, #4338ca 0%, #6b38d4 100%);
+            transition: all 0.3s ease;
+        }
+        .ai-gradient-btn:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px rgba(67, 56, 202, 0.2);
+        }
+        .ghost-input {
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .ghost-input:hover, .ghost-input:focus {
+            background-color: #f1f5f9;
+            border-color: #4338ca;
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(107, 56, 212, 0.2);
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#372abf",
+                        "on-secondary-container": "#fffbff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-tint": "#5148d7",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4ad5f4",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#acedff",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#23005c",
+                        "secondary-container": "#8455ef",
+                        "inverse-surface": "#213145",
+                        "surface-container-low": "#eff4ff",
+                        "on-primary-fixed": "#100069",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-container": "#e5eeff",
+                        "primary-container": "#4338ca",
+                        "surface": "#f8f9ff",
+                        "outline-variant": "#c7c4d7",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-surface-variant": "#464554",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "secondary": "#6b38d4",
+                        "outline": "#777586",
+                        "on-primary-container": "#c1beff",
+                        "secondary-fixed": "#e9ddff",
+                        "primary": "#2a14b4",
+                        "tertiary-fixed-dim": "#4cd7f6",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary": "#00414d",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#e3dfff",
+                        "tertiary-container": "#005a6a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "lg": "40px",
+                        "xl": "64px",
+                        "md": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "32px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Sora"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Sora"],
+                        "headline-sm": ["Sora"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-md": ["Sora"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-lg": ["Sora"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface min-h-screen flex flex-col">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface dark:bg-on-surface border-b border-outline-variant dark:border-outline">
+<div class="flex items-center gap-4">
+<button class="hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-colors p-2 rounded-full flex items-center justify-center text-primary dark:text-primary-fixed-dim">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="font-headline-sm text-headline-sm dark:text-inverse-on-surface">Build Your Brand Profile</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:bg-surface-container-low dark:hover:bg-inverse-surface transition-colors p-2 rounded-full flex items-center justify-center text-on-surface-variant dark:text-surface-variant">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="flex-grow pt-24 pb-32 px-margin-mobile md:px-margin-desktop flex justify-center items-start">
+<div class="w-full max-w-[640px]">
+<!-- Progress Section -->
+<div class="mb-lg">
+<div class="flex justify-between items-end mb-xs">
+<span class="font-label-md text-label-md text-primary">Step 2 of 5</span>
+<span class="font-label-sm text-label-sm text-on-surface-variant">40% Complete</span>
+</div>
+<div class="h-1 w-full bg-surface-container-high rounded-full overflow-hidden">
+<div class="h-full bg-primary-container w-[40%] transition-all duration-700 ease-out"></div>
+</div>
+</div>
+<!-- Form Header -->
+<div class="mb-md">
+<h2 class="font-headline-lg text-headline-lg mb-xs">Tell us about your company</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">This information helps our AI engine understand your brand's core identity and industry context.</p>
+</div>
+<!-- Main Form Card -->
+<div class="glass-card rounded-xl p-md shadow-sm">
+<form class="space-y-md">
+<!-- Company Name -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md block text-on-surface-variant" for="company_name">Company Name</label>
+<input class="w-full h-12 px-4 rounded-lg bg-surface-container-low ghost-input font-body-md text-on-surface" id="company_name" placeholder="e.g. Acme Creative Agency" type="text"/>
+</div>
+<!-- Website URL -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md block text-on-surface-variant" for="website">Website URL</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 text-outline material-symbols-outlined">language</span>
+<input class="w-full h-12 pl-12 pr-4 rounded-lg bg-surface-container-low ghost-input font-body-md text-on-surface" id="website" placeholder="https://www.yourbrand.com" type="url"/>
+</div>
+</div>
+<!-- Industry Select -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md block text-on-surface-variant" for="industry">Industry</label>
+<select class="w-full h-12 px-4 rounded-lg bg-surface-container-low ghost-input font-body-md text-on-surface appearance-none" id="industry">
+<option disabled="" selected="" value="">Select your industry</option>
+<option value="tech">Technology &amp; Software</option>
+<option value="fashion">Fashion &amp; Apparel</option>
+<option value="finance">Finance &amp; Fintech</option>
+<option value="health">Healthcare &amp; Wellness</option>
+<option value="food">Food &amp; Beverage</option>
+<option value="travel">Travel &amp; Hospitality</option>
+</select>
+</div>
+<!-- Short Description -->
+<div class="space-y-xs">
+<label class="font-label-md text-label-md block text-on-surface-variant" for="description">Short Business Description</label>
+<textarea class="w-full p-4 rounded-lg bg-surface-container-low ghost-input font-body-md text-on-surface resize-none" id="description" placeholder="Briefly describe what your business does, your mission, and your primary target audience..." rows="4"></textarea>
+<div class="flex justify-end">
+<span class="font-label-sm text-label-sm text-outline">0 / 250 characters</span>
+</div>
+</div>
+<!-- Action Area -->
+<div class="pt-base">
+<button class="ai-gradient-btn w-full h-12 rounded-full font-label-md text-on-primary flex items-center justify-center gap-base" type="submit">
+                            Continue
+                            <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</form>
+</div>
+<!-- AI Insight Section (Asymmetric / Bento Lite) -->
+<div class="mt-lg grid grid-cols-1 md:grid-cols-2 gap-md">
+<div class="p-md rounded-xl bg-primary-container/5 border border-primary/10 flex flex-col justify-between">
+<div>
+<div class="w-10 h-10 rounded-lg bg-primary-container text-on-primary-container flex items-center justify-center mb-base">
+<span class="material-symbols-outlined" data-weight="fill">psychology</span>
+</div>
+<h4 class="font-headline-sm text-headline-sm text-primary mb-xs">AI Optimization</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Providing a detailed description allows our AI to generate high-converting ad copy tailored specifically to your niche.</p>
+</div>
+</div>
+<div class="relative overflow-hidden rounded-xl h-48 border border-outline-variant">
+<img alt="Modern workspace" class="w-full h-full object-cover grayscale opacity-50" data-alt="A clean, professional modern office workspace featuring a sleek glass desk with high-end tech accessories. The lighting is bright and airy, reflecting a light-mode corporate aesthetic with subtle atmospheric indigos. The composition is minimalist and focuses on precision and clarity, using a soft depth-of-field to suggest a sophisticated and innovative working environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCp529v9AuaWm9gQooenwZ9N5hSXsnPcx07Tj5Ib_My-07JcKFZpuhR2eigbAv6oqnfjQBISK4rAceJL_aHQOvUKmeYrDmuOoTXA15Yxhik-vAn7WxBNLEC9jGhaqRjiezjVYh3IEA0Y4jSr6o6uXSA4t3Ak51gToUI3kqJSo5Jbnkqa6jxZh0N5Hfeaye9ZutmtEDuf80d0UllRLcTr3NY3TzPQ1HaZX84Z9Q9fHUNggq2eYxzZrCFL96sPZSp33D4fWSL3dQSsYo"/>
+<div class="absolute inset-0 bg-gradient-to-t from-surface to-transparent opacity-60"></div>
+<div class="absolute bottom-4 left-4 right-4">
+<div class="flex items-center gap-xs text-primary">
+<span class="material-symbols-outlined text-[16px]">verified</span>
+<span class="font-label-sm text-label-sm uppercase tracking-wider">Trusted Ecosystem</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Navigation Shell -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-surface-container-lowest dark:bg-on-surface border-t border-outline-variant dark:border-outline shadow-lg dark:shadow-none rounded-t-xl md:hidden">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">start</span>
+<span class="font-label-sm text-label-sm">Welcome</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-primary-container dark:bg-primary text-on-primary-container dark:text-on-primary rounded-2xl px-4 py-1 scale-95 duration-200" href="#">
+<span class="material-symbols-outlined">business_center</span>
+<span class="font-label-sm text-label-sm">Details</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="font-label-sm text-label-sm">Assets</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-sm text-label-sm">Analysis</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-surface-variant px-4 py-1 hover:text-primary transition-all" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-sm text-label-sm">Review</span>
+</a>
+</nav>
+<script>
+        // Character count micro-interaction
+        const textarea = document.getElementById('description');
+        const countSpan = textarea.nextElementSibling.querySelector('span');
+
+        textarea.addEventListener('input', () => {
+            const count = textarea.value.length;
+            countSpan.textContent = `${count} / 250 characters`;
+            if (count > 250) {
+                countSpan.classList.add('text-error');
+            } else {
+                countSpan.classList.remove('text-error');
+            }
+        });
+
+        // Simple form validation visual feedback
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            input.addEventListener('blur', () => {
+                if (input.value.trim() !== '') {
+                    input.classList.add('border-primary/20');
+                } else {
+                    input.classList.remove('border-primary/20');
+                }
+            });
+        });
+    </script>
+</body></html>

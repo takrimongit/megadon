@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Review &amp; Approve Brand Playbook</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&amp;family=Hanken+Grotesk:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed-variant": "#372abf",
+                        "on-secondary-container": "#fffbff",
+                        "surface-variant": "#d3e4fe",
+                        "surface-container-high": "#dce9ff",
+                        "on-surface": "#0b1c30",
+                        "on-primary": "#ffffff",
+                        "primary-fixed-dim": "#c3c0ff",
+                        "surface-tint": "#5148d7",
+                        "error": "#ba1a1a",
+                        "on-tertiary-container": "#4ad5f4",
+                        "on-error-container": "#93000a",
+                        "surface-container-highest": "#d3e4fe",
+                        "surface-bright": "#f8f9ff",
+                        "on-error": "#ffffff",
+                        "on-secondary": "#ffffff",
+                        "tertiary-fixed": "#acedff",
+                        "surface-dim": "#cbdbf5",
+                        "on-secondary-fixed": "#23005c",
+                        "secondary-container": "#8455ef",
+                        "inverse-surface": "#213145",
+                        "surface-container-low": "#eff4ff",
+                        "on-primary-fixed": "#100069",
+                        "error-container": "#ffdad6",
+                        "background": "#f8f9ff",
+                        "on-tertiary-fixed": "#001f26",
+                        "surface-container": "#e5eeff",
+                        "primary-container": "#4338ca",
+                        "surface": "#f8f9ff",
+                        "outline-variant": "#c7c4d7",
+                        "inverse-on-surface": "#eaf1ff",
+                        "on-tertiary": "#ffffff",
+                        "on-secondary-fixed-variant": "#5516be",
+                        "on-surface-variant": "#464554",
+                        "on-tertiary-fixed-variant": "#004e5c",
+                        "secondary": "#6b38d4",
+                        "outline": "#777586",
+                        "on-primary-container": "#c1beff",
+                        "secondary-fixed": "#e9ddff",
+                        "primary": "#2a14b4",
+                        "tertiary-fixed-dim": "#4cd7f6",
+                        "on-background": "#0b1c30",
+                        "secondary-fixed-dim": "#d0bcff",
+                        "inverse-primary": "#c3c0ff",
+                        "tertiary": "#00414d",
+                        "surface-container-lowest": "#ffffff",
+                        "primary-fixed": "#e3dfff",
+                        "tertiary-container": "#005a6a"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "xs": "4px",
+                        "sm": "12px",
+                        "base": "8px",
+                        "lg": "40px",
+                        "xl": "64px",
+                        "md": "24px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "margin-desktop": "32px",
+                        "container-max": "1280px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Sora"],
+                        "body-md": ["Hanken Grotesk"],
+                        "headline-lg-mobile": ["Sora"],
+                        "headline-sm": ["Sora"],
+                        "label-md": ["Hanken Grotesk"],
+                        "headline-md": ["Sora"],
+                        "body-sm": ["Hanken Grotesk"],
+                        "body-lg": ["Hanken Grotesk"],
+                        "label-sm": ["Hanken Grotesk"],
+                        "headline-lg": ["Sora"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["48px", {"lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                        "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "36px", "fontWeight": "600"}],
+                        "headline-sm": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["14px", {"lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600"}],
+                        "headline-md": ["24px", {"lineHeight": "32px", "fontWeight": "600"}],
+                        "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "body-lg": ["18px", {"lineHeight": "28px", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500"}],
+                        "headline-lg": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "600"}]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body {
+            background-color: #f8f9ff;
+            font-family: 'Hanken Grotesk', sans-serif;
+            color: #0b1c30;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(203, 219, 245, 0.5);
+        }
+        .ai-gradient-btn {
+            background: linear-gradient(135deg, #4338ca 0%, #6b38d4 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .ai-gradient-btn:hover {
+            box-shadow: 0 8px 24px rgba(67, 56, 202, 0.25);
+            transform: translateY(-1px);
+        }
+        .shimmer {
+            background: linear-gradient(90deg, #F1F5F9 0%, #E2E8F0 50%, #F1F5F9 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .step-active { width: 40px; }
+        .tab-transition { transition: all 0.3s ease; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface">
+<!-- TopAppBar -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-mobile md:px-margin-desktop h-16 bg-surface border-b border-outline-variant">
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary hover:bg-surface-container-low p-2 rounded-full transition-colors">arrow_back</button>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Build Your Brand Profile</h1>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-label-md text-on-surface-variant mr-4 hidden md:inline">Step 5 of 5</span>
+<button class="material-symbols-outlined text-on-surface-variant hover:bg-surface-container-low p-2 rounded-full transition-colors">close</button>
+</div>
+</header>
+<main class="pt-24 pb-32 px-margin-mobile md:px-margin-desktop max-w-container-max mx-auto">
+<!-- Header & Progress -->
+<section class="mb-lg">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-md">
+<div>
+<span class="text-primary font-label-md tracking-widest uppercase">Final Step</span>
+<h2 class="font-headline-xl text-headline-xl mt-2">Review &amp; Approve</h2>
+<p class="text-on-surface-variant font-body-lg text-body-lg mt-2 max-w-2xl">Confirm your AI brand playbook. This intelligence layer will power all future creative generations to ensure 100% brand consistency.</p>
+</div>
+<div class="flex gap-2 mb-2">
+<div class="h-2 w-8 bg-primary rounded-full"></div>
+<div class="h-2 w-8 bg-primary rounded-full"></div>
+<div class="h-2 w-8 bg-primary rounded-full"></div>
+<div class="h-2 w-8 bg-primary rounded-full"></div>
+<div class="h-2 w-12 bg-primary rounded-full"></div>
+</div>
+</div>
+</section>
+<!-- Bento Grid Layout for Playbook Sections -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-gutter">
+<!-- Brand Voice & Messaging (Large Card) -->
+<div class="md:col-span-8 flex flex-col gap-gutter">
+<!-- Brand Voice -->
+<div class="glass-card rounded-xl p-md flex flex-col relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary bg-secondary-fixed p-2 rounded-lg">record_voice_over</span>
+<h3 class="font-headline-sm text-headline-sm">Brand Voice</h3>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline text-label-sm font-label-sm hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[18px]">edit</span> Edit
+                            </button>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-primary text-primary text-label-sm font-label-sm hover:bg-primary-fixed transition-all">
+<span class="material-symbols-outlined text-[18px]">cached</span> Regenerate
+                            </button>
+</div>
+</div>
+<div class="space-y-4">
+<div class="flex flex-wrap gap-2">
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">Professional</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">Data-Driven</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">Empathetic</span>
+<span class="px-3 py-1 rounded-full bg-surface-container-high text-on-surface font-label-sm">Visionary</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant leading-relaxed">
+                            Your brand communicates with clinical precision balanced by human empathy. It avoids marketing jargon in favor of clear, actionable insights. The tone is that of a trusted senior advisor—authoritative yet accessible.
+                        </p>
+</div>
+</div>
+<!-- Messaging Style -->
+<div class="glass-card rounded-xl p-md flex flex-col relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-tertiary bg-tertiary-fixed p-2 rounded-lg">chat_bubble</span>
+<h3 class="font-headline-sm text-headline-sm">Messaging Style</h3>
+</div>
+<div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline text-label-sm font-label-sm hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[18px]">edit</span> Edit
+                            </button>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-primary text-primary text-label-sm font-label-sm hover:bg-primary-fixed transition-all">
+<span class="material-symbols-outlined text-[18px]">cached</span> Regenerate
+                            </button>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant">
+<span class="font-label-md text-primary mb-2 block">Value Proposition</span>
+<p class="font-body-sm text-body-sm">Focus on ROI, efficiency gains, and seamless integration with existing enterprise workflows.</p>
+</div>
+<div class="p-4 rounded-lg bg-surface-container-low border border-outline-variant">
+<span class="font-label-md text-primary mb-2 block">Customer Objection Handling</span>
+<p class="font-body-sm text-body-sm">Counter complexity concerns with "One-click deployment" and "AI-automated maintenance."</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Visual Guidelines (Sidebar Card) -->
+<div class="md:col-span-4 flex flex-col gap-gutter">
+<div class="glass-card rounded-xl p-md flex flex-col h-full relative group">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary bg-primary-fixed p-2 rounded-lg">palette</span>
+<h3 class="font-headline-sm text-headline-sm">Visuals</h3>
+</div>
+<div class="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="p-1.5 rounded-lg border border-outline hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px]">edit</span></button>
+</div>
+</div>
+<div class="space-y-6">
+<div>
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider block mb-3">Color Palette</span>
+<div class="flex gap-2">
+<div class="w-10 h-10 rounded-full bg-[#2a14b4] border border-outline-variant" title="Primary Indigo"></div>
+<div class="w-10 h-10 rounded-full bg-[#6b38d4] border border-outline-variant" title="Secondary Purple"></div>
+<div class="w-10 h-10 rounded-full bg-[#f8f9ff] border border-outline-variant" title="Surface White"></div>
+<div class="w-10 h-10 rounded-full bg-[#0b1c30] border border-outline-variant" title="On-Surface Slate"></div>
+</div>
+</div>
+<div>
+<span class="font-label-sm text-on-surface-variant uppercase tracking-wider block mb-3">Typography</span>
+<div class="space-y-2">
+<p class="font-headline-sm text-headline-sm text-primary">Sora Bold</p>
+<p class="font-body-md text-body-md text-on-surface">Hanken Grotesk Regular</p>
+</div>
+</div>
+<div class="relative rounded-lg overflow-hidden h-40 group/img">
+<img class="w-full h-full object-cover" data-alt="A sophisticated digital abstract background featuring flowing waves of deep indigo and vibrant purple light. The composition is minimalist and high-tech, with sharp edges and soft gradients creating a sense of depth and intelligence. The lighting is moody and cinematic, perfectly capturing the professional yet innovative brand personality of an AI-powered platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuD5U6Jf-VQ8wPN3Utmc8z5_qB1IPtdDYMWBkwV1azMyQ-8pVsJHfqBQbAzIMcWDymKICHtXACW02bhuPf7UtI59xedcQFo_zTV2zPK1ZcCV6Fmt7gGPxbmbqTmOm_oXHVlJdis6fUeqznSffpYy26-YspH-vmas2P8KMqwvxoUSwNCGDAld35eaoOK33Pq4oCr5MEaveJHQFIMutge5Tos8fPAL54_Ye6Biu_Xasty2pApz38rtkBVVXs-2Dhqowk5Lkj2_XApyAvs"/>
+<div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity">
+<span class="text-white font-label-md">Current Visual Vibe</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Approved Creative Styles (Wide Card) -->
+<div class="md:col-span-12 glass-card rounded-xl p-md group">
+<div class="flex justify-between items-center mb-6">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-secondary-container bg-secondary-fixed p-2 rounded-lg">grid_view</span>
+<h3 class="font-headline-sm text-headline-sm">Approved Creative Styles</h3>
+</div>
+<div class="flex gap-2">
+<button class="flex items-center gap-1 px-4 py-2 rounded-lg border border-outline text-label-md font-label-md hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[20px]">add</span> Add Style
+                        </button>
+</div>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+<!-- Style 1 -->
+<div class="flex flex-col gap-3">
+<div class="aspect-video rounded-lg overflow-hidden border border-outline-variant relative">
+<img class="w-full h-full object-cover" data-alt="A clean, modern technology-focused image showcasing a sleek server room with neon blue and purple glowing lights. The perspective is symmetrical and futuristic, emphasizing high-performance data processing and security. The lighting is atmospheric and technical, suggesting a trustworthy and sophisticated digital environment for corporate enterprise applications." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBwhRDfi0qLV1miGuDcAWJXGtlbJNBEwvCnOE4Sng0Wn19RQP91ndAm-vJyobqb5U7md9FDgrKQehinvd98s9a5lNW4pODGkYJsj44EB9DzVinSNq1ho7GlQQ-1kg27NpfOjx6XWYDJ14MSSwglejsYDkxWKABluUjrjQ3eIsRu2ylolp1OxoCIjpgrAsz6sHPtHmqYclwG2dWePQ39hvPglynHjchb72u8nRhdYVnSgR9dAw_eF04vhqktb263ZKo865cYzTz9fR0"/>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-md">Tech-Minimalism</span>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
+</div>
+</div>
+<!-- Style 2 -->
+<div class="flex flex-col gap-3">
+<div class="aspect-video rounded-lg overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A high-end data visualization dashboard displayed on a premium glass monitor in a bright, airy office setting. The interface features elegant charts and graphs in shades of indigo and purple against a crisp white background. The composition uses shallow depth of field to focus on the intricate data details, conveying a professional and analytical brand image." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCA8PLXbOTdEZ7Z1sIAyiBZcBY66KY6SCwJ4_rtZvEg0TBovzPEWtoNFfNWJa_6ycMrxagYM1RCvYoJGnEyKrNlVi8QjTRtFiLHJ9yWqhLTy92R-r-1hnNH6GNYAh44GvxjSv1-caLSWZZY2WgsAB4X2KZUs9WkjM5qAl2-DIsEVErVSjea4CvfgK49UXaRvnJTci4lV465bN11Pj1F0tVcBoczJ7xzk6ny-ZN4WbejtSs7MPsrTuwzK9_lcCsqK2JqbHeQVPT9CsQ"/>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-md">Data-Forward Dashboard</span>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
+</div>
+</div>
+<!-- Style 3 -->
+<div class="flex flex-col gap-3">
+<div class="aspect-video rounded-lg overflow-hidden border border-outline-variant">
+<img class="w-full h-full object-cover" data-alt="A collaborative team of diverse professionals working in a sun-drenched, modern glass-walled office space. They are interacting with high-tech digital displays, projecting a sense of human-centric innovation and synergy. The color palette is warm but grounded by the brand's signature cool tones, highlighting the trustworthy and collaborative nature of the business." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCayMiiTb7mgfxJXLStAHmOYYD_3uHXdwQ6s5Q64wrRLlcCrzhMFssbDuNv5Hmv3vq4W9DAw5shtMLZQiyxnHydG1vfTKnJq50WO9Zxr1sLD0P8GMJIxqNQ3vSWcqplSSmQArI9EB-EWi6kC8Vz7-rUkI9T0kfocFz_jUP6dGABn5LNw5OCOLgyYB6nDlyE6aWMoedbnLw2YJUqw7wYtrXcjuGanGLBZ7gcP3b7VN-fcSehiqfefVJyC-FdOxpay7ZFddcHBJbMg0A"/>
+</div>
+<div class="flex justify-between items-center">
+<span class="font-label-md">Human-Centric Innovation</span>
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
+</div>
+</div>
+</div>
+</div>
+<!-- CTA Preferences -->
+<div class="md:col-span-12 glass-card rounded-xl p-md group">
+<div class="flex justify-between items-start mb-4">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-on-primary-container bg-primary-container p-2 rounded-lg" data-weight="fill">ads_click</span>
+<h3 class="font-headline-sm text-headline-sm">CTA Preferences</h3>
+</div>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-outline text-label-sm font-label-sm opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[18px]">edit</span> Edit
+                    </button>
+</div>
+<div class="flex flex-wrap gap-4">
+<div class="flex-1 min-w-[200px] border border-outline-variant rounded-lg p-4 bg-surface-container-low">
+<span class="font-label-sm text-primary mb-1 block uppercase">Primary CTA</span>
+<p class="font-headline-sm text-headline-sm text-on-surface">Book a Demo</p>
+</div>
+<div class="flex-1 min-w-[200px] border border-outline-variant rounded-lg p-4 bg-surface-container-low">
+<span class="font-label-sm text-primary mb-1 block uppercase">Secondary CTA</span>
+<p class="font-headline-sm text-headline-sm text-on-surface">Get Whitepaper</p>
+</div>
+<div class="flex-1 min-w-[200px] border border-outline-variant rounded-lg p-4 bg-surface-container-low">
+<span class="font-label-sm text-primary mb-1 block uppercase">Trial Offer</span>
+<p class="font-headline-sm text-headline-sm text-on-surface">14-Day Free Trial</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Primary CTA Area -->
+<div class="mt-xl flex flex-col items-center gap-6 pb-20">
+<button class="ai-gradient-btn text-white px-12 py-4 rounded-full font-headline-sm text-headline-sm shadow-lg flex items-center gap-3 group" id="completeBtn">
+                Complete Setup
+                <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</button>
+<p class="text-on-surface-variant font-body-sm text-body-sm text-center max-w-md">By completing setup, you authorize our AI to generate advertising assets based on these guidelines.</p>
+</div>
+</main>
+<!-- Success Modal (Hidden by default) -->
+<div class="fixed inset-0 z-[100] flex items-center justify-center p-4 hidden" id="successModal">
+<div class="absolute inset-0 bg-on-surface/40 backdrop-blur-md"></div>
+<div class="relative bg-surface-container-lowest rounded-2xl p-lg max-w-lg w-full shadow-2xl border border-outline-variant transform scale-95 opacity-0 transition-all duration-300 ease-out" id="modalContent">
+<div class="flex flex-col items-center text-center">
+<div class="w-20 h-20 bg-primary-container rounded-full flex items-center justify-center mb-6">
+<span class="material-symbols-outlined text-[48px] text-on-primary-container" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h2 class="font-headline-lg text-headline-lg mb-4">Identity Established!</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant mb-8">Your AI now understands your brand and is ready to generate high-performing ads.</p>
+<div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+<button class="ai-gradient-btn text-white px-6 py-3 rounded-xl font-label-md">Generate First Ad</button>
+<button class="bg-surface-container text-on-surface px-6 py-3 rounded-xl font-label-md hover:bg-surface-container-high transition-colors">Go to Dashboard</button>
+</div>
+</div>
+</div>
+</div>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center h-20 px-4 pb-safe bg-surface-container-lowest border-t border-outline-variant rounded-t-xl shadow-lg md:hidden">
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">start</span>
+<span class="font-label-sm text-label-sm">Welcome</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">business_center</span>
+<span class="font-label-sm text-label-sm">Details</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">cloud_upload</span>
+<span class="font-label-sm text-label-sm">Assets</span>
+</div>
+<div class="flex flex-col items-center justify-center text-on-surface-variant px-4 py-1">
+<span class="material-symbols-outlined">psychology</span>
+<span class="font-label-sm text-label-sm">Analysis</span>
+</div>
+<div class="flex flex-col items-center justify-center bg-primary-container text-on-primary-container rounded-2xl px-4 py-1">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+<span class="font-label-sm text-label-sm">Review</span>
+</div>
+</nav>
+<script>
+        const completeBtn = document.getElementById('completeBtn');
+        const successModal = document.getElementById('successModal');
+        const modalContent = document.getElementById('modalContent');
+
+        completeBtn.addEventListener('click', () => {
+            successModal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-100');
+            }, 10);
+        });
+
+        // Close modal on escape
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !successModal.classList.contains('hidden')) {
+                successModal.classList.add('hidden');
+            }
+        });
+
+        // Add subtle hover effect to cards
+        document.querySelectorAll('.glass-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.classList.add('shadow-md');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.classList.remove('shadow-md');
+            });
+        });
+    </script>
+</body></html>

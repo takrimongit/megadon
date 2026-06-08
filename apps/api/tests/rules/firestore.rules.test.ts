@@ -180,3 +180,35 @@ describe('firestore.rules: server-only collections', () => {
     await assertFails(setDoc(doc(db, 'config/wizardOptions'), { goals: [] }));
   });
 });
+
+describe('firestore.rules: brandPlaybook (server-only writes)', () => {
+  it('members can READ the brand playbook', async () => {
+    await seedWorkspace('ws1', 'alice');
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'workspaces/ws1/brandPlaybook/current'), {
+        status: 'approved', info: { companyName: 'Acme' },
+      });
+    });
+    const db = env.authenticatedContext('alice').firestore();
+    await assertSucceeds(getDoc(doc(db, 'workspaces/ws1/brandPlaybook/current')));
+  });
+
+  it('non-members cannot read the brand playbook', async () => {
+    await seedWorkspace('ws1', 'alice');
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'workspaces/ws1/brandPlaybook/current'), {
+        status: 'approved',
+      });
+    });
+    const db = env.authenticatedContext('bob').firestore();
+    await assertFails(getDoc(doc(db, 'workspaces/ws1/brandPlaybook/current')));
+  });
+
+  it('clients cannot write the brand playbook', async () => {
+    await seedWorkspace('ws1', 'alice');
+    const db = env.authenticatedContext('alice').firestore();
+    await assertFails(
+      setDoc(doc(db, 'workspaces/ws1/brandPlaybook/current'), { status: 'approved' })
+    );
+  });
+});

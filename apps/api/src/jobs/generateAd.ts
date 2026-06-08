@@ -17,8 +17,21 @@ export async function runGenerateAd(payload: JobPayload) {
 
   const [batchSnap, adSnap] = await Promise.all([batchRef.get(), adRef.get()]);
   if (!batchSnap.exists || !adSnap.exists) throw new Error('Batch or ad missing');
-  const brief: Brief = batchSnap.data()!.brief;
+  const batchData = batchSnap.data()!;
+  const brief: Brief = batchData.brief;
+  const brandContext = batchData.brandContext ?? null;
   const ad = adSnap.data()!;
+
+  // Merge brand context into the brief if available.
+  const effectiveBrief: Brief = brandContext?.analysis
+    ? {
+        ...brief,
+        creativeStyle: brief.creativeStyle,
+        tones: brief.tones && brief.tones.length > 0
+          ? brief.tones
+          : (brandContext.analysis.toneOfVoice ? [brandContext.analysis.toneOfVoice] : brief.tones),
+      }
+    : brief;
 
   try {
     // 1. Flip batch into 'generating' on first ad.
@@ -27,11 +40,11 @@ export async function runGenerateAd(payload: JobPayload) {
     }
 
     // 2. Copy generation.
-    const copy = await kieProvider.generateCopy(brief, ad.platform as Platform);
+    const copy = await kieProvider.generateCopy(effectiveBrief, ad.platform as Platform, brandContext);
 
     // 3. Creative generation.
     const provider = getCreativeProvider();
-    const kickoff = await provider.kickoff(brief, ad.platform as Platform, copy);
+    const kickoff = await provider.kickoff(effectiveBrief, ad.platform as Platform, copy, brandContext);
 
     if (kickoff.jobId && !kickoff.assetUrl) {
       // Async — persist job id, enqueue delayed poll.

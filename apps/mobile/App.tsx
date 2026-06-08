@@ -15,6 +15,7 @@ import Navigation from './src/navigation';
 import { initFirebase } from './src/lib/firebase';
 import { AuthProvider, useAuth } from './src/lib/AuthContext';
 import { WizardProvider } from './src/lib/WizardContext';
+import { OnboardingProvider } from './src/lib/OnboardingContext';
 import AuthNavigator from './src/screens/auth/AuthNavigator';
 import Splash from './src/screens/auth/SplashScreen';
 import ErrorView from './src/components/ErrorView';
@@ -66,9 +67,11 @@ export default function App() {
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <StatusBar style="dark" />
         <AuthProvider>
-          <WizardProvider>
-            <RootGate />
-          </WizardProvider>
+          <OnboardingProvider>
+            <WizardProvider>
+              <RootGate />
+            </WizardProvider>
+          </OnboardingProvider>
         </AuthProvider>
       </View>
     </SafeAreaProvider>

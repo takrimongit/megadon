@@ -1,4 +1,9 @@
-import type { Brief, Persona, Platform } from '@megadon/types';
+import type { Brief, Persona, Platform, BrandAnalysis, BrandInfo } from '@megadon/types';
+
+export interface BrandContext {
+  info: BrandInfo;
+  analysis: BrandAnalysis;
+}
 
 export interface CopyResult {
   headline: string;
@@ -21,8 +26,8 @@ export interface CreativeJobStatus {
 }
 
 export interface CopyProvider {
-  generateCopy(brief: Brief, platform: Platform): Promise<CopyResult>;
-  reviseCopy(current: CopyResult, instruction: string, brief: Brief): Promise<CopyResult>;
+  generateCopy(brief: Brief, platform: Platform, brand?: BrandContext | null): Promise<CopyResult>;
+  reviseCopy(current: CopyResult, instruction: string, brief: Brief, brand?: BrandContext | null): Promise<CopyResult>;
   suggestPersonas(input: {
     ageGroups: string[];
     interests: string[];
@@ -31,6 +36,6 @@ export interface CopyProvider {
 }
 
 export interface CreativeProvider {
-  kickoff(brief: Brief, platform: Platform, copy: CopyResult): Promise<CreativeJobKickoff>;
+  kickoff(brief: Brief, platform: Platform, copy: CopyResult, brand?: BrandContext | null): Promise<CreativeJobKickoff>;
   pollJob(jobId: string): Promise<CreativeJobStatus>;
 }

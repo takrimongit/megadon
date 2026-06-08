@@ -5,6 +5,11 @@ import type {
   Brief,
   DashboardStats,
   WizardOptions,
+  BrandPlaybook,
+  BrandInfo,
+  BrandAsset,
+  BrandAssetType,
+  BrandAnalysis,
 } from '@megadon/types';
 import { getAuthToken, getWorkspaceId } from './firebase';
 
@@ -91,6 +96,32 @@ export const api = {
   signedUrl: (adId: string) => request<{ url: string; expiresIn: number }>(`/assets/${adId}/signed-url`),
   revisionSignedUrl: (adId: string, revisionId: string) =>
     request<{ url: string; expiresIn: number }>(`/ads/${adId}/revisions/${revisionId}/signed-url`),
+
+  // Brand Playbook (onboarding)
+  getBrandPlaybook: () => request<BrandPlaybook>('/brand/playbook'),
+  updateBrandInfo: (info: BrandInfo) =>
+    request<BrandPlaybook>('/brand/info', { method: 'PUT', body: JSON.stringify(info) }),
+  requestBrandUploadUrl: (type: BrandAssetType, mimeType: string, filename?: string) =>
+    request<{ url: string; assetPath: string; assetId: string; expiresIn: number }>(
+      '/brand/assets/signed-upload',
+      { method: 'POST', body: JSON.stringify({ type, mimeType, filename }) },
+    ),
+  registerBrandAsset: (input: { type: BrandAssetType; path: string; mimeType: string; filename?: string }) =>
+    request<BrandAsset>('/brand/assets/register', {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }),
+  deleteBrandAsset: (assetId: string) =>
+    request<{ ok: true }>(`/brand/assets/${assetId}`, { method: 'DELETE' }),
+  analyzeBrand: () =>
+    request<{ ok: true; estimatedSeconds: number }>('/brand/analyze', { method: 'POST' }),
+  updateBrandPlaybook: (updates: { analysis?: Partial<BrandAnalysis> }) =>
+    request<BrandPlaybook>('/brand/playbook', {
+      method: 'PATCH',
+      body: JSON.stringify(updates),
+    }),
+  approveBrandPlaybook: () =>
+    request<{ ok: true }>('/brand/playbook/approve', { method: 'POST' }),
 
   // Stubs
   campaignMetrics: (id: string, period: '7d' | '30d' | '90d' = '30d') =>
