@@ -138,6 +138,23 @@ export async function brandRoutes(app: FastifyInstance) {
     return ok(reply, { ok: true });
   });
 
+  // GET signed-read URL for a brand asset (15 min validity).
+  app.get('/brand/assets/:assetId/signed-url', async (req, reply) => {
+    const { assetId } = req.params as { assetId: string };
+    const ref = playbookRef(req.workspace!.id);
+    const snap = await ref.get();
+    if (!snap.exists) throw AppError.notFound();
+    const data = snap.data() as BrandPlaybook;
+    const asset = data.assets.find((a) => a.id === assetId);
+    if (!asset) throw AppError.notFound('Asset not found');
+    const [url] = await bucket().file(asset.path).getSignedUrl({
+      version: 'v4',
+      action: 'read',
+      expires: Date.now() + 15 * 60 * 1000,
+    });
+    return ok(reply, { url, expiresIn: 900 });
+  });
+
   // POST kick off analysis
   app.post('/brand/analyze', async (req, reply) => {
     const wid = req.workspace!.id;

@@ -113,6 +113,8 @@ export const api = {
     }),
   deleteBrandAsset: (assetId: string) =>
     request<{ ok: true }>(`/brand/assets/${assetId}`, { method: 'DELETE' }),
+  brandAssetSignedUrl: (assetId: string) =>
+    request<{ url: string; expiresIn: number }>(`/brand/assets/${assetId}/signed-url`),
   analyzeBrand: () =>
     request<{ ok: true; estimatedSeconds: number }>('/brand/analyze', { method: 'POST' }),
   updateBrandPlaybook: (updates: { analysis?: Partial<BrandAnalysis> }) =>

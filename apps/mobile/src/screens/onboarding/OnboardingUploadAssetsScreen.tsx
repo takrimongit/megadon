@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import { File, UploadType } from 'expo-file-system';
+import { useBrandAssetUrl } from '../../lib/useBrandAssetUrl';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { BrandAsset, BrandAssetType } from '@megadon/types';
@@ -68,6 +69,24 @@ async function uploadAsset(
     mimeType,
     filename,
   });
+}
+
+function AssetTile({ assetId, onDelete }: { assetId: string; onDelete: () => void }) {
+  const url = useBrandAssetUrl(assetId);
+  return (
+    <View style={styles.tile}>
+      {url ? (
+        <Image source={{ uri: url }} style={styles.tileImage} />
+      ) : (
+        <View style={[styles.tileImage, styles.tileLoading]}>
+          <ActivityIndicator size="small" color={Colors.primary} />
+        </View>
+      )}
+      <TouchableOpacity style={styles.deleteBtn} onPress={onDelete}>
+        <MaterialIcons name="close" size={14} color={Colors.onPrimary} />
+      </TouchableOpacity>
+    </View>
+  );
 }
 
 export default function OnboardingUploadAssetsScreen() {
@@ -160,15 +179,11 @@ export default function OnboardingUploadAssetsScreen() {
 
               <View style={styles.grid}>
                 {items.map((asset) => (
-                  <View key={asset.id} style={styles.tile}>
-                    <Image source={{ uri: `https://placehold.co/200x200/3525cd/ffffff?text=Asset` }} style={styles.tileImage} />
-                    <TouchableOpacity
-                      style={styles.deleteBtn}
-                      onPress={() => handleDelete(asset.id)}
-                    >
-                      <MaterialIcons name="close" size={14} color={Colors.onPrimary} />
-                    </TouchableOpacity>
-                  </View>
+                  <AssetTile
+                    key={asset.id}
+                    assetId={asset.id}
+                    onDelete={() => handleDelete(asset.id)}
+                  />
                 ))}
                 {showAddTile && (
                   <TouchableOpacity
@@ -253,6 +268,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.surfaceContainerHigh,
   },
   tileImage: { width: '100%', height: '100%' },
+  tileLoading: { alignItems: 'center', justifyContent: 'center' },
   deleteBtn: {
     position: 'absolute',
     top: 4,
