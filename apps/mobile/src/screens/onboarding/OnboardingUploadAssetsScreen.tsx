@@ -5,6 +5,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialIcons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import { File, UploadType } from 'expo-file-system';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { BrandAsset, BrandAssetType } from '@megadon/types';
@@ -48,14 +49,17 @@ async function uploadAsset(
 
   const signed = await api.requestBrandUploadUrl(type, mimeType, filename);
 
-  const blob = await fetch(uri).then((r) => r.blob());
-  const putResp = await fetch(signed.url, {
-    method: 'PUT',
+  // RN's fetch can't make a Blob out of a file:// URI ("Creating blobs
+  // from ArrayBuffer ... are not supported"). Use expo-file-system's
+  // native binary upload instead.
+  const file = new File(uri);
+  const result = await file.upload(signed.url, {
+    httpMethod: 'PUT',
     headers: { 'Content-Type': mimeType },
-    body: blob,
+    uploadType: UploadType.BINARY_CONTENT,
   });
-  if (!putResp.ok) {
-    throw new Error(`Upload failed (${putResp.status})`);
+  if (result.status < 200 || result.status >= 300) {
+    throw new Error(`Upload failed (${result.status}): ${result.body?.slice(0, 200) ?? ''}`);
   }
 
   return api.registerBrandAsset({
