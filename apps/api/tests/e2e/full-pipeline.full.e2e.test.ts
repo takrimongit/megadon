@@ -15,7 +15,7 @@ import type { Brief } from '@megadon/types';
 const brief: Brief = {
   goal: 'conversion',
   audience: { ageGroups: ['25–34'], interests: ['Tech'] },
-  offer: 'E2E full pipeline test — please ignore',
+  offer: 'Cloud platform 14-day free trial',
   platforms: ['instagram'],
   batchSize: 1,
   creativeStyle: 'bold',

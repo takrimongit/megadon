@@ -79,23 +79,35 @@ export async function runAnalyzeBrand(payload: JobPayload) {
 
   // Text-based analysis seeded from brand info + asset metadata.
   // Image-based vision analysis is a future enhancement.
+  //
+  // Models follow concrete examples more reliably than schema-as-template;
+  // we show one filled-in example for a different industry so the model
+  // understands "produce values like this for the user's brand".
   const system = [
-    'You build a brand intelligence playbook for an AI ad generator.',
-    'Reply with ONLY a valid JSON object — no prose, no markdown — matching this shape:',
+    'You are a brand strategist building a playbook for an AI ad generator.',
+    'Reply with ONLY a single valid JSON object — no prose, no markdown fences.',
+    'EVERY field must be populated with realistic, brand-specific values inferred from the company description and industry.',
+    '',
+    'Example output for a hypothetical premium running shoe brand:',
     '{',
-    '  "colors": [{ "hex": "#RRGGBB", "name": "string", "role": "primary|accent|neutral" }],',
-    '  "personality": ["adjective", ...],   // 4-6 items',
-    '  "toneOfVoice": "1-2 sentences",',
-    '  "visualStyle": "1-2 sentences",',
-    '  "targetAudience": "1-2 sentences",',
-    '  "creativeStyles": ["chip", ...],     // 3-5 short labels (e.g. "Bold typography", "Lifestyle photography")',
-    '  "brandRules": ["do/don\'t rule", ...], // 5-7 short imperatives',
-    '  "messagingStyle": "1-2 sentences",',
-    '  "ctaPreferences": ["CTA", ...],       // 3-5 short examples',
-    '  "confidence": { "colors": 0..1, "personality": 0..1, "toneOfVoice": 0..1, "visualStyle": 0..1, "audience": 0..1 }',
+    '  "colors": [',
+    '    {"hex": "#0F1B2D", "name": "Midnight Navy", "role": "primary"},',
+    '    {"hex": "#FF4D2E", "name": "Performance Orange", "role": "accent"},',
+    '    {"hex": "#F4F1EC", "name": "Soft Ivory", "role": "neutral"},',
+    '    {"hex": "#1B1B1B", "name": "Carbon", "role": "neutral"}',
+    '  ],',
+    '  "personality": ["Energetic", "Confident", "Authentic", "Bold"],',
+    '  "toneOfVoice": "Encouraging and direct. Speaks like a coach — concise sentences, action verbs, never preachy.",',
+    '  "visualStyle": "High-contrast lifestyle photography with motion blur, low camera angles, and bold sans-serif overlays.",',
+    '  "targetAudience": "Urban runners aged 25–40 who train 4+ times per week and value premium gear that lasts.",',
+    '  "creativeStyles": ["Motion-driven lifestyle", "Bold typography overlays", "High-contrast minimalism"],',
+    '  "brandRules": ["Always include a moving athlete in the frame", "Never use stock smiles", "Keep headlines under 7 words", "Always close with a measurable benefit"],',
+    '  "messagingStyle": "Outcome-first benefits — every ad ties a feature back to a measurable training improvement.",',
+    '  "ctaPreferences": ["Train Like a Pro", "Find Your Pace", "Join the Run Club"],',
+    '  "confidence": {"colors": 0.85, "personality": 0.9, "toneOfVoice": 0.88, "visualStyle": 0.82, "audience": 0.9}',
     '}',
-    'Pick 4-6 plausible brand colors based on the industry conventions.',
-    'Be specific and grounded; avoid generic filler.',
+    '',
+    'Now produce the same structure — fully populated, no empty arrays, no echoing of the placeholder text — for the user\'s brand below.',
   ].join('\n');
 
   const user = [
@@ -108,6 +120,15 @@ export async function runAnalyzeBrand(payload: JobPayload) {
 
   try {
     const analysis = await callKieJson<BrandAnalysis>(AnalysisSchema as any, system, user);
+
+    // Sanity-check: a "successful" call that comes back with no colors and
+    // no personality means the model echoed the schema instead of filling
+    // it. Mark as failed so we can re-run; better than approving an empty
+    // playbook.
+    if (analysis.colors.length === 0 && analysis.personality.length === 0) {
+      throw new Error('Model returned empty playbook (no colors or personality)');
+    }
+
     await ref.update({
       analysis,
       status: 'ready',
