@@ -196,7 +196,7 @@ export default function BatchGeneratingScreen() {
               return (
                 <View key={ad.id} style={[styles.previewTile, hasAsset && styles.previewTileReady]}>
                   {hasAsset ? (
-                    <AdImage adId={ad.id} hasAsset style={styles.previewImage} fallbackIconSize={20} />
+                    <AdImage adId={ad.id} hasAsset assetVersion={ad.assetPath} style={styles.previewImage} fallbackIconSize={20} />
                   ) : (
                     <MaterialIcons name="hourglass-empty" size={20} color={Colors.outlineVariant + '66'} />
                   )}

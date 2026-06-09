@@ -151,6 +151,7 @@ export default function AIRevisionScreen() {
                 <AdImage
                   adId={ad.id}
                   hasAsset={!!ad.assetPath}
+                  assetVersion={ad.assetPath}
                   style={styles.adImage}
                   imageStyle={styles.adImageInner}
                   fallbackIconSize={48}

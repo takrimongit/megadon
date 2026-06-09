@@ -141,6 +141,7 @@ export default function RapidReviewScreen() {
               <AdImage
                 adId={currentAd.id}
                 hasAsset={!!currentAd.assetPath}
+                assetVersion={currentAd.assetPath}
                 style={StyleSheet.absoluteFill as never}
                 fallbackIconSize={48}
               />

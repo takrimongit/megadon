@@ -25,6 +25,12 @@ interface Props {
   zoomable?: boolean;
   /** Optional pre-fetched URL to display instead of fetching by adId. */
   urlOverride?: string | null;
+  /**
+   * Asset version key — typically `ad.assetPath`. When this changes
+   * (e.g. a revision was accepted and replaced the underlying asset),
+   * the signed-URL cache is busted and a fresh URL is fetched.
+   */
+  assetVersion?: string | null;
 }
 
 /**
@@ -39,8 +45,9 @@ export default function AdImage({
   fallbackIconSize = 32,
   zoomable = false,
   urlOverride,
+  assetVersion,
 }: Props) {
-  const fetched = useAdImageUrl(adId, hasAsset && urlOverride == null);
+  const fetched = useAdImageUrl(adId, hasAsset && urlOverride == null, assetVersion);
   const url = urlOverride ?? fetched;
   const [zoomOpen, setZoomOpen] = useState(false);
 

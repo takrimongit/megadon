@@ -159,6 +159,7 @@ export default function ReviewBatchScreen() {
                 <AdImage
                   adId={item.id}
                   hasAsset={hasAsset}
+                  assetVersion={item.assetPath}
                   style={styles.adPlaceholder}
                   fallbackIconSize={32}
                 />
