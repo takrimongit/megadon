@@ -29,31 +29,33 @@ export async function runReviseAd(payload: JobPayload) {
   const batchRef = adRef.parent.parent!;
   const batchId = batchRef.id;
   const batchSnap = await batchRef.get();
-  const brief = batchSnap.data()!.brief;
+  const batchData = batchSnap.data()!;
+  const brief = batchData.brief;
+  const brand = batchData.brandContext ?? null;
 
   try {
-    // 1. Revise copy.
+    // 1. Revise copy — pass brand so tone/rules/personality are preserved.
     const current: CopyResult = {
       headline: ad.headline ?? '',
       body: ad.body ?? '',
       hook: ad.hook ?? '',
       cta: ad.cta ?? '',
     };
-    const revised = await kieProvider.reviseCopy(current, rev.instruction, brief);
+    const revised = await kieProvider.reviseCopy(current, rev.instruction, brief, brand);
     await revRef.update({
       headline: revised.headline,
       body: revised.body,
       cta: revised.cta,
     });
 
-    // 2. Regenerate creative using revised copy + the user's instruction.
+    // 2. Regenerate creative. The prompt builder bakes in palette + brand
+    // identity again, plus the user's revision note as a final directive,
+    // so the new image stays on-brand.
     const provider = getCreativeProvider();
     const platform = (ad.platform as Platform) ?? 'facebook';
-    const revisedBrief = {
-      ...brief,
-      creativeStyle: `${brief.creativeStyle}. Revision note: ${rev.instruction}`,
-    };
-    const kickoff = await provider.kickoff(revisedBrief, platform, revised);
+    const kickoff = await provider.kickoff(brief, platform, revised, brand, {
+      revisionInstruction: rev.instruction,
+    });
 
     if (kickoff.jobId && !kickoff.assetUrl) {
       // Async — store provider job id, enqueue poll.

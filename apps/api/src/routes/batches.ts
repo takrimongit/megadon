@@ -44,7 +44,7 @@ export async function batchRoutes(app: FastifyInstance) {
     const playbookSnap = await db().doc(`workspaces/${workspaceId}/brandPlaybook/current`).get();
     const playbook = playbookSnap.exists ? playbookSnap.data() : null;
     const brandContext = playbook?.status === 'approved'
-      ? { info: playbook.info, analysis: playbook.analysis }
+      ? { info: playbook.info, analysis: playbook.analysis, assets: playbook.assets ?? [] }
       : null;
 
     // Create batch + placeholder ads in a single batched write.

@@ -1,6 +1,7 @@
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import type { CreativeProvider } from './types.js';
+import { buildImagePrompt } from './brandPrompt.js';
 
 // kie.ai image generation is async:
 //   POST /api/v1/jobs/createTask  → { taskId }
@@ -42,25 +43,14 @@ async function authedJson<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 export const kieCreativeProvider: CreativeProvider = {
-  async kickoff(brief, platform, copy, brand) {
-    const a = brand?.analysis;
-    const promptParts = [
-      `Ad creative for ${platform}.`,
-      `Headline: ${copy.headline}.`,
-      `Body: ${copy.body}.`,
-      `Hook: ${copy.hook}.`,
-      `Visual style: ${brief.creativeStyle}.`,
-      `Tone: ${brief.tones.join(', ')}.`,
-    ];
-    if (brand?.info?.companyName) promptParts.push(`Brand: ${brand.info.companyName}.`);
-    if (a?.visualStyle) promptParts.push(`Brand visual style: ${a.visualStyle}.`);
-    if (a?.colors?.length) {
-      promptParts.push(`Brand palette: ${a.colors.map((c) => c.hex).slice(0, 5).join(', ')}.`);
-    }
-    if (a?.creativeStyles?.length) {
-      promptParts.push(`Approved creative styles: ${a.creativeStyles.join(', ')}.`);
-    }
-    const prompt = promptParts.join(' ');
+  async kickoff(brief, platform, copy, brand, opts) {
+    const prompt = buildImagePrompt({
+      brief,
+      platform,
+      copy,
+      brand,
+      revisionInstruction: opts?.revisionInstruction,
+    });
 
     const json = await authedJson<CreateTaskResponse>('/jobs/createTask', {
       method: 'POST',

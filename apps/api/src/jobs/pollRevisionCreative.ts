@@ -1,6 +1,7 @@
 import { db, bucket } from '../lib/firebase.js';
 import { getCreativeProvider } from '../providers/creative.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
+import { compositeBrandOverlay, fetchBrandLogo } from './composite.js';
 
 const MAX_ATTEMPTS = 60; // ~30 min at 30s intervals
 
@@ -76,11 +77,39 @@ export async function downloadRevisionAsset(
 ): Promise<string> {
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`Asset download failed: ${resp.status}`);
-  const buf = Buffer.from(await resp.arrayBuffer());
-  const ext = url.split('.').pop()?.split('?')[0] ?? 'jpg';
-  const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/rev-${revisionId}.${ext}`;
-  await bucket().file(path).save(buf, {
-    metadata: { contentType: resp.headers.get('content-type') ?? 'image/jpeg' },
+  const bgBuf = Buffer.from(await resp.arrayBuffer());
+
+  // Re-fetch batch + revision to access brand + revised copy for compositing.
+  const batchSnap = await db().doc(`workspaces/${workspaceId}/batches/${batchId}`).get();
+  const brand = batchSnap.data()?.brandContext ?? null;
+  const logo = await fetchBrandLogo(brand);
+
+  // The revision doc holds the new copy. Look it up via collectionGroup
+  // to avoid having to plumb adPath through every caller.
+  const adSnap = await db()
+    .collectionGroup('ads')
+    .where('id', '==', adId)
+    .where('workspaceId', '==', workspaceId)
+    .limit(1)
+    .get();
+  let revHeadline = '';
+  let revCta = '';
+  if (!adSnap.empty) {
+    const revSnap = await adSnap.docs[0].ref.collection('revisions').doc(revisionId).get();
+    revHeadline = revSnap.data()?.headline ?? '';
+    revCta = revSnap.data()?.cta ?? '';
+  }
+
+  const out = await compositeBrandOverlay({
+    background: bgBuf,
+    brand,
+    logo,
+    copy: { headline: revHeadline, cta: revCta },
+  });
+
+  const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/rev-${revisionId}.${out.ext}`;
+  await bucket().file(path).save(out.buffer, {
+    metadata: { contentType: out.contentType },
   });
   return path;
 }

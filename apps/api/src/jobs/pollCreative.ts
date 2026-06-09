@@ -1,7 +1,8 @@
-import { db } from '../lib/firebase.js';
+import { db, bucket } from '../lib/firebase.js';
 import { getCreativeProvider } from '../providers/creative.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
-import { downloadToStorage, finalizeProgress } from './generateAd.js';
+import { finalizeProgress } from './generateAd.js';
+import { compositeBrandOverlay, fetchBrandLogo } from './composite.js';
 
 const MAX_ATTEMPTS = 60; // ~30 min at 30s intervals
 
@@ -51,7 +52,27 @@ export async function runPollCreative(payload: JobPayload) {
   }
 
   if (!status.assetUrl) return;
-  const assetPath = await downloadToStorage(status.assetUrl, workspaceId, batchId, adId);
+
+  // Re-fetch batch to get brand context, and use the copy already on the ad doc.
+  const batchSnap = await batchRef.get();
+  const brand = batchSnap.data()?.brandContext ?? null;
+  const logo = await fetchBrandLogo(brand);
+
+  const resp = await fetch(status.assetUrl);
+  if (!resp.ok) throw new Error(`Asset download failed: ${resp.status}`);
+  const bgBuf = Buffer.from(await resp.arrayBuffer());
+  const out = await compositeBrandOverlay({
+    background: bgBuf,
+    brand,
+    logo,
+    copy: { headline: ad.headline, cta: ad.cta },
+  });
+
+  const assetPath = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/v1.${out.ext}`;
+  await bucket().file(assetPath).save(out.buffer, {
+    metadata: { contentType: out.contentType },
+  });
+
   await adRef.update({
     assetPath,
     score: 60 + Math.floor(Math.random() * 35),

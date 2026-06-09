@@ -15,12 +15,13 @@
     "test:e2e:full": "vitest run --config vitest.e2e.full.config.ts"
   },
   "dependencies": {
-    "@google-cloud/tasks": "^5.5.1",
-    "@google-cloud/storage": "^7.14.0",
-    "@megadon/types": "*",
-    "fastify": "^5.1.0",
     "@fastify/cors": "^10.0.1",
     "@fastify/helmet": "^12.0.1",
+    "@google-cloud/storage": "^7.14.0",
+    "@google-cloud/tasks": "^5.5.1",
+    "@megadon/types": "*",
+    "@napi-rs/canvas": "^0.1.100",
+    "fastify": "^5.1.0",
     "firebase-admin": "^13.0.1",
     "openai": "^4.73.0",
     "pino": "^9.5.0",

@@ -1,8 +1,9 @@
-import type { Brief, Persona, Platform, BrandAnalysis, BrandInfo } from '@megadon/types';
+import type { Brief, Persona, Platform, BrandAnalysis, BrandInfo, BrandAsset } from '@megadon/types';
 
 export interface BrandContext {
   info: BrandInfo;
   analysis: BrandAnalysis;
+  assets?: BrandAsset[];
 }
 
 export interface CopyResult {
@@ -35,7 +36,20 @@ export interface CopyProvider {
   }): Promise<Persona[]>;
 }
 
+export interface CreativeKickoffOptions {
+  /** When set, the prompt includes this as a "revision directive"
+   * appended after all brand sections — so on-brand constraints
+   * still apply and the model just steers per the user's note. */
+  revisionInstruction?: string;
+}
+
 export interface CreativeProvider {
-  kickoff(brief: Brief, platform: Platform, copy: CopyResult, brand?: BrandContext | null): Promise<CreativeJobKickoff>;
+  kickoff(
+    brief: Brief,
+    platform: Platform,
+    copy: CopyResult,
+    brand?: BrandContext | null,
+    opts?: CreativeKickoffOptions,
+  ): Promise<CreativeJobKickoff>;
   pollJob(jobId: string): Promise<CreativeJobStatus>;
 }

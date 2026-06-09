@@ -2,6 +2,8 @@ import { db, bucket, FieldValue } from '../lib/firebase.js';
 import { kieProvider } from '../providers/kie.js';
 import { getCreativeProvider } from '../providers/creative.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
+import { compositeBrandOverlay, fetchBrandLogo } from './composite.js';
+import type { BrandContext, CopyResult } from '../providers/types.js';
 import type { Brief, Platform } from '@megadon/types';
 
 interface JobPayload {
@@ -63,8 +65,15 @@ export async function runGenerateAd(payload: JobPayload) {
 
     if (!kickoff.assetUrl) throw new Error('Provider returned neither asset nor job id');
 
-    // 4. Download + upload to storage.
-    const assetPath = await downloadToStorage(kickoff.assetUrl, workspaceId, batchId, adId);
+    // 4. Download, composite brand overlay, upload.
+    const assetPath = await downloadAndComposite(
+      kickoff.assetUrl,
+      workspaceId,
+      batchId,
+      adId,
+      copy,
+      brandContext,
+    );
 
     // 5. Patch ad doc.
     await adRef.update({
@@ -100,21 +109,48 @@ export async function runGenerateAd(payload: JobPayload) {
   }
 }
 
+/**
+ * Downloads the FLUX-generated background, composites the brand logo +
+ * headline + CTA on top, and stores the result. Returns the GCS path.
+ */
+async function downloadAndComposite(
+  url: string,
+  workspaceId: string,
+  batchId: string,
+  adId: string,
+  copy: CopyResult,
+  brand?: BrandContext | null,
+): Promise<string> {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Asset download failed: ${resp.status}`);
+  const bgBuf = Buffer.from(await resp.arrayBuffer());
+
+  const logo = await fetchBrandLogo(brand);
+  const out = await compositeBrandOverlay({
+    background: bgBuf,
+    brand,
+    logo,
+    copy,
+  });
+
+  const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/v1.${out.ext}`;
+  await bucket().file(path).save(out.buffer, {
+    metadata: { contentType: out.contentType },
+  });
+  return path;
+}
+
+// Kept as a re-export for callers that want raw download (pollCreative
+// re-exports it but now also composites internally).
 async function downloadToStorage(
   url: string,
   workspaceId: string,
   batchId: string,
   adId: string,
 ): Promise<string> {
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Asset download failed: ${resp.status}`);
-  const buf = Buffer.from(await resp.arrayBuffer());
-  const ext = url.split('.').pop()?.split('?')[0] ?? 'jpg';
-  const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/v1.${ext}`;
-  await bucket().file(path).save(buf, {
-    metadata: { contentType: resp.headers.get('content-type') ?? 'image/jpeg' },
-  });
-  return path;
+  return downloadAndComposite(url, workspaceId, batchId, adId, {
+    headline: '', body: '', hook: '', cta: '',
+  }, null);
 }
 
 async function finalizeProgress(batchRef: FirebaseFirestore.DocumentReference) {
