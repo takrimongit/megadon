@@ -12,4 +12,4 @@ process.env.WORKER_URL = 'http://localhost:0';
 // Provider keys: not required; we mock the OpenAI module per-test.
 process.env.KIE_API_KEY = 'test-key';
 process.env.KIE_CHAT_MODEL = 'gpt-5-2';
-process.env.KIE_IMAGE_MODEL = 'google/nano-banana';
+process.env.KIE_IMAGE_MODEL = 'flux-2/pro-text-to-image';

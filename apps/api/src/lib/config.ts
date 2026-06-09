@@ -17,7 +17,7 @@ export const config = {
   // - Images use kie.ai's async task pattern at https://api.kie.ai/api/v1/jobs/*
   kieKey: process.env.KIE_API_KEY ?? '',
   kieChatModel: process.env.KIE_CHAT_MODEL ?? 'gpt-5-2',
-  kieImageModel: process.env.KIE_IMAGE_MODEL ?? 'google/nano-banana',
+  kieImageModel: process.env.KIE_IMAGE_MODEL ?? 'flux-2/pro-text-to-image',
 
   emulators: {
     auth: process.env.FIREBASE_AUTH_EMULATOR_HOST,
