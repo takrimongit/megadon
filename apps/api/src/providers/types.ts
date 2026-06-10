@@ -53,3 +53,15 @@ export interface CreativeProvider {
   ): Promise<CreativeJobKickoff>;
   pollJob(jobId: string): Promise<CreativeJobStatus>;
 }
+
+/** Video provider — async only. Returns mp4 URL. */
+export interface VideoProvider {
+  kickoff(
+    brief: Brief,
+    platform: Platform,
+    copy: CopyResult,
+    brand?: BrandContext | null,
+    opts?: CreativeKickoffOptions,
+  ): Promise<CreativeJobKickoff>;
+  pollJob(jobId: string): Promise<CreativeJobStatus>;
+}

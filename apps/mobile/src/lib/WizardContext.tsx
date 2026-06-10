@@ -1,6 +1,7 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import type {
   CampaignGoal,
+  MediaType,
   Persona,
   Platform,
   VisualStyle,
@@ -18,6 +19,7 @@ export interface WizardState {
   batchSize: number;
   creativeStyle: VisualStyle | null;
   tones: string[];
+  mediaType: MediaType;
   options: WizardOptions | null;
 }
 
@@ -32,6 +34,7 @@ const initialState: WizardState = {
   batchSize: 10,
   creativeStyle: null,
   tones: [],
+  mediaType: 'image',
   options: null,
 };
 

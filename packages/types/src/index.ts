@@ -36,6 +36,9 @@ export type CampaignGoal = z.infer<typeof CampaignGoal>;
 export const VisualStyle = z.enum(['bold', 'minimal', 'warm', 'playful']);
 export type VisualStyle = z.infer<typeof VisualStyle>;
 
+export const MediaType = z.enum(['image', 'video']);
+export type MediaType = z.infer<typeof MediaType>;
+
 // ============ Entities ============
 
 export const User = z.object({
@@ -85,6 +88,8 @@ export const Brief = z.object({
   batchSize: z.number().int().min(1).max(50),
   creativeStyle: VisualStyle,
   tones: z.array(z.string()),
+  /** What kind of asset to generate. Defaults to image for back-compat. */
+  mediaType: MediaType.default('image'),
 });
 export type Brief = z.infer<typeof Brief>;
 
@@ -127,6 +132,8 @@ export const Ad = z.object({
   format: z.string(),
   status: AdStatus,
   score: z.number().optional(),
+  mediaType: MediaType.default('image'),
+  /** GCS path for the final asset (jpg for image, mp4 for video). */
   assetPath: z.string().optional(),
   providerJobId: z.string().optional(),
   error: z.object({ code: z.string(), message: z.string() }).optional(),

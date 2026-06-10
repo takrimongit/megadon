@@ -127,7 +127,7 @@ jobs:
             --region="${REGION}" \
             --no-allow-unauthenticated \
             --service-account="worker-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image" \
+            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite" \
             --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
           WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
@@ -156,7 +156,7 @@ jobs:
             --region="${REGION}" \
             --allow-unauthenticated \
             --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image" \
+            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite" \
             --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
 
@@ -273,7 +273,7 @@ jobs:
             --region="${REGION}" \
             --no-allow-unauthenticated \
             --service-account="worker-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image" \
+            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite" \
             --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
           WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
@@ -302,7 +302,7 @@ jobs:
             --region="${REGION}" \
             --allow-unauthenticated \
             --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image" \
+            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite" \
             --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
 

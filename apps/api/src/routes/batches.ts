@@ -63,6 +63,7 @@ export async function batchRoutes(app: FastifyInstance) {
       updatedAt: now,
     });
 
+    const mediaType = body.brief.mediaType ?? 'image';
     const adRefs = slots.map(({ platform, format }) => {
       const adRef = batchRef.collection('ads').doc();
       writer.set(adRef, {
@@ -71,6 +72,7 @@ export async function batchRoutes(app: FastifyInstance) {
         workspaceId,
         platform,
         format,
+        mediaType,
         status: 'generating',
         history: [],
         createdAt: now,

@@ -1,6 +1,7 @@
 import { db, bucket, FieldValue } from '../lib/firebase.js';
 import { kieProvider } from '../providers/kie.js';
 import { getCreativeProvider } from '../providers/creative.js';
+import { getVideoProvider } from '../providers/video.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { compositeBrandOverlay, fetchBrandLogo } from './composite.js';
 import type { BrandContext, CopyResult } from '../providers/types.js';
@@ -44,36 +45,40 @@ export async function runGenerateAd(payload: JobPayload) {
     // 2. Copy generation.
     const copy = await kieProvider.generateCopy(effectiveBrief, ad.platform as Platform, brandContext);
 
-    // 3. Creative generation.
-    const provider = getCreativeProvider();
+    // 3. Creative generation — dispatch on mediaType.
+    const mediaType: 'image' | 'video' = ad.mediaType ?? effectiveBrief.mediaType ?? 'image';
+    const provider = mediaType === 'video' ? getVideoProvider() : getCreativeProvider();
     const kickoff = await provider.kickoff(effectiveBrief, ad.platform as Platform, copy, brandContext);
 
     if (kickoff.jobId && !kickoff.assetUrl) {
-      // Async — persist job id, enqueue delayed poll.
+      // Async — persist job id, enqueue delayed poll. Video jobs use a
+      // longer initial delay because Veo typically takes 30-60s.
       await adRef.update({
         providerJobId: kickoff.jobId,
         ...copy,
         updatedAt: new Date().toISOString(),
       });
       await enqueueJob({
-        path: '/internal/jobs/poll-creative',
+        path: mediaType === 'video' ? '/internal/jobs/poll-video' : '/internal/jobs/poll-creative',
         payload: { workspaceId, batchId, adId, attempt: 1 },
-        delaySeconds: 10,
+        delaySeconds: mediaType === 'video' ? 30 : 10,
       });
       return;
     }
 
     if (!kickoff.assetUrl) throw new Error('Provider returned neither asset nor job id');
 
-    // 4. Download, composite brand overlay, upload.
-    const assetPath = await downloadAndComposite(
-      kickoff.assetUrl,
-      workspaceId,
-      batchId,
-      adId,
-      copy,
-      brandContext,
-    );
+    // 4. Download. Image gets brand composited; video is stored as-is.
+    const assetPath = mediaType === 'video'
+      ? await downloadVideoToStorage(kickoff.assetUrl, workspaceId, batchId, adId)
+      : await downloadAndComposite(
+          kickoff.assetUrl,
+          workspaceId,
+          batchId,
+          adId,
+          copy,
+          brandContext,
+        );
 
     // 5. Patch ad doc.
     await adRef.update({
@@ -136,6 +141,27 @@ async function downloadAndComposite(
   const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/v1.${out.ext}`;
   await bucket().file(path).save(out.buffer, {
     metadata: { contentType: out.contentType },
+  });
+  return path;
+}
+
+/**
+ * Downloads a video file (Veo mp4) and stores it as-is. No compositing
+ * because Veo embeds motion + may include text; the mobile UI displays
+ * the headline/CTA alongside the player.
+ */
+export async function downloadVideoToStorage(
+  url: string,
+  workspaceId: string,
+  batchId: string,
+  adId: string,
+): Promise<string> {
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`Video download failed: ${resp.status}`);
+  const buf = Buffer.from(await resp.arrayBuffer());
+  const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/v1.mp4`;
+  await bucket().file(path).save(buf, {
+    metadata: { contentType: resp.headers.get('content-type') ?? 'video/mp4' },
   });
   return path;
 }

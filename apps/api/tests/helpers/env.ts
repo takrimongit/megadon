@@ -13,3 +13,4 @@ process.env.WORKER_URL = 'http://localhost:0';
 process.env.KIE_API_KEY = 'test-key';
 process.env.KIE_CHAT_MODEL = 'gpt-5-2';
 process.env.KIE_IMAGE_MODEL = 'flux-2/pro-text-to-image';
+process.env.KIE_VIDEO_MODEL = 'veo3_lite';

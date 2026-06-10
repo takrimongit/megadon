@@ -18,6 +18,8 @@ export const config = {
   kieKey: process.env.KIE_API_KEY ?? '',
   kieChatModel: process.env.KIE_CHAT_MODEL ?? 'gpt-5-2',
   kieImageModel: process.env.KIE_IMAGE_MODEL ?? 'flux-2/pro-text-to-image',
+  // Veo 3.1 variants: veo3 (flagship) | veo3_fast (light) | veo3_lite (cheapest)
+  kieVideoModel: process.env.KIE_VIDEO_MODEL ?? 'veo3_lite',
 
   emulators: {
     auth: process.env.FIREBASE_AUTH_EMULATOR_HOST,

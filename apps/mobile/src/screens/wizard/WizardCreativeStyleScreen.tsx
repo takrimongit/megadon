@@ -43,6 +43,30 @@ export default function WizardCreativeStyleScreen() {
         <Text style={styles.title}>Define your creative style</Text>
         <Text style={styles.subtitle}>This guides the visual language and tone AI uses to generate your ads.</Text>
 
+        <Text style={styles.fieldLabel}>MEDIA TYPE</Text>
+        <View style={styles.mediaRow}>
+          {(['image', 'video'] as const).map((m) => {
+            const selected = state.mediaType === m;
+            return (
+              <TouchableOpacity
+                key={m}
+                style={[styles.mediaCard, selected && styles.mediaCardSelected]}
+                onPress={() => update({ mediaType: m })}
+                activeOpacity={0.85}
+              >
+                <Text style={[styles.mediaLabel, selected && styles.mediaLabelSelected]}>
+                  {m === 'image' ? 'Static Image' : 'Video (Veo 3.1 Light)'}
+                </Text>
+                <Text style={styles.mediaHint}>
+                  {m === 'image'
+                    ? 'FLUX 2 Pro — fastest, lowest cost'
+                    : '6s vertical/horizontal video — higher cost'}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
         <Text style={styles.fieldLabel}>VISUAL STYLE</Text>
         <View style={styles.styleGrid}>
           {visualStyles.map((s) => {
@@ -102,6 +126,20 @@ const styles = StyleSheet.create({
   title: { ...Typography.headlineMd, color: Colors.onSurface },
   subtitle: { ...Typography.bodyBase, color: Colors.onSurfaceVariant },
   fieldLabel: { ...Typography.labelCaps, color: Colors.onSurfaceVariant, textTransform: 'uppercase' },
+  mediaRow: { flexDirection: 'row', gap: Spacing.sm },
+  mediaCard: {
+    flex: 1,
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: Radius.lg,
+    borderWidth: 1.5,
+    borderColor: Colors.outlineVariant,
+    padding: Spacing.md,
+    gap: 4,
+  },
+  mediaCardSelected: { borderColor: Colors.primary, backgroundColor: Colors.primary + '0F' },
+  mediaLabel: { ...Typography.titleMd, color: Colors.onSurface },
+  mediaLabelSelected: { color: Colors.primary },
+  mediaHint: { ...Typography.labelCaps, color: Colors.onSurfaceVariant },
   styleGrid: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   styleCard: {
     width: '47%',

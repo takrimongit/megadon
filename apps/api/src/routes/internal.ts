@@ -6,6 +6,7 @@ import { runPollCreative } from '../jobs/pollCreative.js';
 import { runReviseAd } from '../jobs/reviseAd.js';
 import { runPollRevisionCreative } from '../jobs/pollRevisionCreative.js';
 import { runAnalyzeBrand } from '../jobs/analyzeBrand.js';
+import { runPollVideo } from '../jobs/pollVideo.js';
 
 export async function internalRoutes(app: FastifyInstance) {
   app.addHook('preHandler', requireCloudTasks);
@@ -32,6 +33,11 @@ export async function internalRoutes(app: FastifyInstance) {
 
   app.post('/internal/jobs/analyze-brand', async (req, reply) => {
     await runAnalyzeBrand(req.body as any);
+    return ok(reply, { ok: true });
+  });
+
+  app.post('/internal/jobs/poll-video', async (req, reply) => {
+    await runPollVideo(req.body as any);
     return ok(reply, { ok: true });
   });
 }

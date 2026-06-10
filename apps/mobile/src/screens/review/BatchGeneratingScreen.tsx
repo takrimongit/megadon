@@ -11,7 +11,7 @@ import AppHeader from '../../components/AppHeader';
 import PrimaryButton from '../../components/PrimaryButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorView from '../../components/ErrorView';
-import AdImage from '../../components/AdImage';
+import AdMedia from '../../components/AdMedia';
 import { RootStackParamList } from '../../navigation';
 import { getDb } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
@@ -196,7 +196,7 @@ export default function BatchGeneratingScreen() {
               return (
                 <View key={ad.id} style={[styles.previewTile, hasAsset && styles.previewTileReady]}>
                   {hasAsset ? (
-                    <AdImage adId={ad.id} hasAsset assetVersion={ad.assetPath} style={styles.previewImage} fallbackIconSize={20} />
+                    <AdMedia adId={ad.id} hasAsset mediaType={ad.mediaType} assetVersion={ad.assetPath} style={styles.previewImage} fallbackIconSize={20} />
                   ) : (
                     <MaterialIcons name="hourglass-empty" size={20} color={Colors.outlineVariant + '66'} />
                   )}

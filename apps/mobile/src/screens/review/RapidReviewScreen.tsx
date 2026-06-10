@@ -10,7 +10,7 @@ import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorView from '../../components/ErrorView';
-import AdImage from '../../components/AdImage';
+import AdMedia from '../../components/AdMedia';
 import { RootStackParamList } from '../../navigation';
 import { getDb } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
@@ -138,8 +138,9 @@ export default function RapidReviewScreen() {
             style={[styles.card, { transform: [...position.getTranslateTransform(), { rotate }] }]}
           >
             <View style={styles.adPreview}>
-              <AdImage
+              <AdMedia
                 adId={currentAd.id}
+                mediaType={currentAd.mediaType}
                 hasAsset={!!currentAd.assetPath}
                 assetVersion={currentAd.assetPath}
                 style={StyleSheet.absoluteFill as never}

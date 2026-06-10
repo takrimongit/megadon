@@ -13,7 +13,7 @@ import AppHeader from '../../components/AppHeader';
 import PrimaryButton from '../../components/PrimaryButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorView from '../../components/ErrorView';
-import AdImage from '../../components/AdImage';
+import AdMedia from '../../components/AdMedia';
 import { RootStackParamList } from '../../navigation';
 import { getDb } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
@@ -148,8 +148,9 @@ export default function AIRevisionScreen() {
           ) : (
             <>
               <View style={styles.adPreview}>
-                <AdImage
+                <AdMedia
                   adId={ad.id}
+                  mediaType={ad.mediaType}
                   hasAsset={!!ad.assetPath}
                   assetVersion={ad.assetPath}
                   style={styles.adImage}
