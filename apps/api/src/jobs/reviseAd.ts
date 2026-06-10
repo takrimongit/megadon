@@ -3,6 +3,7 @@ import { kieProvider } from '../providers/kie.js';
 import { getCreativeProvider } from '../providers/creative.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { downloadRevisionAsset } from './pollRevisionCreative.js';
+import { loadGeekSettings, pickChat, pickMedia } from '../lib/geekSettings.js';
 import type { CopyResult } from '../providers/types.js';
 import type { Platform } from '@megadon/types';
 
@@ -41,7 +42,10 @@ export async function runReviseAd(payload: JobPayload) {
       hook: ad.hook ?? '',
       cta: ad.cta ?? '',
     };
-    const revised = await kieProvider.reviseCopy(current, rev.instruction, brief, brand);
+    const geek = await loadGeekSettings(workspaceId);
+    const revised = await kieProvider.reviseCopy(
+      current, rev.instruction, brief, brand, pickChat(geek, 'revise'),
+    );
     await revRef.update({
       headline: revised.headline,
       body: revised.body,
@@ -53,8 +57,12 @@ export async function runReviseAd(payload: JobPayload) {
     // so the new image stays on-brand.
     const provider = getCreativeProvider();
     const platform = (ad.platform as Platform) ?? 'facebook';
+    // For revision creative we always go through the image provider (the
+    // user revises one ad at a time — video revisions would need their
+    // own UI flow and worker; out of scope for now).
     const kickoff = await provider.kickoff(brief, platform, revised, brand, {
       revisionInstruction: rev.instruction,
+      override: pickMedia(geek, 'image'),
     });
 
     if (kickoff.jobId && !kickoff.assetUrl) {

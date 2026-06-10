@@ -2,6 +2,7 @@ import { db } from '../lib/firebase.js';
 import { z } from 'zod';
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
+import { loadGeekSettings, pickChat } from '../lib/geekSettings.js';
 import type { BrandPlaybook, BrandAnalysis } from '@megadon/types';
 
 interface JobPayload {
@@ -41,9 +42,15 @@ function unwrapJson(raw: string): string {
 // for elaborate structured-output prompts. Override via KIE_ANALYZE_MODEL.
 const ANALYZE_MODEL = process.env.KIE_ANALYZE_MODEL ?? 'gemini-2.5-flash';
 
-async function callKieJson<T>(schema: z.ZodSchema<T>, system: string, user: string): Promise<T> {
+async function callKieJson<T>(
+  schema: z.ZodSchema<T>,
+  system: string,
+  user: string,
+  modelOverride?: string,
+): Promise<T> {
   if (!config.kieKey) throw AppError.provider('KIE_API_KEY not set');
-  const url = `https://api.kie.ai/${ANALYZE_MODEL}/v1/chat/completions`;
+  const model = modelOverride && modelOverride.trim() ? modelOverride.trim() : ANALYZE_MODEL;
+  const url = `https://api.kie.ai/${model}/v1/chat/completions`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -51,7 +58,7 @@ async function callKieJson<T>(schema: z.ZodSchema<T>, system: string, user: stri
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: ANALYZE_MODEL,
+      model,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user },
@@ -59,13 +66,13 @@ async function callKieJson<T>(schema: z.ZodSchema<T>, system: string, user: stri
     }),
   });
   if (!resp.ok) {
-    throw AppError.provider(`kie.ai analysis ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
+    throw AppError.provider(`kie.ai analysis (${model}) ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
   }
   const json = (await resp.json()) as { choices?: Array<{ message?: { content?: string } }> };
   const raw = json.choices?.[0]?.message?.content;
   if (!raw) {
     throw AppError.provider(
-      `kie.ai analysis (${ANALYZE_MODEL}) returned empty content: ${JSON.stringify(json).slice(0, 300)}`,
+      `kie.ai analysis (${model}) returned empty content: ${JSON.stringify(json).slice(0, 300)}`,
     );
   }
   try {
@@ -99,7 +106,10 @@ export async function runAnalyzeBrand(payload: JobPayload) {
   // Models follow concrete examples more reliably than schema-as-template;
   // we show one filled-in example for a different industry so the model
   // understands "produce values like this for the user's brand".
-  const system = [
+  const geek = await loadGeekSettings(workspaceId);
+  const analyzeOverride = pickChat(geek, 'analyze');
+
+  const defaultSystem = [
     'You are a brand strategist building a playbook for an AI ad generator.',
     'Reply with ONLY a single valid JSON object — no prose, no markdown fences.',
     'EVERY field must be populated with realistic, brand-specific values inferred from the company description and industry.',
@@ -126,6 +136,10 @@ export async function runAnalyzeBrand(payload: JobPayload) {
     'Now produce the same structure — fully populated, no empty arrays, no echoing of the placeholder text — for the user\'s brand below.',
   ].join('\n');
 
+  const system = analyzeOverride?.systemPrompt && analyzeOverride.systemPrompt.trim().length > 0
+    ? analyzeOverride.systemPrompt
+    : defaultSystem;
+
   const user = [
     `Company: ${data.info.companyName}`,
     `Industry: ${data.info.industry}`,
@@ -135,7 +149,9 @@ export async function runAnalyzeBrand(payload: JobPayload) {
   ].join('\n');
 
   try {
-    const analysis = await callKieJson<BrandAnalysis>(AnalysisSchema as any, system, user);
+    const analysis = await callKieJson<BrandAnalysis>(
+      AnalysisSchema as any, system, user, analyzeOverride?.model,
+    );
 
     // Sanity-check: a "successful" call that comes back with no colors and
     // no personality means the model echoed the schema instead of filling

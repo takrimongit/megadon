@@ -37,9 +37,15 @@ function unwrapJson(raw: string): string {
   return fenced ? fenced[1] : raw;
 }
 
-async function callJson<T>(schema: z.ZodSchema<T>, system: string, user: string): Promise<T> {
+async function callJson<T>(
+  schema: z.ZodSchema<T>,
+  system: string,
+  user: string,
+  modelOverride?: string,
+): Promise<T> {
   if (!config.kieKey) throw AppError.provider('KIE_API_KEY not set');
-  const url = `https://api.kie.ai/${config.kieChatModel}/v1/chat/completions`;
+  const model = modelOverride && modelOverride.trim() ? modelOverride.trim() : config.kieChatModel;
+  const url = `https://api.kie.ai/${model}/v1/chat/completions`;
   const resp = await fetch(url, {
     method: 'POST',
     headers: {
@@ -47,7 +53,7 @@ async function callJson<T>(schema: z.ZodSchema<T>, system: string, user: string)
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      model: config.kieChatModel,
+      model,
       messages: [
         { role: 'system', content: system },
         { role: 'user', content: user },
@@ -55,12 +61,12 @@ async function callJson<T>(schema: z.ZodSchema<T>, system: string, user: string)
     }),
   });
   if (!resp.ok) {
-    throw AppError.provider(`kie.ai chat ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
+    throw AppError.provider(`kie.ai chat (${model}) ${resp.status}: ${(await resp.text()).slice(0, 200)}`);
   }
   const json = await resp.json() as ChatResponse;
   const raw = json.choices?.[0]?.message?.content;
   if (!raw) {
-    throw AppError.provider(`kie.ai chat: empty content (${json.msg ?? 'unknown'})`);
+    throw AppError.provider(`kie.ai chat (${model}): empty content (${json.msg ?? 'unknown'})`);
   }
   try {
     return schema.parse(JSON.parse(unwrapJson(raw)));
@@ -83,23 +89,38 @@ function brandSystemAddendum(brand?: BrandContext | null): string {
   return lines.join('\n');
 }
 
+const DEFAULT_SYSTEMS = {
+  generateCopy: (brand?: BrandContext | null) =>
+    `You write high-conversion ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}. Match the platform's format.${brandSystemAddendum(brand)}`,
+  reviseCopy: (brand?: BrandContext | null) =>
+    `Revise ad copy per the user's instruction. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}.${brandSystemAddendum(brand)}`,
+  personas: () =>
+    `Suggest 3 distinct audience personas. Reply with ONLY a valid JSON object — no prose, no markdown — matching {personas: [{id, name, desc, tags, reach}, ...]}. reach is a string like "2.4M".`,
+};
+
+function pickSystem(override: { systemPrompt?: string } | null | undefined, fallback: string): string {
+  return override?.systemPrompt && override.systemPrompt.trim().length > 0
+    ? override.systemPrompt
+    : fallback;
+}
+
 export const kieProvider: CopyProvider = {
-  async generateCopy(brief: Brief, platform: Platform, brand?: BrandContext | null): Promise<CopyResult> {
-    const system = `You write high-conversion ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}. Match the platform's format.${brandSystemAddendum(brand)}`;
+  async generateCopy(brief, platform, brand, override) {
+    const system = pickSystem(override, DEFAULT_SYSTEMS.generateCopy(brand));
     const user = `Platform: ${platform}\nGoal: ${brief.goal}\nOffer: ${brief.offer}\nStyle: ${brief.creativeStyle}\nTone: ${brief.tones.join(', ')}\nAudience: ${brief.audience.selectedPersona?.name ?? brief.audience.personaDescription ?? brief.audience.interests.join(', ')}`;
-    return callJson(CopySchema, system, user);
+    return callJson(CopySchema, system, user, override?.model);
   },
 
-  async reviseCopy(current, instruction, brief, brand?: BrandContext | null) {
-    const system = `Revise ad copy per the user's instruction. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}.${brandSystemAddendum(brand)}`;
+  async reviseCopy(current, instruction, brief, brand, override) {
+    const system = pickSystem(override, DEFAULT_SYSTEMS.reviseCopy(brand));
     const user = `Current: ${JSON.stringify(current)}\nInstruction: ${instruction}\nBrief offer: ${brief.offer}\nStyle: ${brief.creativeStyle}`;
-    return callJson(CopySchema, system, user);
+    return callJson(CopySchema, system, user, override?.model);
   },
 
-  async suggestPersonas(input): Promise<Persona[]> {
-    const system = `Suggest 3 distinct audience personas. Reply with ONLY a valid JSON object — no prose, no markdown — matching {personas: [{id, name, desc, tags, reach}, ...]}. reach is a string like "2.4M".`;
+  async suggestPersonas(input, override) {
+    const system = pickSystem(override, DEFAULT_SYSTEMS.personas());
     const user = `Age groups: ${input.ageGroups.join(', ')}\nInterests: ${input.interests.join(', ')}\nDescription: ${input.personaDescription ?? '(none)'}`;
-    const out = await callJson(PersonasSchema, system, user);
+    const out = await callJson(PersonasSchema, system, user, override?.model);
     return out.personas;
   },
 };

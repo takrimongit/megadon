@@ -30,6 +30,7 @@ import OnboardingBrandInfoScreen from '../screens/onboarding/OnboardingBrandInfo
 import OnboardingUploadAssetsScreen from '../screens/onboarding/OnboardingUploadAssetsScreen';
 import OnboardingAnalysisScreen from '../screens/onboarding/OnboardingAnalysisScreen';
 import OnboardingReviewScreen from '../screens/onboarding/OnboardingReviewScreen';
+import GeekModeScreen from '../screens/settings/GeekModeScreen';
 
 import { useOnboarding } from '../lib/OnboardingContext';
 import Splash from '../screens/auth/SplashScreen';
@@ -57,6 +58,8 @@ export type RootStackParamList = {
   OnboardingUploadAssets: undefined;
   OnboardingAnalysis: undefined;
   OnboardingReview: undefined;
+
+  GeekMode: undefined;
 };
 
 export type TabParamList = {
@@ -155,6 +158,7 @@ export default function Navigation() {
         <Stack.Screen name="WizardFinalReviewSummary" component={WizardFinalReviewSummaryScreen} />
         <Stack.Screen name="GeneratingBatch" component={GeneratingBatchScreen} />
         <Stack.Screen name="BatchGenerating" component={BatchGeneratingScreen} />
+        <Stack.Screen name="GeekMode" component={GeekModeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
   );

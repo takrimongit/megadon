@@ -105,7 +105,11 @@ export default function DashboardScreen() {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar barStyle="dark-content" backgroundColor={Colors.surface} />
-      <AppHeader onSignOut={handleSignOut} />
+      <AppHeader
+        onSignOut={handleSignOut}
+        rightIcon="settings"
+        onRightPress={() => navigation.navigate('GeekMode')}
+      />
       <ScrollView
         style={styles.scroll}
         contentContainerStyle={styles.content}

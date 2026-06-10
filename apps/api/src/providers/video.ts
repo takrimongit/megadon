@@ -8,6 +8,7 @@ import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import type { VideoProvider } from './types.js';
 import { buildImagePrompt } from './brandPrompt.js';
+import { interpolateWithContext } from './interpolate.js';
 import type { Platform } from '@megadon/types';
 
 const BASE = 'https://api.kie.ai/api/v1';
@@ -58,34 +59,42 @@ function aspectFor(platform: Platform): '16:9' | '9:16' {
   return '9:16';
 }
 
+function buildDefaultVideoPrompt(brief: any, platform: Platform, copy: any, brand: any, revisionInstruction?: string): string {
+  const stillPrompt = buildImagePrompt({ brief, platform, copy, brand, revisionInstruction });
+  return stillPrompt
+    .replace(
+      /STRICT CONSTRAINTS[\s\S]*?(?=\n\n[A-Z]|$)/,
+      [
+        'STRICT CONSTRAINTS:',
+        '- Photorealistic, cinematic camera movement (subtle, no shaky motion)',
+        '- Keep typography and logos out of the video itself — they will be presented in the app UI alongside the video',
+        '- No watermarks or signatures',
+        '- Smooth, premium pacing',
+      ].join('\n'),
+    )
+    .concat(
+      '\n\nMOTION DIRECTION:\n- Establish the scene in the first 2 seconds, then a subtle parallax/dolly move\n- End on a stable beauty shot that holds the brand mood',
+    );
+}
+
 export const kieVideoProvider: VideoProvider = {
   async kickoff(brief, platform, copy, brand, opts) {
-    // Reuse the image prompt builder — it produces a structured brief that
-    // works well for text-to-video too, but rephrase the STRICT CONSTRAINTS
-    // since text/logo compositing on a video frame isn't possible.
-    const stillPrompt = buildImagePrompt({ brief, platform, copy, brand, revisionInstruction: opts?.revisionInstruction });
-    // Replace the "no text, leave bottom 25% empty" wording with motion-
-    // focused direction since video can legibly show text in-camera.
-    const videoPrompt = stillPrompt
-      .replace(
-        /STRICT CONSTRAINTS[\s\S]*?(?=\n\n[A-Z]|$)/,
-        [
-          'STRICT CONSTRAINTS:',
-          '- Photorealistic, cinematic camera movement (subtle, no shaky motion)',
-          '- Keep typography and logos out of the video itself — they will be presented in the app UI alongside the video',
-          '- No watermarks or signatures',
-          '- Smooth, premium pacing',
-        ].join('\n'),
-      )
-      .concat(
-        '\n\nMOTION DIRECTION:\n- Establish the scene in the first 2 seconds, then a subtle parallax/dolly move\n- End on a stable beauty shot that holds the brand mood',
-      );
+    const override = opts?.override;
+    const videoPrompt = override?.promptTemplate && override.promptTemplate.trim().length > 0
+      ? interpolateWithContext(override.promptTemplate, {
+          brief, platform, copy, brand, revisionInstruction: opts?.revisionInstruction,
+        })
+      : buildDefaultVideoPrompt(brief, platform, copy, brand, opts?.revisionInstruction);
+
+    const model = override?.model && override.model.trim().length > 0
+      ? override.model.trim()
+      : config.kieVideoModel;
 
     const json = await authedJson<VeoCreateResponse>('/veo/generate', {
       method: 'POST',
       body: JSON.stringify({
         prompt: videoPrompt,
-        model: config.kieVideoModel,
+        model,
         generationType: 'TEXT_2_VIDEO',
         aspect_ratio: aspectFor(platform),
         resolution: '720p',
@@ -95,7 +104,7 @@ export const kieVideoProvider: VideoProvider = {
     });
 
     if (json.code !== 200 || !json.data?.taskId) {
-      throw AppError.provider(`kie.ai veo kickoff failed: ${json.msg ?? 'unknown'}`);
+      throw AppError.provider(`kie.ai veo kickoff (${model}) failed: ${json.msg ?? 'unknown'}`);
     }
     return { jobId: json.data.taskId };
   },

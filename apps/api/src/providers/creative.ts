@@ -2,6 +2,7 @@ import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import type { CreativeProvider } from './types.js';
 import { buildImagePrompt } from './brandPrompt.js';
+import { interpolateWithContext } from './interpolate.js';
 
 // kie.ai image generation is async:
 //   POST /api/v1/jobs/createTask  → { taskId }
@@ -44,18 +45,31 @@ async function authedJson<T>(path: string, init: RequestInit = {}): Promise<T> {
 
 export const kieCreativeProvider: CreativeProvider = {
   async kickoff(brief, platform, copy, brand, opts) {
-    const prompt = buildImagePrompt({
-      brief,
-      platform,
-      copy,
-      brand,
-      revisionInstruction: opts?.revisionInstruction,
-    });
+    const override = opts?.override;
+    const prompt = override?.promptTemplate && override.promptTemplate.trim().length > 0
+      ? interpolateWithContext(override.promptTemplate, {
+          brief,
+          platform,
+          copy,
+          brand,
+          revisionInstruction: opts?.revisionInstruction,
+        })
+      : buildImagePrompt({
+          brief,
+          platform,
+          copy,
+          brand,
+          revisionInstruction: opts?.revisionInstruction,
+        });
+
+    const model = override?.model && override.model.trim().length > 0
+      ? override.model.trim()
+      : config.kieImageModel;
 
     const json = await authedJson<CreateTaskResponse>('/jobs/createTask', {
       method: 'POST',
       body: JSON.stringify({
-        model: config.kieImageModel,
+        model,
         input: {
           prompt,
           aspect_ratio: '1:1',
@@ -65,7 +79,7 @@ export const kieCreativeProvider: CreativeProvider = {
     });
 
     if (json.code !== 200 || !json.data?.taskId) {
-      throw AppError.provider(`kie.ai image kickoff failed: ${json.msg ?? 'unknown'}`);
+      throw AppError.provider(`kie.ai image kickoff (${model}) failed: ${json.msg ?? 'unknown'}`);
     }
     return { jobId: json.data.taskId };
   },

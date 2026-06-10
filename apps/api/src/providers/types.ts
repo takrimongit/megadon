@@ -1,4 +1,7 @@
-import type { Brief, Persona, Platform, BrandAnalysis, BrandInfo, BrandAsset } from '@megadon/types';
+import type {
+  Brief, Persona, Platform, BrandAnalysis, BrandInfo, BrandAsset,
+  GeekChatOverride, GeekMediaOverride,
+} from '@megadon/types';
 
 export interface BrandContext {
   info: BrandInfo;
@@ -27,13 +30,27 @@ export interface CreativeJobStatus {
 }
 
 export interface CopyProvider {
-  generateCopy(brief: Brief, platform: Platform, brand?: BrandContext | null): Promise<CopyResult>;
-  reviseCopy(current: CopyResult, instruction: string, brief: Brief, brand?: BrandContext | null): Promise<CopyResult>;
-  suggestPersonas(input: {
-    ageGroups: string[];
-    interests: string[];
-    personaDescription?: string;
-  }): Promise<Persona[]>;
+  generateCopy(
+    brief: Brief,
+    platform: Platform,
+    brand?: BrandContext | null,
+    override?: GeekChatOverride | null,
+  ): Promise<CopyResult>;
+  reviseCopy(
+    current: CopyResult,
+    instruction: string,
+    brief: Brief,
+    brand?: BrandContext | null,
+    override?: GeekChatOverride | null,
+  ): Promise<CopyResult>;
+  suggestPersonas(
+    input: {
+      ageGroups: string[];
+      interests: string[];
+      personaDescription?: string;
+    },
+    override?: GeekChatOverride | null,
+  ): Promise<Persona[]>;
 }
 
 export interface CreativeKickoffOptions {
@@ -41,6 +58,9 @@ export interface CreativeKickoffOptions {
    * appended after all brand sections — so on-brand constraints
    * still apply and the model just steers per the user's note. */
   revisionInstruction?: string;
+  /** Geek-Mode override: swap the model and/or replace the prompt
+   * template with a user-supplied one (interpolated at call time). */
+  override?: GeekMediaOverride | null;
 }
 
 export interface CreativeProvider {

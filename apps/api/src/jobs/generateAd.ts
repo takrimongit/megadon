@@ -4,6 +4,7 @@ import { getCreativeProvider } from '../providers/creative.js';
 import { getVideoProvider } from '../providers/video.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { compositeBrandOverlay, fetchBrandLogo } from './composite.js';
+import { loadGeekSettings, pickChat, pickMedia } from '../lib/geekSettings.js';
 import type { BrandContext, CopyResult } from '../providers/types.js';
 import type { Brief, Platform } from '@megadon/types';
 
@@ -42,13 +43,27 @@ export async function runGenerateAd(payload: JobPayload) {
       await batchRef.update({ status: 'generating', updatedAt: new Date().toISOString() });
     }
 
-    // 2. Copy generation.
-    const copy = await kieProvider.generateCopy(effectiveBrief, ad.platform as Platform, brandContext);
+    // 2. Geek Mode overrides (no-op when disabled).
+    const geek = await loadGeekSettings(workspaceId);
 
-    // 3. Creative generation — dispatch on mediaType.
+    // 3. Copy generation.
+    const copy = await kieProvider.generateCopy(
+      effectiveBrief,
+      ad.platform as Platform,
+      brandContext,
+      pickChat(geek, 'chat'),
+    );
+
+    // 4. Creative generation — dispatch on mediaType.
     const mediaType: 'image' | 'video' = ad.mediaType ?? effectiveBrief.mediaType ?? 'image';
     const provider = mediaType === 'video' ? getVideoProvider() : getCreativeProvider();
-    const kickoff = await provider.kickoff(effectiveBrief, ad.platform as Platform, copy, brandContext);
+    const kickoff = await provider.kickoff(
+      effectiveBrief,
+      ad.platform as Platform,
+      copy,
+      brandContext,
+      { override: pickMedia(geek, mediaType === 'video' ? 'video' : 'image') },
+    );
 
     if (kickoff.jobId && !kickoff.assetUrl) {
       // Async — persist job id, enqueue delayed poll. Video jobs use a

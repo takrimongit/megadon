@@ -53,6 +53,12 @@ service cloud.firestore {
         allow read: if isAuthed() && isMember(wid);
         allow write: if false;
       }
+
+      // Workspace settings (Geek Mode etc.) — members read, server writes only.
+      match /settings/{doc} {
+        allow read: if isAuthed() && isMember(wid);
+        allow write: if false;
+      }
     }
 
     // Server-only collections

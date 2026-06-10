@@ -10,6 +10,8 @@ import type {
   BrandAsset,
   BrandAssetType,
   BrandAnalysis,
+  GeekSettings,
+  UpdateGeekSettingsBody,
 } from '@megadon/types';
 import { getAuthToken, getWorkspaceId } from './firebase';
 
@@ -132,6 +134,14 @@ export const api = {
     request<AdIntelligenceResponse>(`/ads/${adId}/intelligence`),
   playbook: () => request<PlaybookResponse>('/playbook'),
   insights: () => request<InsightsResponse>('/insights'),
+
+  // Geek Mode settings
+  getGeekSettings: () => request<GeekSettings>('/settings/geek'),
+  updateGeekSettings: (body: Partial<UpdateGeekSettingsBody> & { enabled?: boolean }) =>
+    request<GeekSettings>('/settings/geek', {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    }),
 };
 
 export interface InsightItem {

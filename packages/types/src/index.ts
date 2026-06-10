@@ -328,3 +328,52 @@ export const RegisterAssetBody = z.object({
 export const UpdatePlaybookBody = z.object({
   analysis: BrandAnalysis.partial().optional(),
 });
+
+// ============ Geek Mode (advanced AI overrides) ============
+
+/**
+ * A chat-style AI surface override. If `model` is set it replaces the
+ * default model id; if `systemPrompt` is set it replaces the system
+ * message (the user-side message is still composed from the runtime
+ * context like Brief + brand info).
+ */
+export const GeekChatOverride = z.object({
+  model: z.string().optional(),
+  systemPrompt: z.string().optional(),
+});
+export type GeekChatOverride = z.infer<typeof GeekChatOverride>;
+
+/**
+ * Image / video override. promptTemplate uses mustache-style
+ * `{{path.to.var}}` placeholders that the worker interpolates against
+ * the runtime context (brief, brand, copy, revisionInstruction).
+ */
+export const GeekMediaOverride = z.object({
+  model: z.string().optional(),
+  promptTemplate: z.string().optional(),
+});
+export type GeekMediaOverride = z.infer<typeof GeekMediaOverride>;
+
+export const GeekSettings = z.object({
+  /** Master switch — when false, all overrides are ignored. */
+  enabled: z.boolean().default(false),
+  chat: GeekChatOverride.optional(),
+  revise: GeekChatOverride.optional(),
+  personas: GeekChatOverride.optional(),
+  analyze: GeekChatOverride.optional(),
+  image: GeekMediaOverride.optional(),
+  video: GeekMediaOverride.optional(),
+  updatedAt: z.string(),
+});
+export type GeekSettings = z.infer<typeof GeekSettings>;
+
+export const UpdateGeekSettingsBody = z.object({
+  enabled: z.boolean().optional(),
+  chat: GeekChatOverride.optional(),
+  revise: GeekChatOverride.optional(),
+  personas: GeekChatOverride.optional(),
+  analyze: GeekChatOverride.optional(),
+  image: GeekMediaOverride.optional(),
+  video: GeekMediaOverride.optional(),
+});
+export type UpdateGeekSettingsBody = z.infer<typeof UpdateGeekSettingsBody>;

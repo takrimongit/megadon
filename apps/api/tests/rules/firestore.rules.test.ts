@@ -212,3 +212,37 @@ describe('firestore.rules: brandPlaybook (server-only writes)', () => {
     );
   });
 });
+
+describe('firestore.rules: settings/geek (server-only writes)', () => {
+  it('members can READ the geek settings doc', async () => {
+    await seedWorkspace('ws1', 'alice');
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'workspaces/ws1/settings/geek'), {
+        enabled: true, updatedAt: new Date().toISOString(),
+      });
+    });
+    const db = env.authenticatedContext('alice').firestore();
+    await assertSucceeds(getDoc(doc(db, 'workspaces/ws1/settings/geek')));
+  });
+
+  it('non-members cannot read the geek settings doc', async () => {
+    await seedWorkspace('ws1', 'alice');
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'workspaces/ws1/settings/geek'), {
+        enabled: false, updatedAt: new Date().toISOString(),
+      });
+    });
+    const db = env.authenticatedContext('bob').firestore();
+    await assertFails(getDoc(doc(db, 'workspaces/ws1/settings/geek')));
+  });
+
+  it('clients cannot write geek settings (must go via API)', async () => {
+    await seedWorkspace('ws1', 'alice');
+    const db = env.authenticatedContext('alice').firestore();
+    await assertFails(
+      setDoc(doc(db, 'workspaces/ws1/settings/geek'), {
+        enabled: true, updatedAt: new Date().toISOString(),
+      })
+    );
+  });
+});
