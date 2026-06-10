@@ -13,3 +13,4 @@ ui-debug.log
 storage-debug.log
 .cache/
 coverage/
+.claude/
