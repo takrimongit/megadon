@@ -31,16 +31,25 @@ export async function settingsRoutes(app: FastifyInstance) {
     const snap = await ref.get();
     const existing = snap.exists ? (snap.data() as GeekSettings) : DEFAULT_GEEK;
 
+    // Firestore admin SDK rejects `undefined` values, so we omit absent
+    // override blocks entirely rather than writing `undefined`.
     const next: GeekSettings = {
       enabled: body.enabled ?? existing.enabled,
-      chat: body.chat ?? existing.chat,
-      revise: body.revise ?? existing.revise,
-      personas: body.personas ?? existing.personas,
-      analyze: body.analyze ?? existing.analyze,
-      image: body.image ?? existing.image,
-      video: body.video ?? existing.video,
       updatedAt: new Date().toISOString(),
     };
+    const chat = body.chat ?? existing.chat;
+    const revise = body.revise ?? existing.revise;
+    const personas = body.personas ?? existing.personas;
+    const analyze = body.analyze ?? existing.analyze;
+    const image = body.image ?? existing.image;
+    const video = body.video ?? existing.video;
+    if (chat) next.chat = chat;
+    if (revise) next.revise = revise;
+    if (personas) next.personas = personas;
+    if (analyze) next.analyze = analyze;
+    if (image) next.image = image;
+    if (video) next.video = video;
+
     await ref.set(next);
     return ok(reply, next);
   });
