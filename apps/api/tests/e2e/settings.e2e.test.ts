@@ -7,7 +7,7 @@ import {
   httpCall, createTestUser, deleteTestUser, cleanupWorkspaces,
   type E2ETestUser,
 } from './helpers/client.js';
-import type { GeekSettings } from '@megadon/types';
+import type { GeekSettings, GeekDefaults } from '@megadon/types';
 
 describe('e2e: settings/geek surface', () => {
   let user: E2ETestUser;
@@ -25,6 +25,21 @@ describe('e2e: settings/geek surface', () => {
   afterAll(async () => {
     await cleanupWorkspaces(user.uid).catch(() => {});
     await deleteTestUser(user.uid).catch(() => {});
+  });
+
+  it('GET /settings/geek/defaults returns curated prompts + models per surface', async () => {
+    const res = await httpCall<GeekDefaults>({
+      method: 'GET', path: '/v1/settings/geek/defaults',
+      idToken: user.idToken,
+    });
+    expect(res.status).toBe(200);
+    const d = res.body.data!;
+    expect(d.chat.systemPrompt.length).toBeGreaterThan(50);
+    expect(d.chat.models).toContain('gpt-5-2');
+    expect(d.analyze.defaultModel).toBe('gemini-2.5-flash');
+    expect(d.image.promptTemplate).toContain('{{brand.colorNames}}');
+    expect(d.video.promptTemplate).toContain('{{platform}}');
+    expect(d.variables.brand).toContain('{{brand.companyName}}');
   });
 
   it('GET /settings/geek returns default (disabled) when doc does not exist', async () => {

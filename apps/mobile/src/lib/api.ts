@@ -12,6 +12,7 @@ import type {
   BrandAnalysis,
   GeekSettings,
   UpdateGeekSettingsBody,
+  GeekDefaults,
 } from '@megadon/types';
 import { getAuthToken, getWorkspaceId } from './firebase';
 
@@ -136,6 +137,8 @@ export const api = {
   insights: () => request<InsightsResponse>('/insights'),
 
   // Geek Mode settings
+  getGeekDefaults: () =>
+    request<GeekDefaults>('/settings/geek/defaults', {}, { requireWorkspace: false }),
   getGeekSettings: () => request<GeekSettings>('/settings/geek'),
   updateGeekSettings: (body: Partial<UpdateGeekSettingsBody> & { enabled?: boolean }) =>
     request<GeekSettings>('/settings/geek', {

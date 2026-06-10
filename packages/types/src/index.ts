@@ -377,3 +377,31 @@ export const UpdateGeekSettingsBody = z.object({
   video: GeekMediaOverride.optional(),
 });
 export type UpdateGeekSettingsBody = z.infer<typeof UpdateGeekSettingsBody>;
+
+// Defaults exposed by GET /v1/settings/geek/defaults so the mobile UI
+// can show users the platform's built-in system prompts and suggested
+// models — they can copy these and tweak them in Geek Mode.
+export interface GeekChatDefault {
+  systemPrompt: string;
+  models: string[];
+  defaultModel: string;
+}
+export interface GeekMediaDefault {
+  promptTemplate: string;
+  models: string[];
+  defaultModel: string;
+}
+export interface GeekDefaults {
+  chat: GeekChatDefault;
+  revise: GeekChatDefault;
+  personas: GeekChatDefault;
+  analyze: GeekChatDefault;
+  image: GeekMediaDefault;
+  video: GeekMediaDefault;
+  variables: {
+    common: string[];
+    brief: string[];
+    copy: string[];
+    brand: string[];
+  };
+}

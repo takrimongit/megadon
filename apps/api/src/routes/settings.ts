@@ -2,6 +2,7 @@ import type { FastifyInstance } from 'fastify';
 import { requireAuth, requireWorkspace } from '../middleware/auth.js';
 import { ok } from '../lib/envelope.js';
 import { settingsRef } from '../lib/geekSettings.js';
+import { getGeekDefaults } from '../lib/geekDefaults.js';
 import { UpdateGeekSettingsBody, type GeekSettings } from '@megadon/types';
 
 const DEFAULT_GEEK: GeekSettings = {
@@ -10,11 +11,17 @@ const DEFAULT_GEEK: GeekSettings = {
 };
 
 export async function settingsRoutes(app: FastifyInstance) {
-  app.addHook('preHandler', requireAuth);
-  app.addHook('preHandler', requireWorkspace);
+  const workspaceGuards = [requireAuth, requireWorkspace];
+
+  // Defaults are static and not workspace-scoped — auth only.
+  app.get(
+    '/settings/geek/defaults',
+    { preHandler: requireAuth },
+    async (_req, reply) => ok(reply, getGeekDefaults()),
+  );
 
   // GET current Geek Mode settings (auto-init with disabled defaults).
-  app.get('/settings/geek', async (req, reply) => {
+  app.get('/settings/geek', { preHandler: workspaceGuards }, async (req, reply) => {
     const ref = settingsRef(req.workspace!.id);
     const snap = await ref.get();
     if (!snap.exists) {
@@ -25,7 +32,7 @@ export async function settingsRoutes(app: FastifyInstance) {
 
   // PUT — replace fields. Each override block is fully replaced when
   // supplied; absent blocks remain unchanged.
-  app.put('/settings/geek', async (req, reply) => {
+  app.put('/settings/geek', { preHandler: workspaceGuards }, async (req, reply) => {
     const body = UpdateGeekSettingsBody.parse(req.body);
     const ref = settingsRef(req.workspace!.id);
     const snap = await ref.get();
