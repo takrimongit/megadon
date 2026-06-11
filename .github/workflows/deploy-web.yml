@@ -1,0 +1,156 @@
+name: Deploy Web
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'apps/web/**'
+      - 'packages/types/**'
+      - '.github/workflows/deploy-web.yml'
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Target environment'
+        required: true
+        default: 'prod'
+        type: choice
+        options:
+          - prod
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  REGISTRY: ${{ secrets.GCP_REGION }}-docker.pkg.dev
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: ${{ secrets.GCP_REGION }}
+
+jobs:
+  test:
+    name: Type check + build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      - run: npm ci
+      - name: Type-check
+        run: npm run typecheck -w @megadon/web
+      - name: Production build sanity
+        run: npm run build -w @megadon/web
+        env:
+          VITE_API_URL: https://api-staging-66h55rjbsq-uc.a.run.app
+          VITE_FIREBASE_API_KEY: AIzaSyDh88VqJ2mgoE62rpmWbApAAko_bmKbYsw
+          VITE_FIREBASE_AUTH_DOMAIN: megadon.firebaseapp.com
+          VITE_FIREBASE_PROJECT_ID: megadon
+          VITE_FIREBASE_STORAGE_BUCKET: megadon.firebasestorage.app
+          VITE_FIREBASE_APP_ID: 1:771319500294:web:d8dfa0d7b44d3f26833d87
+
+  deploy-staging:
+    name: Deploy → web-staging
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build + push web image (staging env baked in)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          platforms: linux/amd64
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+          tags: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/api/web:staging-${{ github.sha }}
+          build-args: |
+            VITE_API_URL=https://api-staging-66h55rjbsq-uc.a.run.app
+            VITE_FIREBASE_API_KEY=AIzaSyDh88VqJ2mgoE62rpmWbApAAko_bmKbYsw
+            VITE_FIREBASE_AUTH_DOMAIN=megadon.firebaseapp.com
+            VITE_FIREBASE_PROJECT_ID=megadon
+            VITE_FIREBASE_STORAGE_BUCKET=megadon.firebasestorage.app
+            VITE_FIREBASE_APP_ID=1:771319500294:web:d8dfa0d7b44d3f26833d87
+
+      - name: Deploy web-staging
+        run: |
+          gcloud run deploy web-staging \
+            --image="${REGISTRY}/${PROJECT_ID}/api/web:staging-${GITHUB_SHA}" \
+            --region="${REGION}" \
+            --allow-unauthenticated \
+            --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --port=8080 \
+            --quiet
+          URL="$(gcloud run services describe web-staging --region="${REGION}" --format='value(status.url)')"
+          echo "Web staging: $URL"
+          curl -fsS "$URL" >/dev/null
+
+  deploy-prod:
+    name: Deploy → web-prod (manual)
+    needs: test
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Authenticate to GCP via WIF
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WIF_PROVIDER }}
+          service_account: ${{ secrets.GCP_DEPLOYER_SA }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker ${{ env.REGISTRY }} --quiet
+
+      - uses: docker/setup-buildx-action@v3
+
+      - name: Build + push web image (prod env baked in)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: apps/web/Dockerfile
+          push: true
+          platforms: linux/amd64
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+          tags: ${{ env.REGISTRY }}/${{ env.PROJECT_ID }}/api/web:prod-${{ github.sha }}
+          build-args: |
+            VITE_API_URL=https://api-prod-66h55rjbsq-uc.a.run.app
+            VITE_FIREBASE_API_KEY=AIzaSyDh88VqJ2mgoE62rpmWbApAAko_bmKbYsw
+            VITE_FIREBASE_AUTH_DOMAIN=megadon.firebaseapp.com
+            VITE_FIREBASE_PROJECT_ID=megadon
+            VITE_FIREBASE_STORAGE_BUCKET=megadon.firebasestorage.app
+            VITE_FIREBASE_APP_ID=1:771319500294:web:d8dfa0d7b44d3f26833d87
+
+      - name: Deploy web-prod
+        run: |
+          gcloud run deploy web-prod \
+            --image="${REGISTRY}/${PROJECT_ID}/api/web:prod-${GITHUB_SHA}" \
+            --region="${REGION}" \
+            --allow-unauthenticated \
+            --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
+            --port=8080 \
+            --quiet
+          URL="$(gcloud run services describe web-prod --region="${REGION}" --format='value(status.url)')"
+          echo "Web prod: $URL"
+          curl -fsS "$URL" >/dev/null

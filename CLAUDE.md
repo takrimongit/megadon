@@ -80,6 +80,22 @@ Follows `stitch_adforge_ai_platform/high_velocity_intelligence/DESIGN.md`.
 
 ---
 
+## Web App (`apps/web`)
+
+Vite + React 19 + TypeScript SPA. Same Firebase Auth + Firestore listeners + REST API as mobile, desktop-optimized.
+
+```bash
+npm run dev -w @megadon/web        # Vite dev server (uses apps/web/.env → staging API)
+npm run build -w @megadon/web      # tsc --noEmit && vite build
+```
+
+- **`src/styles/theme.css`** — hand-rolled design system (same tokens as mobile: Deep Indigo/Vibrant Purple, Inter + JetBrains Mono). No Tailwind.
+- **`src/lib/`** — `firebase.ts`, `api.ts` (mirror of mobile's client), `AuthContext.tsx` (workspace bootstrap + brand playbook), `useSignedUrl.ts` (asset-version-keyed signed URL caches)
+- **`src/pages/`** — Auth, Onboarding (brand setup stepper), Dashboard, NewCampaign (4-step wizard with localStorage draft), Batches, BatchReview (live Firestore + keyboard review A/R/arrows + revision loop), GeekMode, BrandPlaybook, Analytics
+- **Deploy:** `.github/workflows/deploy-web.yml` — nginx Docker image on Cloud Run (`web-staging` auto on push, `web-prod` via workflow_dispatch). Vite env values are baked at image build via build-args.
+
+---
+
 ## Backend API (`apps/api`)
 
 Fastify + TypeScript on Cloud Run. Firebase Auth, Firestore, Cloud Storage, Cloud Tasks.
