@@ -404,4 +404,58 @@ export interface GeekDefaults {
     copy: string[];
     brand: string[];
   };
+  /** Per-model cost/time estimates so UIs can show "≈ N credits · ~Ms". */
+  pricing: AiPricingTable;
+}
+
+// ============ AI usage metering ============
+
+export type AiSurface = 'chat' | 'revise' | 'personas' | 'analyze' | 'image' | 'video';
+
+/**
+ * Best-effort estimates derived from kie.ai's published pricing
+ * (1 credit ≈ $0.005). Estimates, not invoices — actuals come from the
+ * kie.ai dashboard; the remaining-credit balance in UsageSummary is real.
+ */
+export interface ModelPricing {
+  unit: 'call' | 'image' | 'video';
+  estCredits: number;
+  estUsd: number;
+  /** Typical wall-clock seconds for one operation. */
+  estSeconds: number;
+}
+
+export interface AiPricingTable {
+  creditUsd: number;
+  models: Record<string, ModelPricing>;
+  /** Fallbacks when a user types a model id we don't know. */
+  fallback: Record<'call' | 'image' | 'video', ModelPricing>;
+}
+
+export interface UsageEntry {
+  surface: AiSurface;
+  model: string;
+  units: number;
+  estCredits: number;
+  estUsd: number;
+  batchId?: string;
+  adId?: string;
+  createdAt: string;
+}
+
+export interface UsageBucket {
+  key: string;
+  operations: number;
+  estCredits: number;
+  estUsd: number;
+}
+
+export interface UsageSummary {
+  windowDays: number;
+  /** Real remaining credit balance from kie.ai, null if unavailable. */
+  creditsRemaining: number | null;
+  creditsRemainingUsd: number | null;
+  totals: { operations: number; estCredits: number; estUsd: number };
+  byModel: UsageBucket[];
+  bySurface: UsageBucket[];
 }

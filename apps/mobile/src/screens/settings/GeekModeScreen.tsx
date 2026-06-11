@@ -109,6 +109,20 @@ export default function GeekModeScreen() {
     Alert.alert('Copied', 'Default prompt copied to clipboard.');
   }, []);
 
+  // "≈ 6 credits ($0.03) · ~25s / image" for the effective model.
+  const estimateFor = useCallback(
+    (model: string | undefined, kind: 'call' | 'image' | 'video', fallbackModel: string): string => {
+      const table = defaults?.pricing;
+      if (!table) return '';
+      const m = model && model.trim() ? model.trim() : fallbackModel;
+      const p = table.models[m] ?? table.fallback[kind];
+      const usd = p.estUsd < 0.01 ? `$${p.estUsd.toFixed(4)}` : `$${p.estUsd.toFixed(2)}`;
+      const dur = p.estSeconds < 60 ? `~${Math.round(p.estSeconds)}s` : `~${Math.round(p.estSeconds / 60)} min`;
+      return `≈ ${p.estCredits} credits (${usd}) · ${dur} / ${p.unit}`;
+    },
+    [defaults],
+  );
+
   if (loading || !settings || !defaults) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -234,6 +248,9 @@ export default function GeekModeScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
+                <Text style={styles.estimate}>
+                  {estimateFor(cur.model, 'call', def.defaultModel)}
+                </Text>
 
                 <Text style={styles.fieldLabel}>System Prompt</Text>
                 <TextInput
@@ -277,6 +294,9 @@ export default function GeekModeScreen() {
                   autoCapitalize="none"
                   autoCorrect={false}
                 />
+                <Text style={styles.estimate}>
+                  {estimateFor(cur.model, s.key === 'video' ? 'video' : 'image', def.defaultModel)}
+                </Text>
 
                 <Text style={styles.fieldLabel}>Prompt Template</Text>
                 <TextInput
@@ -361,6 +381,12 @@ const styles = StyleSheet.create({
     fontFamily: 'JetBrainsMono_400Regular', fontSize: 13,
   },
   textarea: { minHeight: 110 },
+  estimate: {
+    fontFamily: 'JetBrainsMono_400Regular',
+    fontSize: 10.5,
+    color: Colors.onSurfaceVariant,
+    marginTop: 4,
+  },
   chipRow: { flexDirection: 'row', flexWrap: 'wrap', gap: 6, marginBottom: 6 },
   chip: {
     paddingHorizontal: 10, paddingVertical: 6,

@@ -31,6 +31,28 @@ function flatten(obj: any, prefix = '', out: Record<string, string> = {}): Recor
   return out;
 }
 
+function brandVars(brand: BrandContext, out: Record<string, string>) {
+  flatten(brand.info, 'brand.info', out);
+  flatten(brand.analysis, 'brand.analysis', out);
+  // Convenience aliases for the most common cases.
+  out['brand.companyName'] = brand.info?.companyName ?? '';
+  out['brand.industry'] = brand.info?.industry ?? '';
+  out['brand.colorHexes'] = (brand.analysis?.colors ?? [])
+    .map((c) => c.hex)
+    .join(', ');
+  out['brand.colorNames'] = (brand.analysis?.colors ?? [])
+    .map((c) => `${c.hex} (${c.name}${c.role ? ' — ' + c.role : ''})`)
+    .join(', ');
+  out['brand.personality'] = (brand.analysis?.personality ?? []).join(', ');
+  out['brand.brandRules'] = (brand.analysis?.brandRules ?? [])
+    .map((r) => '- ' + r)
+    .join('\n');
+  out['brand.creativeStyles'] = (brand.analysis?.creativeStyles ?? []).join(', ');
+  out['brand.toneOfVoice'] = brand.analysis?.toneOfVoice ?? '';
+  out['brand.visualStyle'] = brand.analysis?.visualStyle ?? '';
+  out['brand.targetAudience'] = brand.analysis?.targetAudience ?? '';
+}
+
 /** Build the flat var map exposed to a template. */
 export function buildVars(ctx: InterpolationContext): Record<string, string> {
   const vars: Record<string, string> = {
@@ -39,27 +61,7 @@ export function buildVars(ctx: InterpolationContext): Record<string, string> {
   };
   flatten(ctx.brief, 'brief', vars);
   if (ctx.copy) flatten(ctx.copy, 'copy', vars);
-  if (ctx.brand) {
-    flatten(ctx.brand.info, 'brand.info', vars);
-    flatten(ctx.brand.analysis, 'brand.analysis', vars);
-    // Convenience aliases for the most common cases.
-    vars['brand.companyName'] = ctx.brand.info?.companyName ?? '';
-    vars['brand.industry'] = ctx.brand.info?.industry ?? '';
-    vars['brand.colorHexes'] = (ctx.brand.analysis?.colors ?? [])
-      .map((c) => c.hex)
-      .join(', ');
-    vars['brand.colorNames'] = (ctx.brand.analysis?.colors ?? [])
-      .map((c) => `${c.hex} (${c.name}${c.role ? ' — ' + c.role : ''})`)
-      .join(', ');
-    vars['brand.personality'] = (ctx.brand.analysis?.personality ?? []).join(', ');
-    vars['brand.brandRules'] = (ctx.brand.analysis?.brandRules ?? [])
-      .map((r) => '- ' + r)
-      .join('\n');
-    vars['brand.creativeStyles'] = (ctx.brand.analysis?.creativeStyles ?? []).join(', ');
-    vars['brand.toneOfVoice'] = ctx.brand.analysis?.toneOfVoice ?? '';
-    vars['brand.visualStyle'] = ctx.brand.analysis?.visualStyle ?? '';
-    vars['brand.targetAudience'] = ctx.brand.analysis?.targetAudience ?? '';
-  }
+  if (ctx.brand) brandVars(ctx.brand, vars);
   return vars;
 }
 
@@ -73,4 +75,22 @@ export function interpolate(template: string, vars: Record<string, string>): str
 /** Convenience: interpolate from a structured context. */
 export function interpolateWithContext(template: string, ctx: InterpolationContext): string {
   return interpolate(template, buildVars(ctx));
+}
+
+/**
+ * Interpolation for chat-surface system prompt overrides, where parts of
+ * the context may be unavailable (e.g. personas has no brief/platform).
+ * Unknown placeholders stay intact, same as the media path.
+ */
+export function interpolateSystemPrompt(
+  template: string,
+  ctx: Partial<InterpolationContext>,
+): string {
+  const vars: Record<string, string> = {};
+  if (ctx.platform) vars.platform = ctx.platform;
+  if (ctx.revisionInstruction !== undefined) vars.revisionInstruction = ctx.revisionInstruction;
+  if (ctx.brief) flatten(ctx.brief, 'brief', vars);
+  if (ctx.copy) flatten(ctx.copy, 'copy', vars);
+  if (ctx.brand) brandVars(ctx.brand, vars);
+  return interpolate(template, vars);
 }

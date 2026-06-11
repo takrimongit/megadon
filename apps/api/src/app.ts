@@ -14,6 +14,7 @@ import { adRoutes } from './routes/ads.js';
 import { readRoutes } from './routes/reads.js';
 import { brandRoutes } from './routes/brand.js';
 import { settingsRoutes } from './routes/settings.js';
+import { usageRoutes } from './routes/usage.js';
 import { internalRoutes } from './routes/internal.js';
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -54,6 +55,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     await app.register(readRoutes, { prefix: '/v1' });
     await app.register(brandRoutes, { prefix: '/v1' });
     await app.register(settingsRoutes, { prefix: '/v1' });
+    await app.register(usageRoutes, { prefix: '/v1' });
   }
   await app.register(internalRoutes);
 

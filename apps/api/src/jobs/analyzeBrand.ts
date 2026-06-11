@@ -3,6 +3,8 @@ import { z } from 'zod';
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import { loadGeekSettings, pickChat } from '../lib/geekSettings.js';
+import { interpolateSystemPrompt } from '../providers/interpolate.js';
+import { recordUsage, resolveModel } from '../lib/usage.js';
 import type { BrandPlaybook, BrandAnalysis } from '@megadon/types';
 
 interface JobPayload {
@@ -136,8 +138,14 @@ export async function runAnalyzeBrand(payload: JobPayload) {
     'Now produce the same structure — fully populated, no empty arrays, no echoing of the placeholder text — for the user\'s brand below.',
   ].join('\n');
 
+  // Interpolate {{brand.*}} vars in an overridden system prompt (analysis
+  // hasn't run yet, so only brand.info-derived vars resolve here).
   const system = analyzeOverride?.systemPrompt && analyzeOverride.systemPrompt.trim().length > 0
-    ? analyzeOverride.systemPrompt
+    ? interpolateSystemPrompt(analyzeOverride.systemPrompt, {
+        // No analysis exists yet at analyze time; the interpolator
+        // null-guards every analysis-derived var.
+        brand: { info: data.info } as import('../providers/types.js').BrandContext,
+      })
     : defaultSystem;
 
   const user = [
@@ -152,6 +160,10 @@ export async function runAnalyzeBrand(payload: JobPayload) {
     const analysis = await callKieJson<BrandAnalysis>(
       AnalysisSchema as any, system, user, analyzeOverride?.model,
     );
+    void recordUsage({
+      workspaceId, surface: 'analyze',
+      model: resolveModel(analyzeOverride, ANALYZE_MODEL),
+    });
 
     // Sanity-check: a "successful" call that comes back with no colors and
     // no personality means the model echoed the schema instead of filling

@@ -3,6 +3,7 @@ import type { GeekDefaults, GeekSettings } from '@megadon/types';
 import { api } from '../lib/api';
 import { useToast } from '../lib/Toast';
 import { CenterSpinner, Toggle } from '../components/Ui';
+import { estimateLabel, priceFor } from '../lib/pricing';
 
 type ChatKey = 'chat' | 'revise' | 'personas' | 'analyze';
 type MediaKey = 'image' | 'video';
@@ -186,6 +187,9 @@ export default function GeekModePage() {
                 placeholder={`Or any kie.ai model id (default: ${def.defaultModel})`}
                 value={cur.model ?? ''}
                 onChange={(e) => patch(s.key, 'model', e.target.value)} />
+              <div className="sub mono mt-4" style={{ fontSize: 11 }}>
+                {estimateLabel(priceFor(defaults.pricing, cur.model, 'call', def.defaultModel))}
+              </div>
 
               <div className="field mt-12" style={{ marginBottom: 8 }}><label>System prompt</label></div>
               <textarea className="textarea mono-area" rows={4}
@@ -250,6 +254,9 @@ export default function GeekModePage() {
                 placeholder={`Or any kie.ai model id (default: ${def.defaultModel})`}
                 value={cur.model ?? ''}
                 onChange={(e) => patch(s.key, 'model', e.target.value)} />
+              <div className="sub mono mt-4" style={{ fontSize: 11 }}>
+                {estimateLabel(priceFor(defaults.pricing, cur.model, s.key === 'video' ? 'video' : 'image', def.defaultModel))}
+              </div>
 
               <div className="field mt-12" style={{ marginBottom: 8 }}>
                 <label>Prompt template</label>

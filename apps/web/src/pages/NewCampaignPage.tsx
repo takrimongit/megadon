@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import type { Brief, MediaType, Persona, Platform, WizardOptions } from '@megadon/types';
+import type { AiPricingTable, Brief, GeekSettings, MediaType, Persona, Platform, WizardOptions } from '@megadon/types';
 import { api } from '../lib/api';
 import { useToast } from '../lib/Toast';
 import { CenterSpinner, Field, Stepper } from '../components/Ui';
+import { fmtCredits, fmtDuration, fmtUsd, priceFor } from '../lib/pricing';
+
+const DEFAULT_MODELS = {
+  chat: 'gpt-5-2',
+  image: 'flux-2/pro-text-to-image',
+  video: 'veo3_lite',
+} as const;
 
 const STEPS = ['Goal', 'Audience', 'Offer & platforms', 'Style & review'];
 const DRAFT_KEY = 'adforge.campaignDraft.v1';
@@ -51,10 +58,35 @@ export default function NewCampaignPage() {
   const [personas, setPersonas] = useState<Persona[] | null>(null);
   const [loadingPersonas, setLoadingPersonas] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [pricing, setPricing] = useState<AiPricingTable | null>(null);
+  const [geek, setGeek] = useState<GeekSettings | null>(null);
 
   useEffect(() => {
     api.wizardOptions().then(setOptions).catch(() => toast('Could not load wizard options', 'error'));
+    api.usagePricing().then(setPricing).catch(() => {});
+    api.getGeekSettings().then(setGeek).catch(() => {});
   }, [toast]);
+
+  // Cost/time estimate for the whole batch, honoring Geek Mode model
+  // overrides when enabled. Every ad = 1 copy call + 1 media generation.
+  const estimate = useMemo(() => {
+    if (!pricing) return null;
+    const chatModel = geek?.enabled ? geek.chat?.model : undefined;
+    const mediaModel = geek?.enabled
+      ? (draft.mediaType === 'video' ? geek.video?.model : geek.image?.model)
+      : undefined;
+    const chat = priceFor(pricing, chatModel, 'call', DEFAULT_MODELS.chat);
+    const media = priceFor(
+      pricing, mediaModel,
+      draft.mediaType === 'video' ? 'video' : 'image',
+      DEFAULT_MODELS[draft.mediaType],
+    );
+    const credits = (chat.estCredits + media.estCredits) * draft.batchSize;
+    const usd = (chat.estUsd + media.estUsd) * draft.batchSize;
+    // Ads run in parallel via Cloud Tasks — wall time ≈ one op + queue slack.
+    const seconds = (chat.estSeconds + media.estSeconds) * 1.4;
+    return { credits, usd, seconds };
+  }, [pricing, geek, draft.mediaType, draft.batchSize]);
 
   useEffect(() => {
     localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
@@ -225,7 +257,12 @@ export default function NewCampaignPage() {
               </button>
             ))}
           </div>
-          <Field label={`Batch size — ${draft.batchSize} ads`} hint="Total ads across all selected platforms.">
+          <Field
+            label={`Batch size — ${draft.batchSize} ads`}
+            hint={estimate
+              ? `Total ads across all selected platforms. ⚡ ≈ ${fmtCredits(estimate.credits)} credits (${fmtUsd(estimate.usd)}) for this batch.`
+              : 'Total ads across all selected platforms.'}
+          >
             <input type="range" min={2} max={20} value={draft.batchSize}
               onChange={(e) => set({ batchSize: Number(e.target.value) })}
               style={{ width: '100%', accentColor: 'var(--primary)' }} />
@@ -265,6 +302,17 @@ export default function NewCampaignPage() {
               <div><span className="sub">Batch size:</span> <strong>{draft.batchSize} ads</strong></div>
               <div><span className="sub">Audience:</span> <strong>{draft.selectedPersona?.name ?? draft.interests.slice(0, 3).join(', ')}</strong></div>
             </div>
+            {estimate && (
+              <div className="row mt-16" style={{
+                padding: '10px 14px', borderRadius: 8,
+                background: 'var(--primary-container)', color: 'var(--primary)',
+                fontWeight: 600, fontSize: 13,
+              }}>
+                ⚡ Estimated cost: ≈ {fmtCredits(estimate.credits)} credits ({fmtUsd(estimate.usd)})
+                · typically ready in {fmtDuration(estimate.seconds)}
+                {geek?.enabled ? ' · using your Geek Mode models' : ''}
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -5,6 +5,8 @@ import { getVideoProvider } from '../providers/video.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { compositeBrandOverlay, fetchBrandLogo } from './composite.js';
 import { loadGeekSettings, pickChat, pickMedia } from '../lib/geekSettings.js';
+import { recordUsage, resolveModel } from '../lib/usage.js';
+import { config } from '../lib/config.js';
 import type { BrandContext, CopyResult } from '../providers/types.js';
 import type { Brief, Platform } from '@megadon/types';
 
@@ -47,23 +49,36 @@ export async function runGenerateAd(payload: JobPayload) {
     const geek = await loadGeekSettings(workspaceId);
 
     // 3. Copy generation.
+    const chatOverride = pickChat(geek, 'chat');
     const copy = await kieProvider.generateCopy(
       effectiveBrief,
       ad.platform as Platform,
       brandContext,
-      pickChat(geek, 'chat'),
+      chatOverride,
     );
+    void recordUsage({
+      workspaceId, batchId, adId, surface: 'chat',
+      model: resolveModel(chatOverride, config.kieChatModel),
+    });
 
     // 4. Creative generation — dispatch on mediaType.
     const mediaType: 'image' | 'video' = ad.mediaType ?? effectiveBrief.mediaType ?? 'image';
     const provider = mediaType === 'video' ? getVideoProvider() : getCreativeProvider();
+    const mediaOverride = pickMedia(geek, mediaType === 'video' ? 'video' : 'image');
     const kickoff = await provider.kickoff(
       effectiveBrief,
       ad.platform as Platform,
       copy,
       brandContext,
-      { override: pickMedia(geek, mediaType === 'video' ? 'video' : 'image') },
+      { override: mediaOverride },
     );
+    void recordUsage({
+      workspaceId, batchId, adId, surface: mediaType,
+      model: resolveModel(
+        mediaOverride,
+        mediaType === 'video' ? config.kieVideoModel : config.kieImageModel,
+      ),
+    });
 
     if (kickoff.jobId && !kickoff.assetUrl) {
       // Async — persist job id, enqueue delayed poll. Video jobs use a

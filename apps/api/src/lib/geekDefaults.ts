@@ -5,6 +5,7 @@
 // the runtime defaults, mirror them here.
 
 import type { GeekDefaults } from '@megadon/types';
+import { getPricingTable } from './aiPricing.js';
 
 const CHAT_GENERATE = `You write high-conversion ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}. Match the platform's format.
 
@@ -139,5 +140,6 @@ export function getGeekDefaults(): GeekDefaults {
     image: { promptTemplate: IMAGE_TEMPLATE, models: IMAGE_MODELS, defaultModel: 'flux-2/pro-text-to-image' },
     video: { promptTemplate: VIDEO_TEMPLATE, models: VIDEO_MODELS, defaultModel: 'veo3_lite' },
     variables: VARIABLES,
+    pricing: getPricingTable(),
   };
 }

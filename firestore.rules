@@ -59,6 +59,12 @@ service cloud.firestore {
         allow read: if isAuthed() && isMember(wid);
         allow write: if false;
       }
+
+      // AI usage ledger — members read (token meter), server writes only.
+      match /usage/{doc} {
+        allow read: if isAuthed() && isMember(wid);
+        allow write: if false;
+      }
     }
 
     // Server-only collections

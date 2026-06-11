@@ -13,6 +13,8 @@ import type {
   GeekSettings,
   UpdateGeekSettingsBody,
   GeekDefaults,
+  AiPricingTable,
+  UsageSummary,
 } from '@megadon/types';
 import { getAuthToken, getWorkspaceId } from './firebase';
 
@@ -131,6 +133,10 @@ export const api = {
     request<AdIntelligenceResponse>(`/ads/${adId}/intelligence`),
   playbook: () => request<PlaybookResponse>('/playbook'),
   insights: () => request<InsightsResponse>('/insights'),
+
+  // Usage metering
+  usageSummary: () => request<UsageSummary>('/usage/summary'),
+  usagePricing: () => request<AiPricingTable>('/usage/pricing', {}, { requireWorkspace: false }),
 
   // Geek Mode
   getGeekDefaults: () =>

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
+import { interpolateSystemPrompt, type InterpolationContext } from './interpolate.js';
 import type { CopyProvider, CopyResult, BrandContext } from './types.js';
 import type { Brief, Persona, Platform } from '@megadon/types';
 
@@ -98,21 +99,32 @@ const DEFAULT_SYSTEMS = {
     `Suggest 3 distinct audience personas. Reply with ONLY a valid JSON object — no prose, no markdown — matching {personas: [{id, name, desc, tags, reach}, ...]}. reach is a string like "2.4M".`,
 };
 
-function pickSystem(override: { systemPrompt?: string } | null | undefined, fallback: string): string {
+/**
+ * Resolve the system prompt: an override (if set) is interpolated against
+ * the runtime context so {{brand.*}}, {{brief.*}}, {{platform}} etc. work
+ * in chat system prompts the same way they do in media prompt templates.
+ */
+function pickSystem(
+  override: { systemPrompt?: string } | null | undefined,
+  fallback: string,
+  ctx: Partial<InterpolationContext> = {},
+): string {
   return override?.systemPrompt && override.systemPrompt.trim().length > 0
-    ? override.systemPrompt
+    ? interpolateSystemPrompt(override.systemPrompt, ctx)
     : fallback;
 }
 
 export const kieProvider: CopyProvider = {
   async generateCopy(brief, platform, brand, override) {
-    const system = pickSystem(override, DEFAULT_SYSTEMS.generateCopy(brand));
+    const system = pickSystem(override, DEFAULT_SYSTEMS.generateCopy(brand), { brief, platform, brand });
     const user = `Platform: ${platform}\nGoal: ${brief.goal}\nOffer: ${brief.offer}\nStyle: ${brief.creativeStyle}\nTone: ${brief.tones.join(', ')}\nAudience: ${brief.audience.selectedPersona?.name ?? brief.audience.personaDescription ?? brief.audience.interests.join(', ')}`;
     return callJson(CopySchema, system, user, override?.model);
   },
 
   async reviseCopy(current, instruction, brief, brand, override) {
-    const system = pickSystem(override, DEFAULT_SYSTEMS.reviseCopy(brand));
+    const system = pickSystem(override, DEFAULT_SYSTEMS.reviseCopy(brand), {
+      brief, brand, copy: current, revisionInstruction: instruction,
+    });
     const user = `Current: ${JSON.stringify(current)}\nInstruction: ${instruction}\nBrief offer: ${brief.offer}\nStyle: ${brief.creativeStyle}`;
     return callJson(CopySchema, system, user, override?.model);
   },

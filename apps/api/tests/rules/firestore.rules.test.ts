@@ -246,3 +246,27 @@ describe('firestore.rules: settings/geek (server-only writes)', () => {
     );
   });
 });
+
+describe('firestore.rules: usage ledger (server-only writes)', () => {
+  it('members can READ usage entries', async () => {
+    await seedWorkspace('ws1', 'alice');
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'workspaces/ws1/usage/u1'), {
+        surface: 'chat', model: 'gpt-5-2', units: 1, estCredits: 2, estUsd: 0.01,
+        createdAt: new Date().toISOString(),
+      });
+    });
+    const db = env.authenticatedContext('alice').firestore();
+    await assertSucceeds(getDoc(doc(db, 'workspaces/ws1/usage/u1')));
+  });
+
+  it('non-members cannot read usage; clients cannot write', async () => {
+    await seedWorkspace('ws1', 'alice');
+    const bob = env.authenticatedContext('bob').firestore();
+    await assertFails(getDoc(doc(bob, 'workspaces/ws1/usage/u1')));
+    const alice = env.authenticatedContext('alice').firestore();
+    await assertFails(
+      setDoc(doc(alice, 'workspaces/ws1/usage/u2'), { surface: 'chat' })
+    );
+  });
+});

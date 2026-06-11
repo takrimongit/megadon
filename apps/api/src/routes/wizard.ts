@@ -6,6 +6,8 @@ import { ok } from '../lib/envelope.js';
 import { defaultWizardOptions } from '../lib/wizardOptions.js';
 import { kieProvider } from '../providers/kie.js';
 import { loadGeekSettings, pickChat } from '../lib/geekSettings.js';
+import { recordUsage, resolveModel } from '../lib/usage.js';
+import { config } from '../lib/config.js';
 import { SuggestPersonasBody, type Persona } from '@megadon/types';
 
 const CACHE_TTL_HOURS = 24;
@@ -43,6 +45,12 @@ export async function wizardRoutes(app: FastifyInstance) {
     const geek = wid ? await loadGeekSettings(wid) : null;
     const override = pickChat(geek, 'personas');
     const personas = await kieProvider.suggestPersonas(body, override);
+    if (wid) {
+      void recordUsage({
+        workspaceId: wid, surface: 'personas',
+        model: resolveModel(override, config.kieChatModel),
+      });
+    }
     await cacheRef.set({ personas, cachedAt: new Date().toISOString() });
     return ok(reply, personas);
   });

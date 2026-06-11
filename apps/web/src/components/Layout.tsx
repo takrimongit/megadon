@@ -10,6 +10,7 @@ const NAV = [
   { to: '/analytics', icon: '📈', label: 'Learn' },
   { to: '/brand', icon: '🎨', label: 'Brand Playbook' },
   { to: '/geek', icon: '🧠', label: 'Geek Mode' },
+  { to: '/usage', icon: '⚡', label: 'Usage' },
 ];
 
 export default function Layout() {

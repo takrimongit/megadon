@@ -11,6 +11,7 @@ import BatchReviewPage from './pages/BatchReviewPage';
 import GeekModePage from './pages/GeekModePage';
 import AnalyticsPage from './pages/AnalyticsPage';
 import BrandPlaybookPage from './pages/BrandPlaybookPage';
+import UsagePage from './pages/UsagePage';
 
 export default function App() {
   const { status, error, retry, playbook } = useAuth();
@@ -62,6 +63,7 @@ export default function App() {
         <Route path="/analytics" element={<AnalyticsPage />} />
         <Route path="/brand" element={<BrandPlaybookPage />} />
         <Route path="/geek" element={<GeekModePage />} />
+        <Route path="/usage" element={<UsagePage />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
