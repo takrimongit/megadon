@@ -7,6 +7,7 @@ import {
   interpolateWithContext,
   interpolateSystemPrompt,
 } from '../src/providers/interpolate.js';
+import { DEFAULT_PROMPTS } from '../src/providers/defaultPrompts.js';
 import type { Brief } from '@megadon/types';
 import type { BrandContext } from '../src/providers/types.js';
 
@@ -82,6 +83,29 @@ describe('interpolateSystemPrompt (geek chat overrides)', () => {
   it('tolerates missing context blocks (personas has no brief/brand)', () => {
     const out = interpolateSystemPrompt('Brand: {{brand.companyName}} static text', {});
     expect(out).toBe('Brand: {{brand.companyName}} static text');
+  });
+
+  it('the DEFAULT generateCopy template actually uses the runtime variables', () => {
+    const out = interpolateSystemPrompt(DEFAULT_PROMPTS.generateCopy, {
+      brief: BRIEF, platform: 'instagram', brand: BRAND,
+    });
+    expect(out).toContain('ad copy for Acme');
+    expect(out).toContain('Platform: instagram');
+    expect(out).toContain('Offer: 20% off annual plans');
+    expect(out).toContain('Tone of voice: Direct and warm');
+    expect(out).toContain('- No stock smiles');
+    expect(out).not.toContain('{{'); // every placeholder resolved
+  });
+
+  it('the DEFAULT reviseCopy template injects instruction + current copy', () => {
+    const out = interpolateSystemPrompt(DEFAULT_PROMPTS.reviseCopy, {
+      brief: BRIEF, brand: BRAND,
+      copy: { headline: 'Old H', body: 'Old B', hook: 'Old K', cta: 'Old C' },
+      revisionInstruction: 'shorter and punchier',
+    });
+    expect(out).toContain('REVISION REQUEST: shorter and punchier');
+    expect(out).toContain('Headline: Old H');
+    expect(out).not.toContain('{{');
   });
 
   it('null-guards missing analysis (brand analyze runs before analysis exists)', () => {

@@ -51,6 +51,8 @@ function brandVars(brand: BrandContext, out: Record<string, string>) {
   out['brand.toneOfVoice'] = brand.analysis?.toneOfVoice ?? '';
   out['brand.visualStyle'] = brand.analysis?.visualStyle ?? '';
   out['brand.targetAudience'] = brand.analysis?.targetAudience ?? '';
+  out['brand.messagingStyle'] = brand.analysis?.messagingStyle ?? '';
+  out['brand.ctaPreferences'] = (brand.analysis?.ctaPreferences ?? []).join(', ');
 }
 
 /** Build the flat var map exposed to a template. */

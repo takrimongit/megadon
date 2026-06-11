@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import { interpolateSystemPrompt, type InterpolationContext } from './interpolate.js';
+import { DEFAULT_PROMPTS } from './defaultPrompts.js';
 import type { CopyProvider, CopyResult, BrandContext } from './types.js';
 import type { Brief, Persona, Platform } from '@megadon/types';
 
@@ -76,53 +77,31 @@ async function callJson<T>(
   }
 }
 
-function brandSystemAddendum(brand?: BrandContext | null): string {
-  if (!brand?.analysis) return '';
-  const a = brand.analysis;
-  const lines: string[] = ['', '## Brand Playbook (use this in every response):'];
-  if (brand.info?.companyName) lines.push(`- Brand: ${brand.info.companyName} (${brand.info.industry})`);
-  if (a.toneOfVoice) lines.push(`- Tone of voice: ${a.toneOfVoice}`);
-  if (a.messagingStyle) lines.push(`- Messaging style: ${a.messagingStyle}`);
-  if (a.targetAudience) lines.push(`- Target audience: ${a.targetAudience}`);
-  if (a.personality?.length) lines.push(`- Brand personality: ${a.personality.join(', ')}`);
-  if (a.brandRules?.length) lines.push(`- Brand rules: ${a.brandRules.join('; ')}`);
-  if (a.ctaPreferences?.length) lines.push(`- Preferred CTA styles: ${a.ctaPreferences.join(', ')}`);
-  return lines.join('\n');
-}
-
-const DEFAULT_SYSTEMS = {
-  generateCopy: (brand?: BrandContext | null) =>
-    `You write high-conversion ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}. Match the platform's format.${brandSystemAddendum(brand)}`,
-  reviseCopy: (brand?: BrandContext | null) =>
-    `Revise ad copy per the user's instruction. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}.${brandSystemAddendum(brand)}`,
-  personas: () =>
-    `Suggest 3 distinct audience personas. Reply with ONLY a valid JSON object — no prose, no markdown — matching {personas: [{id, name, desc, tags, reach}, ...]}. reach is a string like "2.4M".`,
-};
-
 /**
- * Resolve the system prompt: an override (if set) is interpolated against
- * the runtime context so {{brand.*}}, {{brief.*}}, {{platform}} etc. work
- * in chat system prompts the same way they do in media prompt templates.
+ * Resolve the system prompt. Both the override AND the platform default
+ * are {{var}} templates interpolated against the runtime context — the
+ * default shown in Geek Mode is exactly the prompt that executes.
  */
 function pickSystem(
   override: { systemPrompt?: string } | null | undefined,
-  fallback: string,
+  defaultTemplate: string,
   ctx: Partial<InterpolationContext> = {},
 ): string {
-  return override?.systemPrompt && override.systemPrompt.trim().length > 0
-    ? interpolateSystemPrompt(override.systemPrompt, ctx)
-    : fallback;
+  const template = override?.systemPrompt && override.systemPrompt.trim().length > 0
+    ? override.systemPrompt
+    : defaultTemplate;
+  return interpolateSystemPrompt(template, ctx);
 }
 
 export const kieProvider: CopyProvider = {
   async generateCopy(brief, platform, brand, override) {
-    const system = pickSystem(override, DEFAULT_SYSTEMS.generateCopy(brand), { brief, platform, brand });
+    const system = pickSystem(override, DEFAULT_PROMPTS.generateCopy, { brief, platform, brand });
     const user = `Platform: ${platform}\nGoal: ${brief.goal}\nOffer: ${brief.offer}\nStyle: ${brief.creativeStyle}\nTone: ${brief.tones.join(', ')}\nAudience: ${brief.audience.selectedPersona?.name ?? brief.audience.personaDescription ?? brief.audience.interests.join(', ')}`;
     return callJson(CopySchema, system, user, override?.model);
   },
 
   async reviseCopy(current, instruction, brief, brand, override) {
-    const system = pickSystem(override, DEFAULT_SYSTEMS.reviseCopy(brand), {
+    const system = pickSystem(override, DEFAULT_PROMPTS.reviseCopy, {
       brief, brand, copy: current, revisionInstruction: instruction,
     });
     const user = `Current: ${JSON.stringify(current)}\nInstruction: ${instruction}\nBrief offer: ${brief.offer}\nStyle: ${brief.creativeStyle}`;
@@ -130,7 +109,7 @@ export const kieProvider: CopyProvider = {
   },
 
   async suggestPersonas(input, override) {
-    const system = pickSystem(override, DEFAULT_SYSTEMS.personas());
+    const system = pickSystem(override, DEFAULT_PROMPTS.personas);
     const user = `Age groups: ${input.ageGroups.join(', ')}\nInterests: ${input.interests.join(', ')}\nDescription: ${input.personaDescription ?? '(none)'}`;
     const out = await callJson(PersonasSchema, system, user, override?.model);
     return out.personas;

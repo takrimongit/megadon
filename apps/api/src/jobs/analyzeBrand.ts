@@ -4,6 +4,7 @@ import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import { loadGeekSettings, pickChat } from '../lib/geekSettings.js';
 import { interpolateSystemPrompt } from '../providers/interpolate.js';
+import { DEFAULT_PROMPTS } from '../providers/defaultPrompts.js';
 import { recordUsage, resolveModel } from '../lib/usage.js';
 import type { BrandPlaybook, BrandAnalysis } from '@megadon/types';
 
@@ -112,9 +113,7 @@ export async function runAnalyzeBrand(payload: JobPayload) {
   const analyzeOverride = pickChat(geek, 'analyze');
 
   const defaultSystem = [
-    'You are a brand strategist building a playbook for an AI ad generator.',
-    'Reply with ONLY a single valid JSON object — no prose, no markdown fences.',
-    'EVERY field must be populated with realistic, brand-specific values inferred from the company description and industry.',
+    DEFAULT_PROMPTS.analyzeHeader,
     '',
     'Example output for a hypothetical premium running shoe brand:',
     '{',
@@ -138,15 +137,15 @@ export async function runAnalyzeBrand(payload: JobPayload) {
     'Now produce the same structure — fully populated, no empty arrays, no echoing of the placeholder text — for the user\'s brand below.',
   ].join('\n');
 
-  // Interpolate {{brand.*}} vars in an overridden system prompt (analysis
-  // hasn't run yet, so only brand.info-derived vars resolve here).
-  const system = analyzeOverride?.systemPrompt && analyzeOverride.systemPrompt.trim().length > 0
-    ? interpolateSystemPrompt(analyzeOverride.systemPrompt, {
-        // No analysis exists yet at analyze time; the interpolator
-        // null-guards every analysis-derived var.
-        brand: { info: data.info } as import('../providers/types.js').BrandContext,
-      })
+  // Both the override and the default are {{var}} templates. Analysis
+  // hasn't run yet, so only brand.info-derived vars resolve here — the
+  // interpolator null-guards the rest.
+  const systemTemplate = analyzeOverride?.systemPrompt && analyzeOverride.systemPrompt.trim().length > 0
+    ? analyzeOverride.systemPrompt
     : defaultSystem;
+  const system = interpolateSystemPrompt(systemTemplate, {
+    brand: { info: data.info } as import('../providers/types.js').BrandContext,
+  });
 
   const user = [
     `Company: ${data.info.companyName}`,

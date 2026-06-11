@@ -1,25 +1,18 @@
-// Static defaults exposed to the mobile Geek Mode screen so a user can
-// see, copy, and enhance the system prompts and prompt templates that
-// the platform ships with. Kept in sync with kie.ts (chat), analyzeBrand
-// (analyze), and brandPrompt/video (media) by inspection — if you change
-// the runtime defaults, mirror them here.
+// Static defaults exposed to the Geek Mode screens so a user can see,
+// copy, and enhance the prompts the platform ships with. The chat
+// templates are imported from providers/defaultPrompts.ts — they are the
+// literal templates executed at runtime (interpolated with the same
+// engine as overrides), so what users see here is exactly what runs.
 
 import type { GeekDefaults } from '@megadon/types';
 import { getPricingTable } from './aiPricing.js';
+import { DEFAULT_PROMPTS } from '../providers/defaultPrompts.js';
 
-const CHAT_GENERATE = `You write high-conversion ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}. Match the platform's format.
+const CHAT_GENERATE = DEFAULT_PROMPTS.generateCopy;
+const CHAT_REVISE = DEFAULT_PROMPTS.reviseCopy;
+const CHAT_PERSONAS = DEFAULT_PROMPTS.personas;
 
-When a brand playbook is attached at runtime, follow its tone of voice, messaging style, target audience, personality, brand rules, and CTA preferences exactly.`;
-
-const CHAT_REVISE = `Revise ad copy per the user's instruction. Reply with ONLY a valid JSON object — no prose, no markdown — matching {headline, body, hook, cta}.
-
-Preserve the brand's tone of voice, personality, and rules from the attached brand playbook. Only change what the user asked for.`;
-
-const CHAT_PERSONAS = `Suggest 3 distinct audience personas. Reply with ONLY a valid JSON object — no prose, no markdown — matching {personas: [{id, name, desc, tags, reach}, ...]}. reach is a string like "2.4M".`;
-
-const CHAT_ANALYZE = `You are a brand strategist building a playbook for an AI ad generator.
-Reply with ONLY a single valid JSON object — no prose, no markdown fences.
-EVERY field must be populated with realistic, brand-specific values inferred from the company description and industry.
+const CHAT_ANALYZE = `${DEFAULT_PROMPTS.analyzeHeader}
 
 Example output for a hypothetical premium running shoe brand:
 {
@@ -128,6 +121,7 @@ const VARIABLES = {
     '{{brand.companyName}}', '{{brand.colorHexes}}', '{{brand.colorNames}}',
     '{{brand.personality}}', '{{brand.toneOfVoice}}', '{{brand.visualStyle}}',
     '{{brand.targetAudience}}', '{{brand.creativeStyles}}', '{{brand.brandRules}}',
+    '{{brand.industry}}', '{{brand.messagingStyle}}', '{{brand.ctaPreferences}}',
   ],
 };
 
