@@ -67,6 +67,34 @@ export default function WizardCreativeStyleScreen() {
           })}
         </View>
 
+        {state.mediaType === 'video' && (
+          <>
+            <Text style={styles.fieldLabel}>VIDEO STYLE</Text>
+            <View style={styles.mediaRow}>
+              {(['scenic', 'avatar'] as const).map((v) => {
+                const selected = state.videoStyle === v;
+                return (
+                  <TouchableOpacity
+                    key={v}
+                    style={[styles.mediaCard, selected && styles.mediaCardSelected]}
+                    onPress={() => update({ videoStyle: v })}
+                    activeOpacity={0.85}
+                  >
+                    <Text style={[styles.mediaLabel, selected && styles.mediaLabelSelected]}>
+                      {v === 'scenic' ? 'Scenic B-roll' : 'AI Spokesperson'}
+                    </Text>
+                    <Text style={styles.mediaHint}>
+                      {v === 'scenic'
+                        ? 'Cinematic footage — no people'
+                        : 'A talking avatar narrates your script'}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </>
+        )}
+
         <Text style={styles.fieldLabel}>VISUAL STYLE</Text>
         <View style={styles.styleGrid}>
           {visualStyles.map((s) => {

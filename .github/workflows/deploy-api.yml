@@ -127,8 +127,8 @@ jobs:
             --region="${REGION}" \
             --no-allow-unauthenticated \
             --service-account="worker-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812" \
-            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest" \
+            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812,HEYGEN_AVATAR_ID=7c2299da72df407ea0bf365a73844621,HEYGEN_VOICE_ID=42d00d4aac5441279d8536cd6b52c53c" \
+            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest,HEYGEN_API_KEY=HEYGEN_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
           WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
           echo "url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
@@ -156,8 +156,8 @@ jobs:
             --region="${REGION}" \
             --allow-unauthenticated \
             --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812" \
-            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest" \
+            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812,HEYGEN_AVATAR_ID=7c2299da72df407ea0bf365a73844621,HEYGEN_VOICE_ID=42d00d4aac5441279d8536cd6b52c53c" \
+            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest,HEYGEN_API_KEY=HEYGEN_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
 
       - name: Smoke test /health
@@ -273,8 +273,8 @@ jobs:
             --region="${REGION}" \
             --no-allow-unauthenticated \
             --service-account="worker-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812" \
-            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest" \
+            --set-env-vars="ROLE=worker,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812,HEYGEN_AVATAR_ID=7c2299da72df407ea0bf365a73844621,HEYGEN_VOICE_ID=42d00d4aac5441279d8536cd6b52c53c" \
+            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest,HEYGEN_API_KEY=HEYGEN_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
           WORKER_URL="$(gcloud run services describe "worker-${ENV_NAME}" --region="${REGION}" --format='value(status.url)')"
           echo "url=${WORKER_URL}" >> "$GITHUB_OUTPUT"
@@ -302,8 +302,8 @@ jobs:
             --region="${REGION}" \
             --allow-unauthenticated \
             --service-account="api-runtime@${PROJECT_ID}.iam.gserviceaccount.com" \
-            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812" \
-            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest" \
+            --set-env-vars="ROLE=api,NODE_ENV=production,GCP_PROJECT=${PROJECT_ID},GCP_REGION=${REGION},STORAGE_BUCKET=${PROJECT_ID}-${ENV_NAME}-assets,CLOUD_TASKS_QUEUE=ad-generation-${ENV_NAME},WORKER_URL=${{ steps.worker.outputs.url }},TASKS_INVOKER_SA=tasks-invoker@${PROJECT_ID}.iam.gserviceaccount.com,KIE_CHAT_MODEL=gpt-5-2,KIE_IMAGE_MODEL=flux-2/pro-text-to-image,KIE_VIDEO_MODEL=veo3_lite,META_FACEBOOK_PAGE_ID=1207082059144258,META_INSTAGRAM_USER_ID=17841478003781812,HEYGEN_AVATAR_ID=7c2299da72df407ea0bf365a73844621,HEYGEN_VOICE_ID=42d00d4aac5441279d8536cd6b52c53c" \
+            --set-secrets="KIE_API_KEY=KIE_API_KEY_${ENV_NAME^^}:latest,META_PAGE_TOKEN=META_PAGE_TOKEN_${ENV_NAME^^}:latest,HEYGEN_API_KEY=HEYGEN_API_KEY_${ENV_NAME^^}:latest" \
             --quiet
 
       - name: Smoke test /health

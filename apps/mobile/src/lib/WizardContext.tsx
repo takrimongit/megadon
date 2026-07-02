@@ -4,6 +4,7 @@ import type {
   MediaType,
   Persona,
   Platform,
+  VideoStyle,
   VisualStyle,
   WizardOptions,
 } from '@megadon/types';
@@ -20,6 +21,7 @@ export interface WizardState {
   creativeStyle: VisualStyle | null;
   tones: string[];
   mediaType: MediaType;
+  videoStyle: VideoStyle;
   options: WizardOptions | null;
 }
 
@@ -35,6 +37,7 @@ const initialState: WizardState = {
   creativeStyle: null,
   tones: [],
   mediaType: 'image',
+  videoStyle: 'scenic',
   options: null,
 };
 

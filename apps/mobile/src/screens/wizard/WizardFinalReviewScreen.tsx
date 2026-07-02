@@ -66,6 +66,7 @@ export default function WizardFinalReviewScreen() {
         creativeStyle: state.creativeStyle,
         tones: state.tones,
         mediaType: state.mediaType,
+        videoStyle: state.videoStyle,
       };
       const name = `${summarizeGoal(state.goal, state.options)} — ${new Date().toLocaleDateString()}`;
       const { batchId } = await api.createBatch({ name, brief });

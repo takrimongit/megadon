@@ -39,6 +39,10 @@ export type VisualStyle = z.infer<typeof VisualStyle>;
 export const MediaType = z.enum(['image', 'video']);
 export type MediaType = z.infer<typeof MediaType>;
 
+/** For video ads: scenic (Veo b-roll) or a talking-avatar spokesperson (HeyGen). */
+export const VideoStyle = z.enum(['scenic', 'avatar']);
+export type VideoStyle = z.infer<typeof VideoStyle>;
+
 // ============ Entities ============
 
 export const User = z.object({
@@ -90,6 +94,8 @@ export const Brief = z.object({
   tones: z.array(z.string()),
   /** What kind of asset to generate. Defaults to image for back-compat. */
   mediaType: MediaType.default('image'),
+  /** For video ads only: scenic (Veo) or avatar spokesperson (HeyGen). */
+  videoStyle: VideoStyle.default('scenic'),
 });
 export type Brief = z.infer<typeof Brief>;
 
@@ -170,6 +176,8 @@ export const Ad = z.object({
   status: AdStatus,
   score: z.number().optional(),
   mediaType: MediaType.default('image'),
+  /** For video ads: which engine produced/should produce the video. */
+  videoStyle: VideoStyle.optional(),
   /** GCS path for the final asset (jpg for image, mp4 for video). */
   assetPath: z.string().optional(),
   providerJobId: z.string().optional(),

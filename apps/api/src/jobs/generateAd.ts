@@ -63,7 +63,8 @@ export async function runGenerateAd(payload: JobPayload) {
 
     // 4. Creative generation — dispatch on mediaType.
     const mediaType: 'image' | 'video' = ad.mediaType ?? effectiveBrief.mediaType ?? 'image';
-    const provider = mediaType === 'video' ? getVideoProvider() : getCreativeProvider();
+    const videoStyle: 'scenic' | 'avatar' = ad.videoStyle ?? effectiveBrief.videoStyle ?? 'scenic';
+    const provider = mediaType === 'video' ? getVideoProvider(videoStyle) : getCreativeProvider();
     const mediaOverride = pickMedia(geek, mediaType === 'video' ? 'video' : 'image');
     const kickoff = await provider.kickoff(
       effectiveBrief,
@@ -85,6 +86,7 @@ export async function runGenerateAd(payload: JobPayload) {
       // longer initial delay because Veo typically takes 30-60s.
       await adRef.update({
         providerJobId: kickoff.jobId,
+        ...(mediaType === 'video' ? { videoStyle } : {}),
         ...copy,
         updatedAt: new Date().toISOString(),
       });

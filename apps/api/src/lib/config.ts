@@ -33,6 +33,14 @@ export const config = {
   metaFacebookPageId: process.env.META_FACEBOOK_PAGE_ID ?? '',
   metaInstagramUserId: process.env.META_INSTAGRAM_USER_ID ?? '',
 
+  // HeyGen avatar video. Key injected from Secret Manager as HEYGEN_API_KEY
+  // (same pattern as KIE_API_KEY). Default avatar + voice power the
+  // single-brand spokesperson; a Geek-Mode override can swap them per ad.
+  heygenKey: process.env.HEYGEN_API_KEY ?? '',
+  heygenApiBase: process.env.HEYGEN_API_BASE ?? 'https://api.heygen.com',
+  heygenAvatarId: process.env.HEYGEN_AVATAR_ID ?? '',
+  heygenVoiceId: process.env.HEYGEN_VOICE_ID ?? '',
+
   emulators: {
     auth: process.env.FIREBASE_AUTH_EMULATOR_HOST,
     firestore: process.env.FIRESTORE_EMULATOR_HOST,

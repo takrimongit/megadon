@@ -21,7 +21,8 @@ export async function runPollVideo(payload: JobPayload) {
   const ad = adSnap.data()!;
   if (!ad.providerJobId) return;
 
-  const provider = getVideoProvider();
+  const style = (ad.videoStyle ?? 'scenic') as 'scenic' | 'avatar';
+  const provider = getVideoProvider(style);
   const status = await provider.pollJob(ad.providerJobId);
 
   if (status.status === 'pending') {
