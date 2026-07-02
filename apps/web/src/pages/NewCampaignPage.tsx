@@ -138,6 +138,7 @@ export default function NewCampaignPage() {
         creativeStyle: draft.creativeStyle as Brief['creativeStyle'],
         tones: draft.tones,
         mediaType: draft.mediaType,
+        videoStyle: 'scenic',
       };
       const { batchId } = await api.createBatch({ name: draft.name.trim(), brief });
       localStorage.removeItem(DRAFT_KEY);
