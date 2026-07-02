@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, ScrollView, StyleSheet, TouchableOpacity, TextInput, Alert,
+  ActivityIndicator, Linking,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialIcons } from '@expo/vector-icons';
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { doc, onSnapshot } from 'firebase/firestore';
-import type { Ad, Revision } from '@megadon/types';
+import type { Ad, Revision, MetaSettings, PublishPlatform } from '@megadon/types';
 import { Colors, Typography, Spacing, Radius } from '../../theme';
 import AppHeader from '../../components/AppHeader';
 import PrimaryButton from '../../components/PrimaryButton';
@@ -30,6 +31,18 @@ const suggestions = [
   'Shorten the copy',
 ];
 
+const PLATFORMS: Record<PublishPlatform, { label: string; icon: keyof typeof FontAwesome.glyphMap; color: string }> = {
+  facebook: { label: 'Facebook', icon: 'facebook-square', color: '#1877F2' },
+  instagram: { label: 'Instagram', icon: 'instagram', color: '#C13584' },
+};
+
+const PUBLISH_STATUS: Record<string, { label: string; color: string }> = {
+  publishing: { label: 'Publishing', color: Colors.primary },
+  published: { label: 'Published', color: Colors.success },
+  partial: { label: 'Partial', color: '#B7791F' },
+  failed: { label: 'Failed', color: Colors.error },
+};
+
 export default function AIRevisionScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
@@ -43,6 +56,9 @@ export default function AIRevisionScreen() {
   const [revisionImageUrl, setRevisionImageUrl] = useState<string | null>(null);
   const [revising, setRevising] = useState(false);
   const [accepting, setAccepting] = useState(false);
+  const [meta, setMeta] = useState<MetaSettings | null>(null);
+  const [targets, setTargets] = useState<PublishPlatform[]>([]);
+  const [publishing, setPublishing] = useState(false);
 
   // Subscribe to the ad doc.
   useEffect(() => {
@@ -116,6 +132,43 @@ export default function AIRevisionScreen() {
     }
   };
 
+  // Load Meta connection so we know which platforms are publishable.
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const m = await api.getMetaSettings();
+        if (cancelled) return;
+        setMeta(m);
+        const available: PublishPlatform[] = [];
+        if (m.facebookPageId) available.push('facebook');
+        if (m.instagramUserId) available.push('instagram');
+        setTargets(available);
+      } catch {
+        // Publishing UI simply won't appear if settings can't load.
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const toggleTarget = (p: PublishPlatform) =>
+    setTargets((t) => (t.includes(p) ? t.filter((x) => x !== p) : [...t, p]));
+
+  const handlePublish = async () => {
+    if (targets.length === 0) return;
+    setPublishing(true);
+    try {
+      await api.publishAd(adId, targets);
+      // ad.publish flips to 'publishing' via the live Firestore subscription.
+    } catch (e) {
+      Alert.alert('Publish failed', e instanceof Error ? e.message : 'Could not publish this ad.');
+    } finally {
+      setPublishing(false);
+    }
+  };
+
   const revisionReady = revision?.status === 'ready';
   const revisionFailed = revision?.status === 'failed';
   const revisionLoading = revisionId !== null && !revisionReady && !revisionFailed;
@@ -170,6 +223,91 @@ export default function AIRevisionScreen() {
                   </View>
                 ) : null}
               </View>
+
+              {ad.status === 'approved' && (() => {
+                const pub = ad.publish;
+                const availablePlatforms = (Object.keys(PLATFORMS) as PublishPlatform[]).filter((p) =>
+                  p === 'facebook' ? !!meta?.facebookPageId : !!meta?.instagramUserId,
+                );
+                return (
+                  <View style={styles.publishCard}>
+                    <View style={styles.publishHeader}>
+                      <MaterialIcons name="rocket-launch" size={18} color={Colors.primary} />
+                      <Text style={styles.publishTitle}>Publish to social</Text>
+                      {pub && pub.status !== 'not_published' && PUBLISH_STATUS[pub.status] ? (
+                        <View style={[styles.statusPill, { backgroundColor: PUBLISH_STATUS[pub.status].color + '22' }]}>
+                          <Text style={[styles.statusPillText, { color: PUBLISH_STATUS[pub.status].color }]}>
+                            {PUBLISH_STATUS[pub.status].label}
+                          </Text>
+                        </View>
+                      ) : null}
+                    </View>
+
+                    {meta && !meta.connected ? (
+                      <Text style={styles.publishHint}>Connect a Facebook Page in settings to publish.</Text>
+                    ) : pub && pub.status === 'publishing' ? (
+                      <View style={styles.publishRow}>
+                        <ActivityIndicator size="small" color={Colors.primary} />
+                        <Text style={styles.publishHint}>Publishing your ad…</Text>
+                      </View>
+                    ) : pub && (pub.status === 'published' || pub.status === 'partial' || pub.status === 'failed') ? (
+                      <View style={styles.targetList}>
+                        {pub.targets.map((t) => (
+                          <View key={t.platform} style={styles.targetRow}>
+                            <FontAwesome name={PLATFORMS[t.platform].icon} size={16} color={PLATFORMS[t.platform].color} />
+                            <Text style={styles.targetLabel}>{PLATFORMS[t.platform].label}</Text>
+                            {t.status === 'published' ? (
+                              t.permalink ? (
+                                <TouchableOpacity onPress={() => Linking.openURL(t.permalink!)}>
+                                  <Text style={styles.viewPost}>View post →</Text>
+                                </TouchableOpacity>
+                              ) : (
+                                <Text style={styles.publishedTag}>Published</Text>
+                              )
+                            ) : (
+                              <Text style={styles.failedTag} numberOfLines={1}>{t.error?.message ?? 'Failed'}</Text>
+                            )}
+                          </View>
+                        ))}
+                        {(pub.status === 'failed' || pub.status === 'partial') && (
+                          <TouchableOpacity style={styles.retryBtn} onPress={handlePublish} disabled={publishing}>
+                            <MaterialIcons name="refresh" size={16} color={Colors.primary} />
+                            <Text style={styles.retryText}>{publishing ? 'Retrying…' : 'Retry publish'}</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                    ) : availablePlatforms.length === 0 ? (
+                      <Text style={styles.publishHint}>Connect a Facebook Page in settings to publish.</Text>
+                    ) : (
+                      <>
+                        <View style={styles.platformRow}>
+                          {availablePlatforms.map((p) => {
+                            const active = targets.includes(p);
+                            return (
+                              <TouchableOpacity
+                                key={p}
+                                style={[styles.platformChip, active && styles.platformChipActive]}
+                                onPress={() => toggleTarget(p)}
+                                activeOpacity={0.8}
+                              >
+                                <FontAwesome name={PLATFORMS[p].icon} size={16} color={active ? PLATFORMS[p].color : Colors.onSurfaceVariant} />
+                                <Text style={[styles.platformChipText, active && styles.platformChipTextActive]}>{PLATFORMS[p].label}</Text>
+                                {active ? <MaterialIcons name="check-circle" size={14} color={Colors.success} /> : null}
+                              </TouchableOpacity>
+                            );
+                          })}
+                        </View>
+                        <PrimaryButton
+                          label={publishing ? 'Publishing…' : 'Publish now'}
+                          onPress={handlePublish}
+                          loading={publishing}
+                          disabled={targets.length === 0 || publishing}
+                        />
+                      </>
+                    )}
+                  </View>
+                );
+              })()}
 
               {revisionLoading && (
                 <View style={styles.loadingNote}>
@@ -287,6 +425,52 @@ const styles = StyleSheet.create({
     borderColor: Colors.secondary + '33',
   },
   revisionNoteText: { ...Typography.bodySm, color: Colors.secondary, flex: 1 },
+  publishCard: {
+    backgroundColor: Colors.surfaceContainerLowest,
+    borderRadius: Radius.lg,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant + '4D',
+    padding: Spacing.md,
+    gap: Spacing.sm,
+  },
+  publishHeader: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  publishTitle: { ...Typography.titleMd, color: Colors.onSurface, flex: 1 },
+  statusPill: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.full },
+  statusPillText: { ...Typography.labelCaps, fontSize: 10, fontWeight: '700' },
+  publishHint: { ...Typography.bodySm, color: Colors.onSurfaceVariant },
+  publishRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  platformRow: { flexDirection: 'row', gap: Spacing.sm, flexWrap: 'wrap' },
+  platformChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.surfaceContainerHigh,
+    borderWidth: 1,
+    borderColor: Colors.outlineVariant,
+  },
+  platformChipActive: { borderColor: Colors.primary, backgroundColor: Colors.primaryFixed },
+  platformChipText: { ...Typography.bodySm, color: Colors.onSurfaceVariant, fontWeight: '600' },
+  platformChipTextActive: { color: Colors.onSurface },
+  targetList: { gap: Spacing.sm },
+  targetRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  targetLabel: { ...Typography.bodySm, color: Colors.onSurface, fontWeight: '600', flex: 1 },
+  viewPost: { ...Typography.labelCaps, color: Colors.primary },
+  publishedTag: { ...Typography.labelCaps, color: Colors.success },
+  failedTag: { ...Typography.labelCaps, color: Colors.error, maxWidth: 160 },
+  retryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    alignSelf: 'flex-start',
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 8,
+    borderRadius: Radius.full,
+    backgroundColor: Colors.primaryFixed,
+  },
+  retryText: { ...Typography.labelCaps, color: Colors.primary },
   fieldLabel: { ...Typography.labelCaps, color: Colors.onSurfaceVariant, textTransform: 'uppercase' },
   suggestionsScroll: { marginHorizontal: -Spacing.gutter },
   suggestionsRow: { flexDirection: 'row', gap: Spacing.sm, paddingHorizontal: Spacing.gutter, paddingVertical: 2 },

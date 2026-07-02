@@ -21,6 +21,18 @@ export const config = {
   // Veo 3.1 variants: veo3 (flagship) | veo3_fast (light) | veo3_lite (cheapest)
   kieVideoModel: process.env.KIE_VIDEO_MODEL ?? 'veo3_lite',
 
+  // Meta (Facebook/Instagram) organic publishing. The Page token is injected
+  // by Cloud Run from Secret Manager as META_PAGE_TOKEN (same pattern as
+  // KIE_API_KEY); only the Graph API version is a plain default here.
+  metaGraphVersion: process.env.META_GRAPH_VERSION ?? 'v21.0',
+
+  // Single-brand fallback: when set, these env vars are used for every
+  // workspace instead of per-workspace Secret Manager / Firestore settings.
+  // Convenient for a one-client deployment; leave empty for multi-tenant.
+  metaPageToken: process.env.META_PAGE_TOKEN ?? '',
+  metaFacebookPageId: process.env.META_FACEBOOK_PAGE_ID ?? '',
+  metaInstagramUserId: process.env.META_INSTAGRAM_USER_ID ?? '',
+
   emulators: {
     auth: process.env.FIREBASE_AUTH_EMULATOR_HOST,
     firestore: process.env.FIRESTORE_EMULATOR_HOST,

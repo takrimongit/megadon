@@ -3,10 +3,23 @@ import { requireAuth, requireWorkspace } from '../middleware/auth.js';
 import { ok } from '../lib/envelope.js';
 import { settingsRef } from '../lib/geekSettings.js';
 import { getGeekDefaults } from '../lib/geekDefaults.js';
-import { UpdateGeekSettingsBody, type GeekSettings } from '@megadon/types';
+import { metaSettingsRef, loadMetaSettings } from '../lib/metaSettings.js';
+import { setMetaToken } from '../lib/metaSecrets.js';
+import {
+  UpdateGeekSettingsBody,
+  UpdateMetaSettingsBody,
+  type GeekSettings,
+  type MetaSettings,
+} from '@megadon/types';
 
 const DEFAULT_GEEK: GeekSettings = {
   enabled: false,
+  updatedAt: new Date(0).toISOString(),
+};
+
+const DEFAULT_META: MetaSettings = {
+  connected: false,
+  tokenSet: false,
   updatedAt: new Date(0).toISOString(),
 };
 
@@ -56,6 +69,43 @@ export async function settingsRoutes(app: FastifyInstance) {
     if (analyze) next.analyze = analyze;
     if (image) next.image = image;
     if (video) next.video = video;
+
+    await ref.set(next);
+    return ok(reply, next);
+  });
+
+  // GET Meta (Facebook/Instagram) connection. Never returns the token.
+  app.get('/settings/meta', { preHandler: workspaceGuards }, async (req, reply) => {
+    const settings = await loadMetaSettings(req.workspace!.id);
+    return ok(reply, settings ?? DEFAULT_META);
+  });
+
+  // PUT — connect / update Meta settings. The Page access token (write-only)
+  // is stored in Secret Manager, never in Firestore.
+  app.put('/settings/meta', { preHandler: workspaceGuards }, async (req, reply) => {
+    const body = UpdateMetaSettingsBody.parse(req.body);
+    const workspaceId = req.workspace!.id;
+    const ref = metaSettingsRef(workspaceId);
+    const snap = await ref.get();
+    const existing = snap.exists ? (snap.data() as MetaSettings) : DEFAULT_META;
+
+    if (body.pageAccessToken) {
+      await setMetaToken(workspaceId, body.pageAccessToken);
+    }
+
+    const tokenSet = existing.tokenSet || !!body.pageAccessToken;
+    const facebookPageId = body.facebookPageId ?? existing.facebookPageId;
+    const instagramUserId = body.instagramUserId ?? existing.instagramUserId;
+
+    const next: MetaSettings = {
+      connected: tokenSet && !!facebookPageId,
+      tokenSet,
+      updatedAt: new Date().toISOString(),
+    };
+    if (facebookPageId) next.facebookPageId = facebookPageId;
+    if (instagramUserId) next.instagramUserId = instagramUserId;
+    const pageName = body.pageName ?? existing.pageName;
+    if (pageName) next.pageName = pageName;
 
     await ref.set(next);
     return ok(reply, next);

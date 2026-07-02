@@ -104,6 +104,7 @@ Fastify + TypeScript on Cloud Run. Firebase Auth, Firestore, Cloud Storage, Clou
 - [docs/backend-design.md](docs/backend-design.md) — architecture & build phases
 - [docs/api.md](docs/api.md) — REST endpoint reference (request/response shapes, error codes)
 - [docs/deployment.md](docs/deployment.md) — CI/CD flow, one-time GCP bootstrap, staging vs prod
+- [docs/meta-publishing.md](docs/meta-publishing.md) — organic Facebook Page + Instagram publishing (setup, tokens, permissions)
 - [docs/mobile-integration.md](docs/mobile-integration.md) — how mobile screens map to API calls + Firestore listeners (**integration not yet done**)
 
 ### Commands
@@ -127,8 +128,8 @@ gcloud builds submit --config apps/api/cloudbuild.yaml
 - **Two roles, one image.** `ROLE=api` boots the public API + worker routes. `ROLE=worker` only registers `/internal/jobs/*` for Cloud Tasks delivery. Same Docker image, different env var.
 - **`src/server.ts`** — Fastify entry: helmet, CORS, request ID, error handler that maps `AppError` and `ZodError` to envelope.
 - **`src/routes/`** — REST endpoints under `/v1` (workspaces, wizard, batches, ads, reads/stubs) and `/internal/jobs/*` for Cloud Tasks.
-- **`src/jobs/`** — Worker handlers (`generateAd`, `pollCreative`, `reviseAd`). Each is idempotent and assumes Cloud Tasks retry/backoff.
-- **`src/providers/`** — `CopyProvider` and `CreativeProvider` interfaces, both backed by kie.ai (chat completions for copy, image generations for creative). `getCreativeProvider()` returns a fake provider in emulator mode.
+- **`src/jobs/`** — Worker handlers (`generateAd`, `pollCreative`, `reviseAd`, `publishAd`). Each is idempotent and assumes Cloud Tasks retry/backoff.
+- **`src/providers/`** — `CopyProvider` and `CreativeProvider` interfaces, both backed by kie.ai (chat completions for copy, image generations for creative). `getCreativeProvider()` returns a fake provider in emulator mode. `MetaProvider` publishes organic posts to Facebook/Instagram via the Graph API (`getMetaProvider()` is fake in emulator mode).
 - **`src/middleware/`** — `requireAuth` (verifies Firebase ID token), `requireWorkspace` (verifies membership via `x-workspace-id`), `requireCloudTasks` (verifies OIDC caller email).
 
 ### Read pattern

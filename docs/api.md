@@ -211,6 +211,34 @@ Apply a `status: 'ready'` revision to the ad: copies `headline/body/cta` from th
 
 No request body. Returns `{ data: { ok: true }, error: null }`.
 
+#### `POST /v1/ads/:adId/publish`
+Publish an **approved** ad organically to the workspace's connected Facebook Page and/or linked Instagram Business account. Sets `ad.publish.status = 'publishing'`, enqueues a worker job, and returns `202`. The worker calls the Meta Graph API and writes per-target results back to `ad.publish` (subscribe to the ad doc to watch progress).
+
+Requires the workspace to be connected via `PUT /v1/settings/meta`. Fails with `VALIDATION_FAILED` if the ad is not approved or has no generated asset.
+
+**Body**
+```json
+{ "targets": ["facebook", "instagram"] }
+```
+**Response 202**
+```json
+{ "data": { "ok": true, "status": "publishing" }, "error": null }
+```
+
+The resulting `ad.publish` shape:
+```json
+{
+  "status": "published",
+  "targets": [
+    { "platform": "facebook", "status": "published", "remoteId": "123_456", "permalink": "https://www.facebook.com/123_456", "publishedAt": "..." },
+    { "platform": "instagram", "status": "published", "remoteId": "178...", "permalink": "https://www.instagram.com/p/...", "publishedAt": "..." }
+  ],
+  "requestedBy": "uid",
+  "updatedAt": "..."
+}
+```
+`status` is `published` (all targets ok), `partial` (some failed), or `failed` (all failed). Failed targets carry an `error: { code, message }`.
+
 ---
 
 ### Reads
@@ -239,6 +267,41 @@ Returns a 15-minute signed read URL for the ad's primary asset in Cloud Storage.
 
 ---
 
+### Settings
+
+#### `GET /v1/settings/meta`
+Returns the workspace's Meta connection. The Page access token is **never** returned — `tokenSet` only reflects whether one has been stored.
+
+```json
+{
+  "data": {
+    "connected": true,
+    "facebookPageId": "1234567890",
+    "pageName": "My Page",
+    "instagramUserId": "9876543210",
+    "tokenSet": true,
+    "updatedAt": "..."
+  },
+  "error": null
+}
+```
+
+#### `PUT /v1/settings/meta`
+Connect or update the Meta account. `pageAccessToken` is **write-only** — it is stored in Secret Manager (`meta-page-token-{workspaceId}`), not Firestore. The workspace becomes `connected` once both a `facebookPageId` and a token are present.
+
+**Body** (all fields optional; supply what you're changing)
+```json
+{
+  "facebookPageId": "1234567890",
+  "pageName": "My Page",
+  "instagramUserId": "9876543210",
+  "pageAccessToken": "EAAG...long-lived-page-token"
+}
+```
+Returns the updated `MetaSettings` (without the token).
+
+---
+
 ### Analytics stubs
 
 These return deterministic mock data in MVP. Schema is real so wiring real pipelines later is a swap-in.
@@ -259,6 +322,7 @@ These are not part of the public API. Cloud Tasks dispatches them with OIDC-sign
 - `POST /internal/jobs/generate-ad`
 - `POST /internal/jobs/poll-creative`
 - `POST /internal/jobs/revise-ad`
+- `POST /internal/jobs/publish-ad`
 
 ---
 

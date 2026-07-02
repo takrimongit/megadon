@@ -13,6 +13,8 @@ import type {
   GeekSettings,
   UpdateGeekSettingsBody,
   GeekDefaults,
+  MetaSettings,
+  PublishPlatform,
 } from '@megadon/types';
 import { getAuthToken, getWorkspaceId } from './firebase';
 
@@ -83,6 +85,14 @@ export const api = {
     request<{ ok: true }>(`/batches/${batchId}/decisions`, {
       method: 'POST',
       body: JSON.stringify({ decisions }),
+    }),
+
+  // Publishing (Meta — Facebook Page + Instagram)
+  getMetaSettings: () => request<MetaSettings>('/settings/meta'),
+  publishAd: (adId: string, targets: PublishPlatform[]) =>
+    request<{ ok: true; status: 'publishing' }>(`/ads/${adId}/publish`, {
+      method: 'POST',
+      body: JSON.stringify({ targets }),
     }),
 
   // Revisions

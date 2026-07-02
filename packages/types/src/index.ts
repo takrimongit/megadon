@@ -120,6 +120,43 @@ export const Batch = z.object({
 });
 export type Batch = z.infer<typeof Batch>;
 
+// ============ Publishing (organic Facebook Page + Instagram) ============
+
+export const PublishPlatform = z.enum(['facebook', 'instagram']);
+export type PublishPlatform = z.infer<typeof PublishPlatform>;
+
+export const PublishTargetStatus = z.enum(['pending', 'published', 'failed']);
+export type PublishTargetStatus = z.infer<typeof PublishTargetStatus>;
+
+/** Per-destination outcome of a publish attempt, stored on the ad. */
+export const PublishTargetResult = z.object({
+  platform: PublishPlatform,
+  status: PublishTargetStatus,
+  /** Remote post/media id returned by Meta. */
+  remoteId: z.string().optional(),
+  permalink: z.string().optional(),
+  error: z.object({ code: z.string(), message: z.string() }).optional(),
+  publishedAt: z.string().optional(),
+});
+export type PublishTargetResult = z.infer<typeof PublishTargetResult>;
+
+export const PublishStatus = z.enum([
+  'not_published',
+  'publishing',
+  'published',
+  'partial', // some targets succeeded, some failed
+  'failed',
+]);
+export type PublishStatus = z.infer<typeof PublishStatus>;
+
+export const AdPublish = z.object({
+  status: PublishStatus,
+  targets: z.array(PublishTargetResult).default([]),
+  requestedBy: z.string().optional(),
+  updatedAt: z.string(),
+});
+export type AdPublish = z.infer<typeof AdPublish>;
+
 export const Ad = z.object({
   id: z.string(),
   batchId: z.string(),
@@ -143,6 +180,8 @@ export const Ad = z.object({
     cta: z.string().optional(),
     revisedAt: z.string(),
   })).default([]),
+  /** Set once the ad has been (or is being) pushed to social platforms. */
+  publish: AdPublish.optional(),
   createdAt: z.string(),
   updatedAt: z.string(),
 });
@@ -194,6 +233,38 @@ export const BulkDecisionsBody = z.object({
   })).min(1),
 });
 export const CreateRevisionBody = z.object({ instruction: z.string().min(1) });
+
+// ============ Meta publishing settings ============
+
+/**
+ * Per-workspace Meta connection. The Page access token itself is NEVER
+ * stored here or returned by the API — it lives in Secret Manager.
+ * `tokenSet` only reflects whether a token has been saved.
+ */
+export const MetaSettings = z.object({
+  connected: z.boolean().default(false),
+  facebookPageId: z.string().optional(),
+  pageName: z.string().optional(),
+  /** Instagram Business/Creator account id linked to the Page. */
+  instagramUserId: z.string().optional(),
+  tokenSet: z.boolean().default(false),
+  updatedAt: z.string(),
+});
+export type MetaSettings = z.infer<typeof MetaSettings>;
+
+export const UpdateMetaSettingsBody = z.object({
+  facebookPageId: z.string().optional(),
+  pageName: z.string().optional(),
+  instagramUserId: z.string().optional(),
+  /** Write-only long-lived Page access token; stored in Secret Manager. */
+  pageAccessToken: z.string().min(1).optional(),
+});
+export type UpdateMetaSettingsBody = z.infer<typeof UpdateMetaSettingsBody>;
+
+export const PublishAdBody = z.object({
+  targets: z.array(PublishPlatform).min(1),
+});
+export type PublishAdBody = z.infer<typeof PublishAdBody>;
 
 // ============ API Envelope ============
 

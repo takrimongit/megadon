@@ -4,7 +4,7 @@ import { requireAuth, requireWorkspace } from '../middleware/auth.js';
 import { ok } from '../lib/envelope.js';
 import { AppError } from '../lib/errors.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
-import { UpdateAdBody, CreateRevisionBody } from '@megadon/types';
+import { UpdateAdBody, CreateRevisionBody, PublishAdBody } from '@megadon/types';
 
 async function findAd(workspaceId: string, adId: string) {
   const snap = await db()
@@ -144,5 +144,40 @@ export async function adRoutes(app: FastifyInstance) {
     });
 
     return ok(reply, { ok: true });
+  });
+
+  // Publish an approved ad to Facebook Page / Instagram (organic).
+  app.post('/ads/:adId/publish', async (req, reply) => {
+    const { adId } = req.params as { adId: string };
+    const body = PublishAdBody.parse(req.body);
+    const { id: workspaceId } = req.workspace!;
+    const uid = req.user!.uid;
+
+    const adDoc = await findAd(workspaceId, adId);
+    const ad = adDoc.data();
+    if (ad.status !== 'approved') throw AppError.validation('Only approved ads can be published');
+    if (!ad.assetPath) throw AppError.validation('Ad has no generated asset yet');
+
+    await adDoc.ref.update({
+      publish: {
+        status: 'publishing',
+        targets: [],
+        requestedBy: uid,
+        updatedAt: new Date().toISOString(),
+      },
+    });
+
+    await enqueueJob({
+      path: '/internal/jobs/publish-ad',
+      payload: {
+        workspaceId,
+        batchId: adDoc.ref.parent.parent!.id,
+        adId,
+        targets: body.targets,
+        requestedBy: uid,
+      },
+    });
+
+    return ok(reply, { ok: true, status: 'publishing' }, 202);
   });
 }
