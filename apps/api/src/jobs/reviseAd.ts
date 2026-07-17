@@ -71,6 +71,7 @@ export async function runReviseAd(payload: JobPayload) {
     const kickoff = await provider.kickoff(brief, platform, revised, brand, {
       revisionInstruction: rev.instruction,
       override: imageOverride,
+      creativeDirection: ad.creativeDirection,
     });
     void recordUsage({
       workspaceId, batchId, adId: ad.id, surface: 'image',

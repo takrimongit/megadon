@@ -1,7 +1,7 @@
 import { db, bucket } from '../lib/firebase.js';
 import { getCreativeProvider } from '../providers/creative.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
-import { compositeBrandOverlay, fetchBrandLogo } from './composite.js';
+import { finishImageAsset } from './composite.js';
 
 const MAX_ATTEMPTS = 60; // ~30 min at 30s intervals
 
@@ -75,14 +75,9 @@ export async function downloadRevisionAsset(
   adId: string,
   revisionId: string,
 ): Promise<string> {
-  const resp = await fetch(url);
-  if (!resp.ok) throw new Error(`Asset download failed: ${resp.status}`);
-  const bgBuf = Buffer.from(await resp.arrayBuffer());
-
   // Re-fetch batch + revision to access brand + revised copy for compositing.
   const batchSnap = await db().doc(`workspaces/${workspaceId}/batches/${batchId}`).get();
   const brand = batchSnap.data()?.brandContext ?? null;
-  const logo = await fetchBrandLogo(brand);
 
   // The revision doc holds the new copy. Look it up via collectionGroup
   // to avoid having to plumb adPath through every caller.
@@ -100,12 +95,7 @@ export async function downloadRevisionAsset(
     revCta = revSnap.data()?.cta ?? '';
   }
 
-  const out = await compositeBrandOverlay({
-    background: bgBuf,
-    brand,
-    logo,
-    copy: { headline: revHeadline, cta: revCta },
-  });
+  const out = await finishImageAsset(url, brand, { headline: revHeadline, cta: revCta });
 
   const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/rev-${revisionId}.${out.ext}`;
   await bucket().file(path).save(out.buffer, {

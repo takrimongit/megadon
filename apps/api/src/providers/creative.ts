@@ -1,8 +1,17 @@
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import type { CreativeProvider } from './types.js';
-import { buildImagePrompt } from './brandPrompt.js';
+import { buildImagePrompt, buildDesignedAdPrompt } from './brandPrompt.js';
 import { interpolateWithContext } from './interpolate.js';
+import type { Platform } from '@megadon/types';
+
+// Vertical for short-form, 4:5 for feeds, square for LinkedIn — designed ads
+// only (the composite path stays 1:1 so overlay coords are stable).
+function designedAspect(platform: Platform): string {
+  if (platform === 'tiktok' || platform === 'youtube') return '9:16';
+  if (platform === 'instagram' || platform === 'facebook') return '4:5';
+  return '1:1';
+}
 
 // kie.ai image generation is async:
 //   POST /api/v1/jobs/createTask  → { taskId }
@@ -46,36 +55,36 @@ async function authedJson<T>(path: string, init: RequestInit = {}): Promise<T> {
 export const kieCreativeProvider: CreativeProvider = {
   async kickoff(brief, platform, copy, brand, opts) {
     const override = opts?.override;
-    const prompt = override?.promptTemplate && override.promptTemplate.trim().length > 0
-      ? interpolateWithContext(override.promptTemplate, {
-          brief,
-          platform,
-          copy,
-          brand,
-          revisionInstruction: opts?.revisionInstruction,
-        })
-      : buildImagePrompt({
-          brief,
-          platform,
-          copy,
-          brand,
-          revisionInstruction: opts?.revisionInstruction,
-        });
+    const hasTemplate = !!(override?.promptTemplate && override.promptTemplate.trim().length > 0);
+    // Designed mode: a text-native model renders the whole ad. A Geek-Mode
+    // prompt template always wins (the user is driving the prompt directly).
+    const designed = config.kieImageDesigned && !hasTemplate;
+
+    const promptInput = {
+      brief,
+      platform,
+      copy,
+      brand,
+      revisionInstruction: opts?.revisionInstruction,
+      creativeDirection: opts?.creativeDirection,
+    };
+    const prompt = hasTemplate
+      ? interpolateWithContext(override!.promptTemplate!, promptInput)
+      : designed
+        ? buildDesignedAdPrompt(promptInput)
+        : buildImagePrompt(promptInput);
 
     const model = override?.model && override.model.trim().length > 0
       ? override.model.trim()
-      : config.kieImageModel;
+      : designed ? config.kieDesignedImageModel : config.kieImageModel;
+
+    const input = designed
+      ? { prompt, aspect_ratio: designedAspect(platform), resolution: '2K', output_format: 'png' }
+      : { prompt, aspect_ratio: '1:1', resolution: '1K' };
 
     const json = await authedJson<CreateTaskResponse>('/jobs/createTask', {
       method: 'POST',
-      body: JSON.stringify({
-        model,
-        input: {
-          prompt,
-          aspect_ratio: '1:1',
-          resolution: '1K',
-        },
-      }),
+      body: JSON.stringify({ model, input }),
     });
 
     if (json.code !== 200 || !json.data?.taskId) {

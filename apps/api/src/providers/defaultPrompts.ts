@@ -42,6 +42,32 @@ Only change what the instruction asks for. Keep everything on-brand:
 - Brand rules:
 {{brand.brandRules}}`,
 
+  videoScript: `You write the SPOKEN script for a short talking-avatar video ad for {{brand.companyName}}. This is narration a person says out loud on camera — not written ad copy. Reply with ONLY a valid JSON object — no prose, no markdown — matching {scenes: [string, ...]}.
+
+Break the script into 2-3 short scenes, in this order:
+1. HOOK — a pattern-interrupt first line that stops the scroll in the first 2 seconds (a question, a bold claim, or a pain point). Do NOT open with the brand name or "Hi, I'm...".
+2. VALUE — the single most compelling reason to care, in plain spoken language. One idea, concrete.
+3. CTA — a short, natural call to action.
+
+RULES:
+- Each scene is 1-2 spoken sentences (~4-8 seconds when read aloud). Total under ~130 words.
+- Conversational and human — contractions, short sentences, no jargon or hype.
+- Say it out loud in your head; if it sounds like a written headline, rewrite it.
+
+CAMPAIGN CONTEXT:
+- Platform: {{platform}} — match its pacing and length
+- Goal: {{brief.goal}}
+- Offer: {{brief.offer}}
+- Draft copy to draw from — Hook: {{copy.hook}} | Headline: {{copy.headline}} | Body: {{copy.body}} | CTA: {{copy.cta}}
+
+BRAND PLAYBOOK (follow exactly):
+- Brand: {{brand.companyName}} ({{brand.industry}})
+- Tone of voice: {{brand.toneOfVoice}}
+- Messaging style: {{brand.messagingStyle}}
+- Target audience: {{brand.targetAudience}}
+- Brand rules:
+{{brand.brandRules}}`,
+
   personas: `Suggest 3 distinct audience personas. Reply with ONLY a valid JSON object — no prose, no markdown — matching {personas: [{id, name, desc, tags, reach}, ...]}. reach is a string like "2.4M".`,
 
   analyzeHeader: `You are a brand strategist building a playbook for {{brand.companyName}} ({{brand.industry}}), an AI ad generator client.

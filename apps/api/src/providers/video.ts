@@ -9,6 +9,7 @@ import { AppError } from '../lib/errors.js';
 import type { VideoProvider } from './types.js';
 import { getHeygenVideoProvider } from './heygen.js';
 import { buildImagePrompt } from './brandPrompt.js';
+import { getDirection } from './creativeDirections.js';
 import { interpolateWithContext } from './interpolate.js';
 import type { Platform } from '@megadon/types';
 
@@ -60,22 +61,24 @@ function aspectFor(platform: Platform): '16:9' | '9:16' {
   return '9:16';
 }
 
-function buildDefaultVideoPrompt(brief: any, platform: Platform, copy: any, brand: any, revisionInstruction?: string): string {
-  const stillPrompt = buildImagePrompt({ brief, platform, copy, brand, revisionInstruction });
+function buildDefaultVideoPrompt(brief: any, platform: Platform, copy: any, brand: any, revisionInstruction?: string, creativeDirection?: string | null): string {
+  const stillPrompt = buildImagePrompt({ brief, platform, copy, brand, revisionInstruction, creativeDirection });
+  const direction = getDirection(creativeDirection);
+  const motion = direction
+    ? `- ${direction.motion}\n- End on a stable beauty frame that holds the brand mood`
+    : '- Establish the scene in the first 2 seconds, then a subtle parallax/dolly move\n- End on a stable beauty shot that holds the brand mood';
   return stillPrompt
     .replace(
       /STRICT CONSTRAINTS[\s\S]*?(?=\n\n[A-Z]|$)/,
       [
         'STRICT CONSTRAINTS:',
-        '- Photorealistic, cinematic camera movement (subtle, no shaky motion)',
+        '- Cinematic camera movement (subtle, no shaky motion)',
         '- Keep typography and logos out of the video itself — they will be presented in the app UI alongside the video',
         '- No watermarks or signatures',
         '- Smooth, premium pacing',
       ].join('\n'),
     )
-    .concat(
-      '\n\nMOTION DIRECTION:\n- Establish the scene in the first 2 seconds, then a subtle parallax/dolly move\n- End on a stable beauty shot that holds the brand mood',
-    );
+    .concat(`\n\nMOTION DIRECTION:\n${motion}`);
 }
 
 export const kieVideoProvider: VideoProvider = {
@@ -85,7 +88,7 @@ export const kieVideoProvider: VideoProvider = {
       ? interpolateWithContext(override.promptTemplate, {
           brief, platform, copy, brand, revisionInstruction: opts?.revisionInstruction,
         })
-      : buildDefaultVideoPrompt(brief, platform, copy, brand, opts?.revisionInstruction);
+      : buildDefaultVideoPrompt(brief, platform, copy, brand, opts?.revisionInstruction, opts?.creativeDirection);
 
     const model = override?.model && override.model.trim().length > 0
       ? override.model.trim()

@@ -14,6 +14,11 @@ const saved = {
   heygenApiBase: config.heygenApiBase,
   heygenAvatarId: config.heygenAvatarId,
   heygenVoiceId: config.heygenVoiceId,
+  heygenCaptions: config.heygenCaptions,
+  heygenVoiceEmotion: config.heygenVoiceEmotion,
+  heygenVoiceSpeed: config.heygenVoiceSpeed,
+  heygenHd: config.heygenHd,
+  kieKey: config.kieKey,
 };
 
 beforeEach(() => {
@@ -21,6 +26,13 @@ beforeEach(() => {
   config.heygenApiBase = 'https://api.heygen.test';
   config.heygenAvatarId = 'avatar-default';
   config.heygenVoiceId = 'voice-default';
+  config.heygenCaptions = true;
+  config.heygenVoiceEmotion = '';
+  config.heygenVoiceSpeed = 1;
+  config.heygenHd = false;
+  // Empty so the script call short-circuits to the copy-derived fallback —
+  // keeps these unit tests offline and deterministic (no kie chat request).
+  config.kieKey = '';
 });
 
 afterEach(() => {
@@ -49,7 +61,7 @@ const COPY: CopyResult = {
 };
 
 describe('heygenAvatarProvider.kickoff', () => {
-  it('posts to /v2/video/generate with the avatar, script and vertical dimension', async () => {
+  it('posts a multi-scene, captioned, brand-backgrounded request to /v2/video/generate', async () => {
     const fetchMock = vi.fn(async () =>
       new Response(JSON.stringify({ error: null, data: { video_id: 'vid_123' } }), { status: 200 }),
     );
@@ -58,6 +70,8 @@ describe('heygenAvatarProvider.kickoff', () => {
     const res = await heygenAvatarProvider.kickoff(BRIEF, 'instagram', COPY);
     expect(res).toEqual({ jobId: 'vid_123' });
 
+    // Only one request — the script call short-circuits (kieKey empty).
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     const [url, init] = fetchMock.mock.calls[0]!;
     expect(url).toBe('https://api.heygen.test/v2/video/generate');
     expect((init as RequestInit).method).toBe('POST');
@@ -65,11 +79,19 @@ describe('heygenAvatarProvider.kickoff', () => {
 
     const body = JSON.parse((init as any).body);
     expect(body.dimension).toEqual({ width: 720, height: 1280 });
-    const input = body.video_inputs[0];
-    expect(input.character).toEqual({ type: 'avatar', avatar_id: 'avatar-default', avatar_style: 'normal' });
-    expect(input.voice.voice_id).toBe('voice-default');
-    expect(input.voice.input_text).toContain('Tired of slow ads?');
-    expect(input.voice.input_text).toContain('Start free today.');
+    expect(body.caption).toBe(true);
+    expect(body.video_inputs.length).toBeGreaterThanOrEqual(2);
+
+    const first = body.video_inputs[0];
+    expect(first.character).toEqual({ type: 'avatar', avatar_id: 'avatar-default', avatar_style: 'normal' });
+    expect(first.voice.voice_id).toBe('voice-default');
+    expect(first.voice.speed).toBe(1);
+    expect(first.voice.emotion).toBeUndefined();
+    expect(first.background).toEqual({ type: 'color', value: expect.stringMatching(/^#/) });
+
+    // Hook leads, CTA closes — spread across scenes rather than one clip.
+    expect(first.voice.input_text).toContain('Tired of slow ads?');
+    expect(body.video_inputs.at(-1).voice.input_text).toContain('Start free today.');
   });
 
   it('uses horizontal dimension for feed platforms', async () => {
@@ -80,6 +102,21 @@ describe('heygenAvatarProvider.kickoff', () => {
     await heygenAvatarProvider.kickoff(BRIEF, 'youtube', COPY);
     const body = JSON.parse((fetchMock.mock.calls[0]![1] as any).body);
     expect(body.dimension).toEqual({ width: 1280, height: 720 });
+  });
+
+  it('adds voice emotion and 1080p only when opted in via config', async () => {
+    config.heygenVoiceEmotion = 'Friendly';
+    config.heygenVoiceSpeed = 1.1;
+    config.heygenHd = true;
+    const fetchMock = vi.fn(async () =>
+      new Response(JSON.stringify({ error: null, data: { video_id: 'v' } }), { status: 200 }),
+    );
+    vi.stubGlobal('fetch', fetchMock);
+    await heygenAvatarProvider.kickoff(BRIEF, 'instagram', COPY);
+    const body = JSON.parse((fetchMock.mock.calls[0]![1] as any).body);
+    expect(body.dimension).toEqual({ width: 1080, height: 1920 });
+    expect(body.video_inputs[0].voice.emotion).toBe('Friendly');
+    expect(body.video_inputs[0].voice.speed).toBe(1.1);
   });
 
   it('throws when HeyGen returns no video_id', async () => {

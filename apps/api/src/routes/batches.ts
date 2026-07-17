@@ -5,6 +5,7 @@ import { ok } from '../lib/envelope.js';
 import { AppError } from '../lib/errors.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { CreateBatchBody, BulkDecisionsBody, type Brief, type Platform } from '@megadon/types';
+import { pickDirection, randomDirectionOffset } from '../providers/creativeDirections.js';
 
 const FORMATS_BY_PLATFORM: Record<Platform, string[]> = {
   instagram: ['Reel', 'Story', 'Feed'],
@@ -14,13 +15,23 @@ const FORMATS_BY_PLATFORM: Record<Platform, string[]> = {
   linkedin: ['Feed'],
 };
 
-function distributePlatforms(brief: Brief): { platform: Platform; format: string }[] {
-  const out: { platform: Platform; format: string }[] = [];
+interface Slot {
+  platform: Platform;
+  format: string;
+  creativeDirection: string;
+  creativeDirectionLabel: string;
+}
+
+function distributePlatforms(brief: Brief): Slot[] {
+  const out: Slot[] = [];
+  // Random start so two same-size batches still explore a different mix.
+  const offset = randomDirectionOffset();
   for (let i = 0; i < brief.batchSize; i++) {
     const platform = brief.platforms[i % brief.platforms.length];
     const formats = FORMATS_BY_PLATFORM[platform];
     const format = formats[i % formats.length];
-    out.push({ platform, format });
+    const dir = pickDirection(i, offset);
+    out.push({ platform, format, creativeDirection: dir.id, creativeDirectionLabel: dir.label });
   }
   return out;
 }
@@ -64,7 +75,7 @@ export async function batchRoutes(app: FastifyInstance) {
     });
 
     const mediaType = body.brief.mediaType ?? 'image';
-    const adRefs = slots.map(({ platform, format }) => {
+    const adRefs = slots.map(({ platform, format, creativeDirection, creativeDirectionLabel }) => {
       const adRef = batchRef.collection('ads').doc();
       writer.set(adRef, {
         id: adRef.id,
@@ -73,6 +84,8 @@ export async function batchRoutes(app: FastifyInstance) {
         platform,
         format,
         mediaType,
+        creativeDirection,
+        creativeDirectionLabel,
         status: 'generating',
         history: [],
         createdAt: now,

@@ -4,7 +4,7 @@ import { AppError } from '../lib/errors.js';
 import { interpolateSystemPrompt, type InterpolationContext } from './interpolate.js';
 import { DEFAULT_PROMPTS } from './defaultPrompts.js';
 import type { CopyProvider, CopyResult, BrandContext } from './types.js';
-import type { Brief, Persona, Platform } from '@megadon/types';
+import type { Brief, Persona, Platform, GeekChatOverride } from '@megadon/types';
 
 // kie.ai chat completions are per-model: POST to
 // https://api.kie.ai/{model}/v1/chat/completions with an OpenAI-shaped
@@ -16,6 +16,10 @@ const CopySchema = z.object({
   body: z.string(),
   hook: z.string(),
   cta: z.string(),
+});
+
+const ScriptSchema = z.object({
+  scenes: z.array(z.string()).min(1).max(4),
 });
 
 const PersonasSchema = z.object({
@@ -115,3 +119,22 @@ export const kieProvider: CopyProvider = {
     return out.personas;
   },
 };
+
+/**
+ * Turn the ad copy + brand into a SPOKEN multi-scene script for a talking
+ * avatar (hook → value → CTA). Kept off the CopyProvider interface because
+ * it's specific to the avatar video path; heygen.ts calls it directly and
+ * falls back to copy-derived scenes if the model call fails.
+ */
+export async function generateVideoScript(
+  brief: Brief,
+  platform: Platform,
+  brand?: BrandContext | null,
+  copy?: CopyResult,
+  override?: GeekChatOverride | null,
+): Promise<string[]> {
+  const system = pickSystem(override, DEFAULT_PROMPTS.videoScript, { brief, platform, brand, copy });
+  const user = `Platform: ${platform}\nGoal: ${brief.goal}\nOffer: ${brief.offer}\nHook: ${copy?.hook ?? ''}\nHeadline: ${copy?.headline ?? ''}\nBody: ${copy?.body ?? ''}\nCTA: ${copy?.cta ?? ''}`;
+  const out = await callJson(ScriptSchema, system, user, override?.model);
+  return out.scenes.map((s) => s.trim()).filter((s) => s.length > 0);
+}

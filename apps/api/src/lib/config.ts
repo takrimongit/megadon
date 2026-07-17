@@ -17,9 +17,18 @@ export const config = {
   // - Images use kie.ai's async task pattern at https://api.kie.ai/api/v1/jobs/*
   kieKey: process.env.KIE_API_KEY ?? '',
   kieChatModel: process.env.KIE_CHAT_MODEL ?? 'gpt-5-2',
+  // Image ad model for the classic COMPOSITE path: a text-free background that
+  // the worker composites the headline/CTA/logo onto.
   kieImageModel: process.env.KIE_IMAGE_MODEL ?? 'flux-2/pro-text-to-image',
-  // Veo 3.1 variants: veo3 (flagship) | veo3_fast (light) | veo3_lite (cheapest)
-  kieVideoModel: process.env.KIE_VIDEO_MODEL ?? 'veo3_lite',
+  // DESIGNED mode: a text-native model renders the whole ad (integrated
+  // typography + layout) and we skip compositing. nano-banana-2 (Gemini 3.1
+  // Flash Image) has strong, accurate text rendering. Set KIE_IMAGE_DESIGNED=false
+  // to fall back to the composite pipeline (flux + overlay).
+  kieImageDesigned: (process.env.KIE_IMAGE_DESIGNED ?? 'true') === 'true',
+  kieDesignedImageModel: process.env.KIE_DESIGNED_IMAGE_MODEL ?? 'nano-banana-2',
+  // Veo 3.1 variants: veo3 (Quality) | veo3_fast (Fast, balanced) | veo3_lite (cheapest).
+  // Default is Fast — noticeably richer b-roll than lite with native audio.
+  kieVideoModel: process.env.KIE_VIDEO_MODEL ?? 'veo3_fast',
 
   // Meta (Facebook/Instagram) organic publishing. The Page token is injected
   // by Cloud Run from Secret Manager as META_PAGE_TOKEN (same pattern as
@@ -40,6 +49,14 @@ export const config = {
   heygenApiBase: process.env.HEYGEN_API_BASE ?? 'https://api.heygen.com',
   heygenAvatarId: process.env.HEYGEN_AVATAR_ID ?? '',
   heygenVoiceId: process.env.HEYGEN_VOICE_ID ?? '',
+  // Effectiveness tuning for avatar ads. Captions + branded backgrounds +
+  // the multi-scene spoken script are on by default (safe for any voice/plan).
+  // Emotion needs an emotion-capable voice, and HD (1080p) needs a plan that
+  // supports it — so both are opt-in to avoid breaking a working pipeline.
+  heygenCaptions: (process.env.HEYGEN_CAPTIONS ?? 'true') !== 'false',
+  heygenVoiceEmotion: process.env.HEYGEN_VOICE_EMOTION ?? '', // e.g. 'Friendly'
+  heygenVoiceSpeed: Number(process.env.HEYGEN_VOICE_SPEED ?? '1'),
+  heygenHd: (process.env.HEYGEN_HD ?? 'false') === 'true',
 
   emulators: {
     auth: process.env.FIREBASE_AUTH_EMULATOR_HOST,

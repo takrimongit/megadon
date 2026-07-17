@@ -61,6 +61,9 @@ export interface CreativeKickoffOptions {
   /** Geek-Mode override: swap the model and/or replace the prompt
    * template with a user-supplied one (interpolated at call time). */
   override?: GeekMediaOverride | null;
+  /** Creative-direction id (see creativeDirections.ts) — steers the art
+   * direction so ads across a batch explore distinct concepts. */
+  creativeDirection?: string | null;
 }
 
 export interface CreativeProvider {

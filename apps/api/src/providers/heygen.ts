@@ -7,9 +7,10 @@
 
 import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
-import type { VideoProvider } from './types.js';
+import type { VideoProvider, BrandContext, CopyResult } from './types.js';
 import { interpolateWithContext } from './interpolate.js';
-import type { Platform } from '@megadon/types';
+import { generateVideoScript } from './kie.js';
+import type { Brief, Platform } from '@megadon/types';
 
 interface GenerateResponse {
   error: unknown | null;
@@ -42,21 +43,50 @@ async function authedJson<T>(path: string, init: RequestInit = {}): Promise<T> {
 }
 
 /** Vertical for Reels/TikTok, horizontal for feed/YouTube — mirrors the Veo provider. */
-function dimensionFor(platform: Platform): { width: number; height: number } {
-  if (platform === 'youtube' || platform === 'linkedin' || platform === 'facebook') {
-    return { width: 1280, height: 720 };
-  }
-  return { width: 720, height: 1280 };
+function dimensionFor(platform: Platform, hd: boolean): { width: number; height: number } {
+  const horizontal = platform === 'youtube' || platform === 'linkedin' || platform === 'facebook';
+  if (horizontal) return hd ? { width: 1920, height: 1080 } : { width: 1280, height: 720 };
+  return hd ? { width: 1080, height: 1920 } : { width: 720, height: 1280 };
 }
 
-/** Turn the ad copy into a short spoken script for the avatar to narrate. */
-function buildDefaultScript(copy: { hook?: string; headline?: string; body?: string; cta?: string }): string {
-  const parts = [copy.hook || copy.headline, copy.body, copy.cta]
+/** Ordered brand colors for scene backgrounds; falls back to the brand indigo/purple. */
+function brandPalette(brand?: BrandContext | null): string[] {
+  const hexes = (brand?.analysis?.colors ?? []).map((c) => c.hex).filter(Boolean);
+  return hexes.length > 0 ? hexes : ['#3525cd', '#831ada'];
+}
+
+/** Copy-derived scenes (hook → value → CTA) used when the script model is unavailable. */
+function fallbackScenes(copy: CopyResult): string[] {
+  const scenes = [copy.hook || copy.headline, copy.body, copy.cta]
     .map((s) => (s ?? '').trim())
     .filter((s) => s.length > 0);
-  const script = parts.join(' ');
-  // Keep narration tight — a few sentences is plenty for a social ad.
-  return script.length > 700 ? `${script.slice(0, 697)}...` : script || 'Discover what we have for you today.';
+  return scenes.length > 0 ? scenes : ['Discover what we have for you today.'];
+}
+
+/**
+ * Resolve the spoken scene texts. A Geek-Mode template override wins (single
+ * scene, interpolated). Otherwise ask the copy model for a hook→value→CTA
+ * script, degrading to copy-derived scenes so video generation never fails
+ * on a script hiccup.
+ */
+async function resolveScenes(
+  brief: Brief,
+  platform: Platform,
+  copy: CopyResult,
+  brand: BrandContext | null | undefined,
+  revisionInstruction?: string,
+  overrideTemplate?: string,
+): Promise<string[]> {
+  if (overrideTemplate && overrideTemplate.trim().length > 0) {
+    return [interpolateWithContext(overrideTemplate, { brief, platform, copy, brand, revisionInstruction })];
+  }
+  try {
+    const scenes = await generateVideoScript(brief, platform, brand, copy);
+    if (scenes.length > 0) return scenes;
+  } catch {
+    // fall through to copy-derived scenes
+  }
+  return fallbackScenes(copy);
 }
 
 export const heygenAvatarProvider: VideoProvider = {
@@ -69,25 +99,32 @@ export const heygenAvatarProvider: VideoProvider = {
         : config.heygenAvatarId;
     if (!avatarId) throw AppError.provider('HEYGEN_AVATAR_ID not set');
 
-    const script =
-      override?.promptTemplate && override.promptTemplate.trim().length > 0
-        ? interpolateWithContext(override.promptTemplate, {
-            brief, platform, copy, brand, revisionInstruction: opts?.revisionInstruction,
-          })
-        : buildDefaultScript(copy);
+    const scenes = await resolveScenes(
+      brief, platform, copy, brand, opts?.revisionInstruction, override?.promptTemplate,
+    );
+    const palette = brandPalette(brand);
 
-    const dimension = dimensionFor(platform);
+    // One HeyGen "scene" per script beat — same avatar, cycling brand-colored
+    // backgrounds — so the ad has visual rhythm instead of one static shot.
+    const video_inputs = scenes.map((text, i) => ({
+      character: { type: 'avatar', avatar_id: avatarId, avatar_style: 'normal' },
+      voice: {
+        type: 'text',
+        input_text: text,
+        voice_id: config.heygenVoiceId,
+        speed: config.heygenVoiceSpeed,
+        ...(config.heygenVoiceEmotion ? { emotion: config.heygenVoiceEmotion } : {}),
+      },
+      background: { type: 'color', value: palette[i % palette.length] },
+    }));
 
     const json = await authedJson<GenerateResponse>('/v2/video/generate', {
       method: 'POST',
       body: JSON.stringify({
-        video_inputs: [
-          {
-            character: { type: 'avatar', avatar_id: avatarId, avatar_style: 'normal' },
-            voice: { type: 'text', input_text: script, voice_id: config.heygenVoiceId },
-          },
-        ],
-        dimension,
+        title: (copy.headline || 'Avatar ad').slice(0, 100),
+        caption: config.heygenCaptions, // burned-in subtitles for muted autoplay
+        dimension: dimensionFor(platform, config.heygenHd),
+        video_inputs,
       }),
     });
 

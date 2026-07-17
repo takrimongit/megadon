@@ -4,6 +4,7 @@
 
 import { createCanvas, loadImage, type SKRSContext2D } from '@napi-rs/canvas';
 import { bucket } from '../lib/firebase.js';
+import { config } from '../lib/config.js';
 import type { BrandContext } from '../providers/types.js';
 
 interface CompositeInput {
@@ -94,6 +95,32 @@ export async function compositeBrandOverlay(input: CompositeInput): Promise<Comp
 
   const buffer = await canvas.encode('jpeg', 92);
   return { buffer, contentType: 'image/jpeg', ext: 'jpg' };
+}
+
+/**
+ * Fetches a generated image and returns the bytes to store. In DESIGNED mode
+ * the model already rendered the finished ad, so we keep it as-is; otherwise
+ * we composite the brand logo + headline + CTA on top. Single decision point
+ * for all three image sites (generate, poll, revision).
+ */
+export async function finishImageAsset(
+  assetUrl: string,
+  brand: BrandContext | null | undefined,
+  copy: { headline?: string; cta?: string },
+): Promise<{ buffer: Buffer; ext: string; contentType: string }> {
+  const resp = await fetch(assetUrl);
+  if (!resp.ok) throw new Error(`Asset download failed: ${resp.status}`);
+  const buf = Buffer.from(await resp.arrayBuffer());
+
+  if (config.kieImageDesigned) {
+    const ct = resp.headers.get('content-type') ?? 'image/png';
+    const ext = ct.includes('jpeg') || ct.includes('jpg') ? 'jpg' : 'png';
+    return { buffer: buf, ext, contentType: ct };
+  }
+
+  const logo = await fetchBrandLogo(brand);
+  const out = await compositeBrandOverlay({ background: buf, brand, logo, copy });
+  return { buffer: out.buffer, ext: out.ext, contentType: out.contentType };
 }
 
 /**
