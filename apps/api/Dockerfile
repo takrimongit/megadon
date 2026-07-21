@@ -22,17 +22,25 @@ RUN npm run build -w @megadon/types && \
 RUN npm prune --omit=dev --include-workspace-root --workspaces
 
 # ---- runtime stage ----
-FROM gcr.io/distroless/nodejs20-debian12 AS runtime
+# Debian slim (not distroless) so we can apt-install a real ffmpeg — the video
+# intro/outro composer shells out to it, and a bundled static binary is not
+# guaranteed to run in a distroless image.
+FROM node:20-bookworm-slim AS runtime
 WORKDIR /workspace
+
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ffmpeg \
+  && rm -rf /var/lib/apt/lists/*
 
 # Copy the entire built workspace (preserves workspace symlinks + locations).
 COPY --from=build /workspace /workspace
 
 ENV NODE_ENV=production
+ENV FFMPEG_PATH=/usr/bin/ffmpeg
 EXPOSE 8080
-USER nonroot
+USER node
 
 # Run from the api workspace so Node walks up:
 #   /workspace/apps/api/node_modules → /workspace/node_modules
 WORKDIR /workspace/apps/api
-CMD ["dist/server.js"]
+CMD ["node", "dist/server.js"]

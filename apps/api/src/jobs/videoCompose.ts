@@ -9,12 +9,16 @@ import { promisify } from 'node:util';
 import { mkdtemp, writeFile, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import ffmpegPath from 'ffmpeg-static';
+import ffmpegStatic from 'ffmpeg-static';
 import { fetchBrandLogo } from './composite.js';
 import type { BrandContext, CopyResult } from '../providers/types.js';
 
 const run = promisify(execFile);
 const CARD_SECONDS = 2.6;
+
+// Prefer the system ffmpeg (apt-installed in the runtime image via FFMPEG_PATH);
+// fall back to the ffmpeg-static binary for local dev.
+const FFMPEG: string = process.env.FFMPEG_PATH || ffmpegStatic || 'ffmpeg';
 
 /** Target frame for the composed video — horizontal for feed/long-form, vertical
  * for short-form — mirroring how the clip itself was generated. */
@@ -35,7 +39,7 @@ interface ComposeInput {
 
 /** Compose intro + clip + outro into a single mp4. Returns the final bytes. */
 export async function composeVideoWithBookends(input: ComposeInput): Promise<Buffer> {
-  if (!ffmpegPath) throw new Error('ffmpeg-static binary not found');
+  if (!FFMPEG) throw new Error('ffmpeg binary not found');
   const { clip, copy, brand, width, height } = input;
   const dir = await mkdtemp(join(tmpdir(), 'adforge-vid-'));
   try {
@@ -52,12 +56,12 @@ export async function composeVideoWithBookends(input: ComposeInput): Promise<Buf
 
     const mainHasAudio = await hasAudioStream(p('main.mp4'));
     // Normalise all three segments to identical streams so concat can copy.
-    await run(ffmpegPath, cardSegmentArgs(p('intro.png'), p('intro.mp4'), width, height));
-    await run(ffmpegPath, cardSegmentArgs(p('outro.png'), p('outro.mp4'), width, height));
-    await run(ffmpegPath, mainSegmentArgs(p('main.mp4'), p('mainN.mp4'), width, height, mainHasAudio));
+    await run(FFMPEG, cardSegmentArgs(p('intro.png'), p('intro.mp4'), width, height));
+    await run(FFMPEG, cardSegmentArgs(p('outro.png'), p('outro.mp4'), width, height));
+    await run(FFMPEG, mainSegmentArgs(p('main.mp4'), p('mainN.mp4'), width, height, mainHasAudio));
 
     await writeFile(p('list.txt'), ['intro.mp4', 'mainN.mp4', 'outro.mp4'].map((f) => `file '${f}'`).join('\n'));
-    await run(ffmpegPath, [
+    await run(FFMPEG, [
       '-y', '-f', 'concat', '-safe', '0', '-i', p('list.txt'),
       '-c', 'copy', '-movflags', '+faststart', p('out.mp4'),
     ]);
@@ -105,10 +109,10 @@ export function mainSegmentArgs(src: string, out: string, w: number, h: number, 
 }
 
 async function hasAudioStream(path: string): Promise<boolean> {
-  if (!ffmpegPath) return false;
+  if (!FFMPEG) return false;
   try {
     // ffmpeg -i exits non-zero but prints stream info to stderr.
-    await run(ffmpegPath, ['-i', path]);
+    await run(FFMPEG, ['-i', path]);
     return false;
   } catch (e) {
     const stderr = String((e as { stderr?: string }).stderr ?? '');
