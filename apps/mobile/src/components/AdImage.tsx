@@ -31,6 +31,9 @@ interface Props {
    * the signed-URL cache is busted and a fresh URL is fetched.
    */
   assetVersion?: string | null;
+  /** When set, the frame sizes to this width/height ratio so the whole
+   * (non-square) designed ad shows with no crop. See `adFrameAspect`. */
+  frameAspect?: number;
 }
 
 /**
@@ -46,10 +49,13 @@ export default function AdImage({
   zoomable = false,
   urlOverride,
   assetVersion,
+  frameAspect,
 }: Props) {
   const fetched = useAdImageUrl(adId, hasAsset && urlOverride == null, assetVersion);
   const url = urlOverride ?? fetched;
   const [zoomOpen, setZoomOpen] = useState(false);
+
+  const containerStyle = [styles.container, style, frameAspect ? { aspectRatio: frameAspect } : null];
 
   const body = url ? (
     <Image source={{ uri: url }} style={[StyleSheet.absoluteFill, imageStyle]} resizeMode="cover" />
@@ -61,12 +67,12 @@ export default function AdImage({
     <TouchableOpacity
       activeOpacity={0.9}
       onPress={() => setZoomOpen(true)}
-      style={[styles.container, style]}
+      style={containerStyle}
     >
       {body}
     </TouchableOpacity>
   ) : (
-    <View style={[styles.container, style]}>{body}</View>
+    <View style={containerStyle}>{body}</View>
   );
 
   return (

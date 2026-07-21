@@ -13,6 +13,8 @@ interface Props {
   fallbackIconSize?: number;
   zoomable?: boolean;
   urlOverride?: string | null;
+  /** Frame width/height ratio so non-square ads show uncropped. See `adFrameAspect`. */
+  frameAspect?: number;
 }
 
 /**
@@ -29,6 +31,7 @@ export default function AdMedia(props: Props) {
         style={props.style}
         zoomable={props.zoomable}
         urlOverride={props.urlOverride}
+        frameAspect={props.frameAspect}
       />
     );
   }

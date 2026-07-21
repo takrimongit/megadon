@@ -240,9 +240,6 @@ export default function ReviewBatchScreen() {
                   style={styles.adPlaceholder}
                   fallbackIconSize={32}
                 />
-                <View style={styles.adOverlay} pointerEvents="none">
-                  <Text style={styles.adHeadline} numberOfLines={2}>{item.headline ?? '—'}</Text>
-                </View>
                 <View style={[styles.statusPill, { backgroundColor: statusColors[status] + '22' }]}>
                   <Text style={[styles.statusPillText, { color: statusColors[status] }]}>{statusLabel[status]}</Text>
                 </View>

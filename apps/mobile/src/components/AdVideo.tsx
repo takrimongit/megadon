@@ -22,6 +22,8 @@ interface Props {
   zoomable?: boolean;
   /** Optional pre-fetched URL to skip the signed-URL fetch. */
   urlOverride?: string | null;
+  /** When set, the frame sizes to this width/height ratio. See `adFrameAspect`. */
+  frameAspect?: number;
 }
 
 /**
@@ -36,10 +38,12 @@ export default function AdVideo({
   style,
   zoomable = false,
   urlOverride,
+  frameAspect,
 }: Props) {
   const fetched = useAdImageUrl(adId, hasAsset && urlOverride == null, assetVersion);
   const url = urlOverride ?? fetched;
   const [fullscreen, setFullscreen] = useState(false);
+  const containerStyle = [styles.container, style, frameAspect ? { aspectRatio: frameAspect } : null];
 
   const player = useVideoPlayer(url ?? '', (p) => {
     p.loop = true;
@@ -69,12 +73,12 @@ export default function AdVideo({
     fallback
   );
 
-  if (!zoomable || !url) return <View style={[styles.container, style]}>{body}</View>;
+  if (!zoomable || !url) return <View style={containerStyle}>{body}</View>;
 
   return (
     <>
       <TouchableOpacity
-        style={[styles.container, style]}
+        style={containerStyle}
         activeOpacity={0.85}
         onPress={() => {
           player.muted = false;

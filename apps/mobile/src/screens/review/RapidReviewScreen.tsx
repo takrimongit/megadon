@@ -11,6 +11,7 @@ import AppHeader from '../../components/AppHeader';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorView from '../../components/ErrorView';
 import AdMedia from '../../components/AdMedia';
+import { adFrameAspect } from '../../lib/adAspect';
 import { RootStackParamList } from '../../navigation';
 import { getDb } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
@@ -143,18 +144,10 @@ export default function RapidReviewScreen() {
                 mediaType={currentAd.mediaType}
                 hasAsset={!!currentAd.assetPath}
                 assetVersion={currentAd.assetPath}
-                style={StyleSheet.absoluteFill as never}
+                style={styles.rapidMedia}
+                frameAspect={adFrameAspect(currentAd)}
                 fallbackIconSize={48}
               />
-              <View style={styles.adOverlay}>
-                {currentAd.hook ? <Text style={styles.adHook}>{currentAd.hook}</Text> : null}
-                <Text style={styles.adHeadline}>{currentAd.headline ?? '—'}</Text>
-                {currentAd.cta ? (
-                  <View style={styles.ctaBtn}>
-                    <Text style={styles.ctaText}>{currentAd.cta}</Text>
-                  </View>
-                ) : null}
-              </View>
             </View>
             <View style={styles.cardFooter}>
               <Text style={styles.platformText}>{currentAd.platform} · {currentAd.format}</Text>
@@ -207,9 +200,10 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
   adPreview: {
-    height: 360,
     backgroundColor: Colors.surfaceContainerHigh,
-    position: 'relative',
+  },
+  rapidMedia: {
+    width: '100%',
   },
   adOverlay: {
     position: 'absolute',

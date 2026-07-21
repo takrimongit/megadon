@@ -259,16 +259,7 @@ export default function BatchReviewPage() {
           {ads.map((ad) => (
             <div key={ad.id} className="card clickable" style={{ padding: 12 }}
               onClick={() => { setRevising(false); setOpenAdId(ad.id); }}>
-              <AdMedia
-                ad={ad}
-                overlay={
-                  ad.headline ? (
-                    <div className="overlay">
-                      <div style={{ fontWeight: 700, fontSize: 13 }}>{ad.headline}</div>
-                    </div>
-                  ) : undefined
-                }
-              />
+              <AdMedia ad={ad} />
               <div className="row-between mt-8">
                 <span className="sub" style={{ fontSize: 12 }}>
                   {PLATFORM_ICON[ad.platform] ?? ''} {ad.platform}
@@ -310,7 +301,7 @@ export default function BatchReviewPage() {
             </div>
 
             <div className="grid grid-2">
-              <AdMedia ad={openAd} controls />
+              <AdMedia ad={openAd} controls matchAspect />
               <div className="col">
                 {openAd.hook && (
                   <div>

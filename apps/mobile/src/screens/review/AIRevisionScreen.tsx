@@ -15,6 +15,7 @@ import PrimaryButton from '../../components/PrimaryButton';
 import LoadingSpinner from '../../components/LoadingSpinner';
 import ErrorView from '../../components/ErrorView';
 import AdMedia from '../../components/AdMedia';
+import { adFrameAspect } from '../../lib/adAspect';
 import { RootStackParamList } from '../../navigation';
 import { getDb } from '../../lib/firebase';
 import { useAuth } from '../../lib/AuthContext';
@@ -210,6 +211,7 @@ export default function AIRevisionScreen() {
                   imageStyle={styles.adImageInner}
                   fallbackIconSize={48}
                   zoomable
+                  frameAspect={adFrameAspect(ad)}
                   urlOverride={revisionImageUrl}
                 />
                 {ad.assetPath ? (
@@ -388,7 +390,6 @@ const styles = StyleSheet.create({
   },
   adImage: {
     width: '100%',
-    aspectRatio: 1,
     borderRadius: Radius.md,
     position: 'relative',
   },
