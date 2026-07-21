@@ -55,9 +55,11 @@ export const config = {
   // supports it — so both are opt-in to avoid breaking a working pipeline.
   // Wrap every generated video ad with a cinematic intro (headline title card)
   // and outro (CTA + logo), stitched with ffmpeg. Title text is rendered as
-  // real canvas text so the heading is always spelled correctly. Off by default
-  // until validated on staging (needs a visual check).
-  videoIntroOutro: (process.env.VIDEO_INTRO_OUTRO ?? 'false') === 'true',
+  // real canvas text so the heading is always spelled correctly. Validated on
+  // staging (14.4s bookended output from a ~6s clip) — on by default; set
+  // VIDEO_INTRO_OUTRO=false to disable. Best-effort: a failed compose falls
+  // back to the raw clip.
+  videoIntroOutro: (process.env.VIDEO_INTRO_OUTRO ?? 'true') !== 'false',
   heygenCaptions: (process.env.HEYGEN_CAPTIONS ?? 'true') !== 'false',
   heygenVoiceEmotion: process.env.HEYGEN_VOICE_EMOTION ?? '', // e.g. 'Friendly'
   heygenVoiceSpeed: Number(process.env.HEYGEN_VOICE_SPEED ?? '1'),
