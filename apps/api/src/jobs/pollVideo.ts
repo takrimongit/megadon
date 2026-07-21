@@ -53,11 +53,13 @@ export async function runPollVideo(payload: JobPayload) {
 
   if (!status.assetUrl) return;
 
+  const brand = (await batchRef.get()).data()?.brandContext ?? null;
   const assetPath = await downloadVideoToStorage(
     status.assetUrl,
     workspaceId,
     batchId,
     adId,
+    { copy: { headline: ad.headline, cta: ad.cta }, brand, platform: ad.platform },
   );
 
   await adRef.update({

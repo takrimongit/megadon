@@ -53,6 +53,11 @@ export const config = {
   // the multi-scene spoken script are on by default (safe for any voice/plan).
   // Emotion needs an emotion-capable voice, and HD (1080p) needs a plan that
   // supports it — so both are opt-in to avoid breaking a working pipeline.
+  // Wrap every generated video ad with a cinematic intro (headline title card)
+  // and outro (CTA + logo), stitched with ffmpeg. Title text is rendered as
+  // real canvas text so the heading is always spelled correctly. Off by default
+  // until validated on staging (needs a visual check).
+  videoIntroOutro: (process.env.VIDEO_INTRO_OUTRO ?? 'false') === 'true',
   heygenCaptions: (process.env.HEYGEN_CAPTIONS ?? 'true') !== 'false',
   heygenVoiceEmotion: process.env.HEYGEN_VOICE_EMOTION ?? '', // e.g. 'Friendly'
   heygenVoiceSpeed: Number(process.env.HEYGEN_VOICE_SPEED ?? '1'),

@@ -4,6 +4,7 @@ import { getCreativeProvider } from '../providers/creative.js';
 import { getVideoProvider } from '../providers/video.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { finishImageAsset } from './composite.js';
+import { composeVideoWithBookends, targetVideoDimension } from './videoCompose.js';
 import { loadGeekSettings, pickChat, pickMedia } from '../lib/geekSettings.js';
 import { recordUsage, resolveModel } from '../lib/usage.js';
 import { config } from '../lib/config.js';
@@ -102,7 +103,9 @@ export async function runGenerateAd(payload: JobPayload) {
 
     // 4. Download. Image gets brand composited; video is stored as-is.
     const assetPath = mediaType === 'video'
-      ? await downloadVideoToStorage(kickoff.assetUrl, workspaceId, batchId, adId)
+      ? await downloadVideoToStorage(kickoff.assetUrl, workspaceId, batchId, adId, {
+          copy, brand: brandContext, platform: ad.platform,
+        })
       : await downloadAndComposite(
           kickoff.assetUrl,
           workspaceId,
@@ -177,13 +180,27 @@ export async function downloadVideoToStorage(
   workspaceId: string,
   batchId: string,
   adId: string,
+  finish?: { copy?: Pick<CopyResult, 'headline' | 'cta'>; brand?: BrandContext | null; platform?: string },
 ): Promise<string> {
   const resp = await fetch(url);
   if (!resp.ok) throw new Error(`Video download failed: ${resp.status}`);
-  const buf = Buffer.from(await resp.arrayBuffer());
+  let buf: Buffer = Buffer.from(await resp.arrayBuffer());
+
+  // Wrap with a cinematic intro/outro (headline + CTA cards) when enabled.
+  // Best-effort: a failed compose falls back to the raw clip so a bad ffmpeg
+  // run never fails the whole ad.
+  if (config.videoIntroOutro && finish?.copy && finish.platform) {
+    try {
+      const { width, height } = targetVideoDimension(finish.platform);
+      buf = await composeVideoWithBookends({ clip: buf, copy: finish.copy, brand: finish.brand, width, height });
+    } catch (err) {
+      console.error(`video bookend compose failed for ${adId}:`, (err as Error).message);
+    }
+  }
+
   const path = `workspaces/${workspaceId}/batches/${batchId}/ads/${adId}/v1.mp4`;
   await bucket().file(path).save(buf, {
-    metadata: { contentType: resp.headers.get('content-type') ?? 'video/mp4' },
+    metadata: { contentType: 'video/mp4' },
   });
   return path;
 }

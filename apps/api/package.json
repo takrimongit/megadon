@@ -22,6 +22,7 @@
     "@google-cloud/tasks": "^5.5.1",
     "@megadon/types": "*",
     "@napi-rs/canvas": "^0.1.100",
+    "ffmpeg-static": "^5.2.0",
     "fastify": "^5.1.0",
     "firebase-admin": "^13.0.1",
     "openai": "^4.73.0",
