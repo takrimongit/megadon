@@ -49,10 +49,23 @@ function dimensionFor(platform: Platform, hd: boolean): { width: number; height:
   return hd ? { width: 1080, height: 1920 } : { width: 720, height: 1280 };
 }
 
-/** Ordered brand colors for scene backgrounds; falls back to the brand indigo/purple. */
-function brandPalette(brand?: BrandContext | null): string[] {
-  const hexes = (brand?.analysis?.colors ?? []).map((c) => c.hex).filter(Boolean);
-  return hexes.length > 0 ? hexes : ['#3525cd', '#831ada'];
+/**
+ * One consistent, premium studio backdrop derived from the brand's primary
+ * color. A talking head on a flat, fully-saturated brand color reads cheap and
+ * "unnatural"; a single deep, desaturated tone reads like a real studio set —
+ * and keeping it consistent across scenes (vs. flashing colors) feels calmer.
+ */
+function studioBackground(brand?: BrandContext | null): string {
+  const colors = brand?.analysis?.colors ?? [];
+  const primary = colors.find((c) => c.role === 'primary')?.hex ?? colors[0]?.hex ?? '#3525cd';
+  const m = /^#?([a-f\d]{6})$/i.exec(primary);
+  if (!m) return '#14161f';
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  // Mix ~78% toward a deep neutral navy: stays subtly on-brand, never garish.
+  const mix = (c: number, target: number) => Math.round(c * 0.22 + target * 0.78);
+  const hex = (v: number) => v.toString(16).padStart(2, '0');
+  return `#${hex(mix(r, 15))}${hex(mix(g, 17))}${hex(mix(b, 28))}`;
 }
 
 /** Copy-derived scenes (hook → value → CTA) used when the script model is unavailable. */
@@ -102,11 +115,11 @@ export const heygenAvatarProvider: VideoProvider = {
     const scenes = await resolveScenes(
       brief, platform, copy, brand, opts?.revisionInstruction, override?.promptTemplate,
     );
-    const palette = brandPalette(brand);
+    const background = studioBackground(brand);
 
-    // One HeyGen "scene" per script beat — same avatar, cycling brand-colored
-    // backgrounds — so the ad has visual rhythm instead of one static shot.
-    const video_inputs = scenes.map((text, i) => ({
+    // One HeyGen "scene" per script beat — same avatar, one consistent studio
+    // backdrop — so it reads as a single natural take rather than a slideshow.
+    const video_inputs = scenes.map((text) => ({
       character: { type: 'avatar', avatar_id: avatarId, avatar_style: 'normal' },
       voice: {
         type: 'text',
@@ -115,7 +128,7 @@ export const heygenAvatarProvider: VideoProvider = {
         speed: config.heygenVoiceSpeed,
         ...(config.heygenVoiceEmotion ? { emotion: config.heygenVoiceEmotion } : {}),
       },
-      background: { type: 'color', value: palette[i % palette.length] },
+      background: { type: 'color', value: background },
     }));
 
     const json = await authedJson<GenerateResponse>('/v2/video/generate', {

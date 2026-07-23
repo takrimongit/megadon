@@ -61,7 +61,7 @@ export const config = {
   videoIntroOutro: (process.env.VIDEO_INTRO_OUTRO ?? 'false') === 'true',
   heygenCaptions: (process.env.HEYGEN_CAPTIONS ?? 'true') !== 'false',
   heygenVoiceEmotion: process.env.HEYGEN_VOICE_EMOTION ?? '', // e.g. 'Friendly'
-  heygenVoiceSpeed: Number(process.env.HEYGEN_VOICE_SPEED ?? '1'),
+  heygenVoiceSpeed: Number(process.env.HEYGEN_VOICE_SPEED ?? '1.05'),
   heygenHd: (process.env.HEYGEN_HD ?? 'false') === 'true',
 
   emulators: {
