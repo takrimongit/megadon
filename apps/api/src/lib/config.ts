@@ -30,6 +30,20 @@ export const config = {
   // Default is Fast — noticeably richer b-roll than lite with native audio.
   kieVideoModel: process.env.KIE_VIDEO_MODEL ?? 'veo3_fast',
 
+  // Avatar video engine. 'omnihuman' animates a HeyGen photo-avatar portrait into
+  // a lively, moving presenter (kie OmniHuman) with an ElevenLabs voice; 'heygen'
+  // is the older static talking-photo (rollback).
+  avatarEngine: process.env.AVATAR_ENGINE ?? 'omnihuman',
+  omnihumanModel: process.env.OMNIHUMAN_MODEL ?? 'omnihuman-1-5',
+  // HeyGen talking-photo avatar whose portrait OmniHuman animates.
+  omnihumanAvatarId: process.env.OMNIHUMAN_AVATAR_ID ?? 'a927c2eb39a04b4d9c425c9c41cc3d01',
+  kieUploadBase: process.env.KIE_UPLOAD_BASE ?? 'https://kieai.redpandaai.co',
+  // ElevenLabs TTS (direct — kie's ElevenLabs relay is unreliable). Key from
+  // Secret Manager as ELEVENLABS_API_KEY.
+  elevenLabsKey: process.env.ELEVENLABS_API_KEY ?? '',
+  elevenLabsModel: process.env.ELEVENLABS_MODEL ?? 'eleven_multilingual_v2',
+  elevenLabsVoiceId: process.env.ELEVENLABS_VOICE_ID ?? '21m00Tcm4TlvDq8ikWAM',
+
   // Meta (Facebook/Instagram) organic publishing. The Page token is injected
   // by Cloud Run from Secret Manager as META_PAGE_TOKEN (same pattern as
   // KIE_API_KEY); only the Graph API version is a plain default here.

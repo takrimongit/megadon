@@ -8,6 +8,7 @@ import { config } from '../lib/config.js';
 import { AppError } from '../lib/errors.js';
 import type { VideoProvider } from './types.js';
 import { getHeygenVideoProvider } from './heygen.js';
+import { getOmnihumanProvider } from './omnihuman.js';
 import { buildImagePrompt } from './brandPrompt.js';
 import { getDirection } from './creativeDirections.js';
 import { interpolateWithContext } from './interpolate.js';
@@ -147,7 +148,9 @@ export const fakeVideoProvider: VideoProvider = {
 
 export function getVideoProvider(style: 'scenic' | 'avatar' = 'scenic'): VideoProvider {
   if (config.isEmulator()) return fakeVideoProvider;
-  if (style === 'avatar') return getHeygenVideoProvider();
+  if (style === 'avatar') {
+    return config.avatarEngine === 'omnihuman' ? getOmnihumanProvider() : getHeygenVideoProvider();
+  }
   if (!config.kieKey) return fakeVideoProvider;
   return kieVideoProvider;
 }
