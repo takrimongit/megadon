@@ -53,13 +53,12 @@ export const config = {
   // the multi-scene spoken script are on by default (safe for any voice/plan).
   // Emotion needs an emotion-capable voice, and HD (1080p) needs a plan that
   // supports it — so both are opt-in to avoid breaking a working pipeline.
-  // Wrap every generated video ad with a cinematic intro (headline title card)
-  // and outro (CTA + logo), stitched with ffmpeg. Title text is rendered as
-  // real canvas text so the heading is always spelled correctly. Validated on
-  // staging (14.4s bookended output from a ~6s clip) — on by default; set
-  // VIDEO_INTRO_OUTRO=false to disable. Best-effort: a failed compose falls
-  // back to the raw clip.
-  videoIntroOutro: (process.env.VIDEO_INTRO_OUTRO ?? 'true') !== 'false',
+  // Wrap every generated video ad with a cinematic intro/outro via ffmpeg.
+  // OFF by default: the ffmpeg encode OOM-killed the 512Mi Cloud Run worker
+  // (uncatchable — the process dies → the batch fails), and the card design
+  // still needs work. Being reworked (more worker memory + better cards +
+  // actual visual verification) before it's re-enabled.
+  videoIntroOutro: (process.env.VIDEO_INTRO_OUTRO ?? 'false') === 'true',
   heygenCaptions: (process.env.HEYGEN_CAPTIONS ?? 'true') !== 'false',
   heygenVoiceEmotion: process.env.HEYGEN_VOICE_EMOTION ?? '', // e.g. 'Friendly'
   heygenVoiceSpeed: Number(process.env.HEYGEN_VOICE_SPEED ?? '1'),
