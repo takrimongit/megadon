@@ -138,3 +138,29 @@ export async function generateVideoScript(
   const out = await callJson(ScriptSchema, system, user, override?.model);
   return out.scenes.map((s) => s.trim()).filter((s) => s.length > 0);
 }
+
+const StoryboardSchema = z.object({
+  imagePrompt: z.string(),
+  segments: z.array(z.string()).min(1),
+});
+
+/**
+ * Storyboard a ~1-minute cinematic ad: one opening-frame image prompt + N
+ * elaborate continuation prompts (one per ~7s Veo beat, forming one evolving
+ * sequence). Returns exactly `count` segments.
+ */
+export async function generateStoryboard(
+  brief: Brief,
+  platform: Platform,
+  brand?: BrandContext | null,
+  copy?: CopyResult,
+  count = 8,
+): Promise<{ imagePrompt: string; segments: string[] }> {
+  const system = pickSystem(null, DEFAULT_PROMPTS.storyboard, { brief, platform, brand, copy });
+  const user = `Platform: ${platform}\nOffer: ${brief.offer}\nGoal: ${brief.goal}\nCreative style: ${brief.creativeStyle}\nTone: ${brief.tones.join(', ')}\nProduce EXACTLY ${count} segments.`;
+  const out = await callJson(StoryboardSchema, system, user);
+  let segments = out.segments.map((s) => s.trim()).filter((s) => s.length > 0);
+  if (segments.length > count) segments = segments.slice(0, count);
+  while (segments.length > 0 && segments.length < count) segments.push(segments[segments.length - 1]);
+  return { imagePrompt: out.imagePrompt.trim(), segments };
+}

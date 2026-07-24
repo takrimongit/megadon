@@ -7,6 +7,7 @@ import { runReviseAd } from '../jobs/reviseAd.js';
 import { runPollRevisionCreative } from '../jobs/pollRevisionCreative.js';
 import { runAnalyzeBrand } from '../jobs/analyzeBrand.js';
 import { runPollVideo } from '../jobs/pollVideo.js';
+import { runPollCinematic } from '../jobs/cinematicVideo.js';
 import { runPublishAd } from '../jobs/publishAd.js';
 
 export async function internalRoutes(app: FastifyInstance) {
@@ -39,6 +40,11 @@ export async function internalRoutes(app: FastifyInstance) {
 
   app.post('/internal/jobs/poll-video', async (req, reply) => {
     await runPollVideo(req.body as any);
+    return ok(reply, { ok: true });
+  });
+
+  app.post('/internal/jobs/poll-cinematic', async (req, reply) => {
+    await runPollCinematic(req.body as any);
     return ok(reply, { ok: true });
   });
 

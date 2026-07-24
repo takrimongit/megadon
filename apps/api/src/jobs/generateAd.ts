@@ -5,6 +5,7 @@ import { getVideoProvider } from '../providers/video.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { finishImageAsset } from './composite.js';
 import { composeVideoWithBookends, targetVideoDimension } from './videoCompose.js';
+import { startCinematicVideo } from './cinematicVideo.js';
 import { loadGeekSettings, pickChat, pickMedia } from '../lib/geekSettings.js';
 import { recordUsage, resolveModel } from '../lib/usage.js';
 import { config } from '../lib/config.js';
@@ -65,6 +66,17 @@ export async function runGenerateAd(payload: JobPayload) {
     // 4. Creative generation — dispatch on mediaType.
     const mediaType: 'image' | 'video' = ad.mediaType ?? effectiveBrief.mediaType ?? 'image';
     const videoStyle: 'scenic' | 'avatar' = ad.videoStyle ?? effectiveBrief.videoStyle ?? 'scenic';
+
+    // Cinematic pipeline replaces the single-clip video path: nano-banana image →
+    // Veo i2v → extend chain → ~48-64s. Runs async via the poll-cinematic job.
+    if (mediaType === 'video' && config.cinematicVideo) {
+      void recordUsage({ workspaceId, batchId, adId, surface: 'video', model: config.cinematicVeoModel });
+      await startCinematicVideo(
+        workspaceId, batchId, adId, effectiveBrief, ad.platform as Platform, copy, brandContext,
+      );
+      return;
+    }
+
     const provider = mediaType === 'video' ? getVideoProvider(videoStyle) : getCreativeProvider();
     const mediaOverride = pickMedia(geek, mediaType === 'video' ? 'video' : 'image');
     const kickoff = await provider.kickoff(

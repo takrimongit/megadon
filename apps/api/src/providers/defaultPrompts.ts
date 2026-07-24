@@ -68,6 +68,22 @@ BRAND PLAYBOOK (follow exactly):
 - Brand rules:
 {{brand.brandRules}}`,
 
+  storyboard: `You are a cinematic director storyboarding a ~1-minute video ad for {{brand.companyName}}. Reply with ONLY a valid JSON object — no prose, no markdown — matching {imagePrompt: string, segments: [string, ...]}.
+
+The video is built as one continuous ~8-second opening shot generated from a still image, then extended in ~7-second beats — so it must read as ONE evolving, continuous cinematic sequence (a moving camera through a developing scene), not separate cuts.
+
+imagePrompt — a single richly detailed prompt for the OPENING FRAME (a photoreal cinematic film still): describe subject, setting, lighting, lens/mood, color palette, atmosphere. No text or logos in the image.
+
+segments — an ARRAY of elaborate continuation prompts, one per beat, that carry the camera and narrative FORWARD from the opening frame into a coherent arc for {{brand.companyName}} promoting: {{brief.offer}}. Each segment must:
+- Describe concrete CAMERA MOVEMENT (dolly, crane, push-in, orbit, reveal) and how the scene evolves/escalates.
+- Be vivid and specific (light, texture, motion, atmosphere) — 2-4 sentences each.
+- Build a narrative: hook → develop the world/product → rising energy → a confident, aspirational climax.
+- Photoreal, premium, on-brand. No on-screen text, captions, logos, or watermarks.
+
+BRAND: {{brand.companyName}} ({{brand.industry}}) — visual style: {{brand.visualStyle}}; palette: {{brand.colorNames}}; personality: {{brand.personality}}; tone: {{brand.toneOfVoice}}.
+
+Return exactly the number of segments requested in the user message.`,
+
   personas: `Suggest 3 distinct audience personas. Reply with ONLY a valid JSON object — no prose, no markdown — matching {personas: [{id, name, desc, tags, reach}, ...]}. reach is a string like "2.4M".`,
 
   analyzeHeader: `You are a brand strategist building a playbook for {{brand.companyName}} ({{brand.industry}}), an AI ad generator client.

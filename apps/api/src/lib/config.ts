@@ -30,6 +30,14 @@ export const config = {
   // Default is Fast — noticeably richer b-roll than lite with native audio.
   kieVideoModel: process.env.KIE_VIDEO_MODEL ?? 'veo3_fast',
 
+  // Cinematic video: nano-banana scene image → Veo 3.1 image-to-video (8s) →
+  // Veo extend ×(segments-1) → ~48-64s. Replaces the single-clip video path.
+  // Set CINEMATIC_VIDEO=false to fall back to the avatar/scenic single-clip path.
+  cinematicVideo: (process.env.CINEMATIC_VIDEO ?? 'true') !== 'false',
+  cinematicSegments: Number(process.env.CINEMATIC_SEGMENTS ?? '8'), // 8s + 7×7s ≈ 57s
+  cinematicVeoModel: process.env.CINEMATIC_VEO_MODEL ?? 'veo3_fast',
+  cinematicImageModel: process.env.CINEMATIC_IMAGE_MODEL ?? 'nano-banana-2',
+
   // Avatar video engine. 'omnihuman' animates a HeyGen photo-avatar portrait into
   // a lively, moving presenter (kie OmniHuman) with an ElevenLabs voice; 'heygen'
   // is the older static talking-photo (rollback).
