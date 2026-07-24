@@ -6,6 +6,7 @@ import { AppError } from '../lib/errors.js';
 import { enqueueJob } from '../lib/cloudTasks.js';
 import { CreateBatchBody, BulkDecisionsBody, type Brief, type Platform } from '@megadon/types';
 import { pickDirection, randomDirectionOffset } from '../providers/creativeDirections.js';
+import { config } from '../lib/config.js';
 
 const FORMATS_BY_PLATFORM: Record<Platform, string[]> = {
   instagram: ['Reel', 'Story', 'Feed'],
@@ -48,7 +49,8 @@ export async function batchRoutes(app: FastifyInstance) {
     const now = new Date().toISOString();
 
     const batchRef = db().collection(`workspaces/${workspaceId}/batches`).doc();
-    const slots = distributePlatforms(body.brief);
+    // Cost control: generate at most maxAdsPerBatch ads even if more were requested.
+    const slots = distributePlatforms(body.brief).slice(0, Math.max(1, config.maxAdsPerBatch));
 
     // Snapshot the approved brand playbook (if any) so generation has stable
     // brand context even if the playbook changes later.
@@ -67,7 +69,7 @@ export async function batchRoutes(app: FastifyInstance) {
       status: 'queued',
       brief: body.brief,
       brandContext,
-      progress: { total: body.brief.batchSize, completed: 0, failed: 0 },
+      progress: { total: slots.length, completed: 0, failed: 0 },
       counters: { approved: 0, rejected: 0 },
       createdBy: uid,
       createdAt: now,
@@ -108,7 +110,8 @@ export async function batchRoutes(app: FastifyInstance) {
 
     return ok(reply, {
       batchId: batchRef.id,
-      estimatedSeconds: Math.max(60, body.brief.batchSize * 8),
+      // Cinematic video runs ~10-16 min; image is quick.
+      estimatedSeconds: mediaType === 'video' ? 900 : Math.max(60, slots.length * 8),
     }, 201);
   });
 

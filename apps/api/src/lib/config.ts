@@ -30,6 +30,10 @@ export const config = {
   // Default is Fast — noticeably richer b-roll than lite with native audio.
   kieVideoModel: process.env.KIE_VIDEO_MODEL ?? 'veo3_fast',
 
+  // Temporary cost control: cap how many ads a batch actually generates,
+  // regardless of the requested batchSize (raise MAX_ADS_PER_BATCH to lift).
+  maxAdsPerBatch: Number(process.env.MAX_ADS_PER_BATCH ?? '1'),
+
   // Cinematic video: nano-banana scene image → Veo 3.1 image-to-video (8s) →
   // Veo extend ×(segments-1) → ~48-64s. Replaces the single-clip video path.
   // Set CINEMATIC_VIDEO=false to fall back to the avatar/scenic single-clip path.

@@ -6,7 +6,10 @@ mockCopyProvider();
 import { call, closeApp } from './helpers/app.js';
 import { clearFirestore, createTestUser } from './helpers/auth.js';
 import { db } from '../src/lib/firebase.js';
+import { config } from '../src/lib/config.js';
 import type { Brief } from '@megadon/types';
+
+const savedMaxAds = config.maxAdsPerBatch;
 
 async function makeWorkspace(idToken: string): Promise<string> {
   const res = await call({
@@ -27,8 +30,8 @@ const sampleBrief: Brief = {
 
 describe('Batches', () => {
   beforeAll(async () => { await clearFirestore(); });
-  beforeEach(async () => { await clearFirestore(); });
-  afterAll(async () => { await closeApp(); });
+  beforeEach(async () => { await clearFirestore(); config.maxAdsPerBatch = 50; });
+  afterAll(async () => { config.maxAdsPerBatch = savedMaxAds; await closeApp(); });
 
   it('creates a batch with N placeholder ads', async () => {
     const user = await createTestUser('b@test.com');
@@ -56,6 +59,22 @@ describe('Batches', () => {
     // Platforms should round-robin across the two requested.
     const platforms = ads.docs.map((d) => d.data().platform).sort();
     expect(platforms).toEqual(['instagram', 'instagram', 'tiktok', 'tiktok']);
+  });
+
+  it('caps generated ads at maxAdsPerBatch even if more requested', async () => {
+    config.maxAdsPerBatch = 1;
+    const user = await createTestUser('cap@test.com');
+    const wid = await makeWorkspace(user.idToken);
+    const res = await call({
+      method: 'POST', url: '/v1/batches', idToken: user.idToken, workspaceId: wid,
+      body: { name: 'Capped', brief: sampleBrief }, // batchSize 4
+    });
+    expect(res.status).toBe(201);
+    const { batchId } = res.body.data as any;
+    const batch = await db().doc(`workspaces/${wid}/batches/${batchId}`).get();
+    expect(batch.data()!.progress.total).toBe(1);
+    const ads = await db().collection(`workspaces/${wid}/batches/${batchId}/ads`).get();
+    expect(ads.size).toBe(1);
   });
 
   it('rejects briefs with invalid platform', async () => {

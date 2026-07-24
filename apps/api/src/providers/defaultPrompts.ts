@@ -68,19 +68,25 @@ BRAND PLAYBOOK (follow exactly):
 - Brand rules:
 {{brand.brandRules}}`,
 
-  storyboard: `You are a cinematic director storyboarding a ~1-minute video ad for {{brand.companyName}}. Reply with ONLY a valid JSON object — no prose, no markdown — matching {imagePrompt: string, segments: [string, ...]}.
+  storyboard: `You are directing a ~1-minute spokesperson video ad for {{brand.companyName}}. A single real PRESENTER speaks to camera the whole time. Reply with ONLY a valid JSON object — no prose, no markdown — matching {imagePrompt: string, segments: [string, ...]}.
 
-The video is built as one continuous ~8-second opening shot generated from a still image, then extended in ~7-second beats — so it must read as ONE evolving, continuous cinematic sequence (a moving camera through a developing scene), not separate cuts.
+The video is one continuous ~8-second opening shot generated from a still image, then extended in ~7-second beats. It must read as ONE unbroken, natural take of the SAME person speaking — not separate scenes or cuts.
 
-imagePrompt — a single richly detailed prompt for the OPENING FRAME (a photoreal cinematic film still): describe subject, setting, lighting, lens/mood, color palette, atmosphere. No text or logos in the image.
+imagePrompt — a single detailed prompt for the OPENING FRAME: a VERY NATURAL, photorealistic portrait of a real human spokesperson for {{brand.companyName}}, looking at the camera, mid-speech. CRITICAL STYLE RULES:
+- Completely natural and realistic — like a real person filmed on a real camera. Documentary/commercial realism.
+- ABSOLUTELY NO futuristic elements, NO glowing/neon lights, NO holograms, NO data particles, NO sci-fi, NO CGI-looking effects. A believable everyday setting (a real office, studio, café, or outdoors).
+- Natural, soft, flattering lighting; realistic skin, clothing, and environment.
+- Describe the person (age range, attire, expression), the real setting, and the natural lighting.
+- No text or logos in the image.
 
-segments — an ARRAY of elaborate continuation prompts, one per beat, that carry the camera and narrative FORWARD from the opening frame into a coherent arc for {{brand.companyName}} promoting: {{brief.offer}}. Each segment must:
-- Describe concrete CAMERA MOVEMENT (dolly, crane, push-in, orbit, reveal) and how the scene evolves/escalates.
-- Be vivid and specific (light, texture, motion, atmosphere) — 2-4 sentences each.
-- Build a narrative: hook → develop the world/product → rising energy → a confident, aspirational climax.
-- Photoreal, premium, on-brand. No on-screen text, captions, logos, or watermarks.
+segments — an ARRAY of continuation prompts, one per beat, of the SAME PERSON continuing to speak to camera. Each segment MUST:
+- Keep the EXACT SAME person — identical face, hair, skin, clothing — and the SAME setting. Do NOT change, morph, age, or replace the subject. Do NOT change their outfit or location.
+- Show them SPEAKING naturally to camera: talking, genuine expressions, natural hand gestures, occasional blinks and head movement.
+- Use only SUBTLE, realistic camera motion (a slow gentle push-in or soft handheld drift). No dramatic camera moves, no scene changes, no transitions, no flashy effects.
+- Stay completely natural and photorealistic — no futuristic or glowing effects at any point.
+- Read as a spokesperson delivering the message for {{brand.companyName}} promoting: {{brief.offer}} — 2-4 sentences each describing the continued natural delivery.
 
-BRAND: {{brand.companyName}} ({{brand.industry}}) — visual style: {{brand.visualStyle}}; palette: {{brand.colorNames}}; personality: {{brand.personality}}; tone: {{brand.toneOfVoice}}.
+BRAND: {{brand.companyName}} ({{brand.industry}}) — audience: {{brand.targetAudience}}; tone: {{brand.toneOfVoice}}.
 
 Return exactly the number of segments requested in the user message.`,
 
